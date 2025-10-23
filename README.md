@@ -18,6 +18,8 @@ Reverse-engineered Go client for Avanza.
 
 - **BankID Authentication** - QR code-based authentication with automatic session management
 - **Account Overview** - Get categorized accounts, balances, and performance data
+- **Trading Accounts** - List all trading accounts with detailed information
+- **Account Positions** - Get detailed positions, stocks, and cash for specific accounts
 
 ## Installation
 
