@@ -1,4 +1,7 @@
-linters-settings:
-  errcheck:
-    exclude-functions:
-      - (io.Closer).Close
+version: 2
+
+linters:
+  settings:
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close

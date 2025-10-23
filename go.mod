@@ -1,6 +1,6 @@
 module github.com/vmorsell/avanza-sdk-go
 
-go 1.25
+go 1.24
 
 require github.com/mdp/qrterminal/v3 v3.0.0
 
