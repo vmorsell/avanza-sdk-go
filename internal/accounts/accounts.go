@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/vmorsell/avanza/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 // AccountsService handles account-related operations with Avanza.

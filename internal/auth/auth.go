@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/mdp/qrterminal/v3"
-	"github.com/vmorsell/avanza/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 // AuthService handles authentication operations with Avanza using BankID.

@@ -4,9 +4,9 @@ package avanza
 import (
 	"net/http"
 
-	"github.com/vmorsell/avanza/internal/accounts"
-	"github.com/vmorsell/avanza/internal/auth"
-	"github.com/vmorsell/avanza/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/accounts"
+	"github.com/vmorsell/avanza-sdk-go/internal/auth"
+	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 // Avanza is the main client for interacting with the Avanza API.

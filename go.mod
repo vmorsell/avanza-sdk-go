@@ -1,4 +1,4 @@
-module github.com/vmorsell/avanza
+module github.com/vmorsell/avanza-sdk-go
 
 go 1.24.1
 

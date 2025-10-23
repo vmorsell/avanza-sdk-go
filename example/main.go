@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/vmorsell/avanza"
+	"github.com/vmorsell/avanza-sdk-go"
 )
 
 func main() {

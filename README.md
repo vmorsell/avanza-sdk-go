@@ -1,5 +1,7 @@
 # Avanza Go SDK
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/vmorsell/avanza-sdk-go.svg)](https://pkg.go.dev/github.com/vmorsell/avanza-sdk-go)
+
 Reverse-engineered Go client for Avanza.
 
 ## READ THIS FIRST
@@ -24,7 +26,7 @@ Reverse-engineered Go client for Avanza.
 ## Installation
 
 ```bash
-go get github.com/vmorsell/avanza
+go get github.com/vmorsell/avanza-sdk-go
 ```
 
 ## Quick Start
@@ -38,7 +40,7 @@ import (
     "log"
     "time"
 
-    "github.com/vmorsell/avanza"
+        "github.com/vmorsell/avanza-sdk-go"
 )
 
 func main() {

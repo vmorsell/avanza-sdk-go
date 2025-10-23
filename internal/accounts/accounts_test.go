@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/vmorsell/avanza/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 func TestNewAccountsService(t *testing.T) {
