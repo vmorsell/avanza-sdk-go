@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -452,10 +453,14 @@ func TestPollBankID_ImmediateComplete(t *testing.T) {
 }
 
 func TestPollBankIDWithQRUpdates_Complete(t *testing.T) {
+	var mu sync.Mutex
 	collectCalls := 0
 	restartCalls := 0
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+
 		switch r.URL.Path {
 		case "/_api/authentication/v2/sessions/bankid/collect":
 			collectCalls++
@@ -501,13 +506,18 @@ func TestPollBankIDWithQRUpdates_Complete(t *testing.T) {
 		t.Errorf("expected state COMPLETE, got %s", resp.State)
 	}
 
-	if collectCalls < 3 {
-		t.Errorf("expected at least 3 collect calls, got %d", collectCalls)
+	mu.Lock()
+	cc := collectCalls
+	rc := restartCalls
+	mu.Unlock()
+
+	if cc < 3 {
+		t.Errorf("expected at least 3 collect calls, got %d", cc)
 	}
 
 	// QR should be updated at least once
-	if restartCalls < 1 {
-		t.Errorf("expected at least 1 restart call, got %d", restartCalls)
+	if rc < 1 {
+		t.Errorf("expected at least 1 restart call, got %d", rc)
 	}
 }
 
