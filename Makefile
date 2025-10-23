@@ -1,4 +1,4 @@
-.PHONY: help install-lint lint test test-race vuln ci clean
+.PHONY: install-lint lint test test-race vuln ci clean release-major release-minor release-patch
 
 GOLANGCI_LINT_VERSION := v2.5.0
 
@@ -25,3 +25,12 @@ ci: test-race vuln lint
 clean:
 	@go clean -testcache
 	@rm -rf dist/
+
+release-major:
+	@./scripts/release.sh major
+
+release-minor:
+	@./scripts/release.sh minor
+
+release-patch:
+	@./scripts/release.sh patch
