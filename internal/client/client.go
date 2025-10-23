@@ -96,6 +96,27 @@ func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*
 	return resp, nil
 }
 
+// Get sends a GET request to the specified endpoint.
+// Cookies and security tokens are automatically included in the request headers.
+func (c *Client) Get(ctx context.Context, endpoint string) (*http.Response, error) {
+	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("new request: %w", err)
+	}
+
+	c.setHeaders(req)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("do: %w", err)
+	}
+
+	c.extractCookies(resp)
+	return resp, nil
+}
+
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Accept", "application/json, text/plain, */*")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.8")

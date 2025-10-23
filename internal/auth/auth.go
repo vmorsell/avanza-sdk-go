@@ -214,3 +214,81 @@ func (a *AuthService) DisplayQRCode(qrCodeData string) error {
 	qrterminal.GenerateHalfBlock(qrCodeData, qrterminal.L, os.Stdout)
 	return nil
 }
+
+// EstablishSession establishes a session after successful BankID authentication.
+// This is required before making other API calls.
+func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDCollectResponse) error {
+	if collectResp == nil || len(collectResp.Logins) == 0 {
+		return fmt.Errorf("no logins available in authentication response")
+	}
+
+	// Step 1: Select user by making a request to the collect endpoint with customer ID
+	login := collectResp.Logins[0]
+	userEndpoint := fmt.Sprintf("/_api/authentication/v2/sessions/bankid/collect/%s", login.CustomerID)
+
+	resp, err := a.client.Get(ctx, userEndpoint)
+	if err != nil {
+		return fmt.Errorf("failed to select user: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("user selection failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Step 2: Verify session is established by checking session info
+	sessionResp, err := a.client.Get(ctx, "/_api/authentication/session/info/session")
+	if err != nil {
+		return fmt.Errorf("failed to verify session: %w", err)
+	}
+	defer sessionResp.Body.Close()
+
+	if sessionResp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(sessionResp.Body)
+		return fmt.Errorf("session verification failed with status %d: %s", sessionResp.StatusCode, string(body))
+	}
+
+	return nil
+}
+
+// SessionInfo represents the session information response.
+type SessionInfo struct {
+	InvalidSessionID string `json:"invalidSessionId"`
+	User             User   `json:"user"`
+}
+
+// User represents the user information in the session.
+type User struct {
+	LoggedIn           bool   `json:"loggedIn"`
+	GreetingName       string `json:"greetingName"`
+	PushSubscriptionID string `json:"pushSubscriptionId"`
+	PushBaseURL        string `json:"pushBaseUrl"`
+	SecurityToken      string `json:"securityToken"`
+	Company            bool   `json:"company"`
+	Minor              bool   `json:"minor"`
+	Start              bool   `json:"start"`
+	CustomerGroup      string `json:"customerGroup"`
+	ID                 string `json:"id"`
+}
+
+// GetSessionInfo retrieves the current session information.
+func (a *AuthService) GetSessionInfo(ctx context.Context) (*SessionInfo, error) {
+	resp, err := a.client.Get(ctx, "/_api/authentication/session/info/session")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("session info failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var sessionInfo SessionInfo
+	if err := json.NewDecoder(resp.Body).Decode(&sessionInfo); err != nil {
+		return nil, fmt.Errorf("failed to decode session info: %w", err)
+	}
+
+	return &sessionInfo, nil
+}

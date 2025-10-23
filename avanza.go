@@ -4,16 +4,19 @@ package avanza
 import (
 	"net/http"
 
+	"github.com/vmorsell/avanza/internal/accounts"
 	"github.com/vmorsell/avanza/internal/auth"
 	"github.com/vmorsell/avanza/internal/client"
 )
 
 // Avanza is the main client for interacting with the Avanza API.
-// It provides access to various services like authentication.
+// It provides access to various services like authentication and account management.
 type Avanza struct {
 	client *client.Client
 	// Auth provides BankID authentication functionality.
 	Auth *auth.AuthService
+	// Accounts provides account overview and management functionality.
+	Accounts *accounts.AccountsService
 }
 
 // Option is a functional option for configuring the Avanza client.
@@ -29,6 +32,7 @@ func WithBaseURL(url string) Option {
 	return func(a *Avanza) {
 		a.client = client.NewClient(client.WithBaseURL(url))
 		a.Auth = auth.NewAuthService(a.client)
+		a.Accounts = accounts.NewAccountsService(a.client)
 	}
 }
 
@@ -43,6 +47,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	return func(a *Avanza) {
 		a.client = client.NewClient(client.WithHTTPClient(httpClient))
 		a.Auth = auth.NewAuthService(a.client)
+		a.Accounts = accounts.NewAccountsService(a.client)
 	}
 }
 
@@ -64,6 +69,7 @@ func New(opts ...Option) *Avanza {
 		client: client.NewClient(),
 	}
 	a.Auth = auth.NewAuthService(a.client)
+	a.Accounts = accounts.NewAccountsService(a.client)
 
 	for _, opt := range opts {
 		opt(a)

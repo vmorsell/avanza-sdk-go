@@ -11,10 +11,13 @@ Reverse-engineered Go client for Avanza.
 - **Educational only** - Experiment away, don't build your retirement fund on this
 - **Rate limits** - Don't be that person who DDoSes their servers
 - **No warranty** - Use at your own risk, no support provided
+- **Reverse engineered** - This was built by sniffing network traffic and will likely break when Avanza changes their API
+- **Incomplete** - Only covers a tiny fraction of Avanza's actual API surface
 
 ## Features
 
 - **BankID Authentication** - QR code-based authentication with automatic session management
+- **Account Overview** - Get categorized accounts, balances, and performance data
 
 ## Installation
 
@@ -60,6 +63,14 @@ func main() {
     }
 
     fmt.Printf("Welcome %s\n", collectResp.Name)
+
+    // Get account overview
+    overview, err := client.Accounts.GetAccountOverview(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("You have %d accounts\n", len(overview.Accounts))
 }
 ```
 
