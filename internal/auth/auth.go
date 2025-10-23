@@ -1,3 +1,4 @@
+// Package auth provides BankID authentication functionality for the Avanza API.
 package auth
 
 import (
@@ -13,27 +14,32 @@ import (
 	"github.com/vmorsell/avanza/internal/client"
 )
 
+// AuthService handles authentication operations with Avanza using BankID.
 type AuthService struct {
 	client *client.Client
 }
 
+// NewAuthService creates a new authentication service with the given HTTP client.
 func NewAuthService(client *client.Client) *AuthService {
 	return &AuthService{
 		client: client,
 	}
 }
 
+// BankIDStartRequest is the request body for starting a BankID authentication session.
 type BankIDStartRequest struct {
 	Method       string `json:"method"`
 	ReturnScheme string `json:"returnScheme"`
 }
 
+// BankIDStartResponse contains the initial response from starting a BankID session.
 type BankIDStartResponse struct {
 	TransactionID string `json:"transactionId"`
 	Expires       string `json:"expires"`
 	QRToken       string `json:"qrToken"`
 }
 
+// BankIDCollectResponse contains the authentication status and user information.
 type BankIDCollectResponse struct {
 	Name                       string        `json:"name"`
 	TransactionID              string        `json:"transactionId"`
@@ -45,6 +51,7 @@ type BankIDCollectResponse struct {
 	Poa                        []interface{} `json:"poa"`
 }
 
+// Login represents a single login associated with the authenticated user.
 type Login struct {
 	CustomerID string    `json:"customerId"`
 	Username   string    `json:"username"`
@@ -52,13 +59,17 @@ type Login struct {
 	LoginPath  string    `json:"loginPath"`
 }
 
+// Account represents an Avanza account (e.g., ISK, KF, AF).
 type Account struct {
 	AccountName string `json:"accountName"`
 	AccountType string `json:"accountType"`
 }
 
+// BankIDRestartRequest is the request body for restarting/refreshing a BankID session.
 type BankIDRestartRequest struct{}
 
+// StartBankID initiates a new BankID authentication session with QR code support.
+// Returns transaction details including a QR token that can be displayed to the user.
 func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, error) {
 	reqBody := BankIDStartRequest{
 		Method:       "QR_START",
@@ -84,6 +95,8 @@ func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, er
 	return &response, nil
 }
 
+// RestartBankID refreshes an existing BankID session, generating a new QR code.
+// This prevents the QR code from expiring during the authentication process.
 func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, error) {
 	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/restart", BankIDRestartRequest{})
 	if err != nil {
@@ -104,6 +117,8 @@ func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, 
 	return &response, nil
 }
 
+// CollectBankID checks the current status of the BankID authentication.
+// Returns the current state and user information if authentication is complete.
 func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse, error) {
 	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/collect", BankIDRestartRequest{})
 	if err != nil {
@@ -124,6 +139,8 @@ func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse
 	return &response, nil
 }
 
+// PollBankID continuously polls the authentication status until completion or failure.
+// Checks every second until the context is cancelled or authentication completes.
 func (a *AuthService) PollBankID(ctx context.Context) (*BankIDCollectResponse, error) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -149,6 +166,9 @@ func (a *AuthService) PollBankID(ctx context.Context) (*BankIDCollectResponse, e
 	}
 }
 
+// PollBankIDWithQRUpdates polls for authentication completion while automatically
+// refreshing the QR code every second to prevent expiration.
+// This is the recommended method for QR-based authentication.
 func (a *AuthService) PollBankIDWithQRUpdates(ctx context.Context) (*BankIDCollectResponse, error) {
 	qrCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -177,10 +197,13 @@ func (a *AuthService) PollBankIDWithQRUpdates(ctx context.Context) (*BankIDColle
 	return a.PollBankID(ctx)
 }
 
+// ClearScreen clears the terminal screen using ANSI escape codes.
 func (a *AuthService) ClearScreen() {
 	fmt.Print("\033[H\033[2J")
 }
 
+// DisplayQRCode displays a QR code in the terminal for the user to scan with BankID.
+// The screen is cleared before displaying the QR code for better visibility.
 func (a *AuthService) DisplayQRCode(qrCodeData string) error {
 	if qrCodeData == "" {
 		return fmt.Errorf("empty qr code data")

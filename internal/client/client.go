@@ -1,3 +1,4 @@
+// Package client provides HTTP client functionality for the Avanza API.
 package client
 
 import (
@@ -10,8 +11,11 @@ import (
 	"time"
 )
 
+// BaseURL is the base URL for the Avanza API.
 const BaseURL = "https://www.avanza.se"
 
+// Client is an HTTP client that manages sessions, cookies, and security tokens
+// for authenticated requests to the Avanza API.
 type Client struct {
 	httpClient    *http.Client
 	baseURL       string
@@ -19,6 +23,8 @@ type Client struct {
 	securityToken string
 }
 
+// NewClient creates a new Avanza HTTP client with default configuration.
+// The client automatically manages cookies and security tokens.
 func NewClient() *Client {
 	return &Client{
 		httpClient: &http.Client{
@@ -29,6 +35,9 @@ func NewClient() *Client {
 	}
 }
 
+// Post sends a POST request to the specified endpoint with the given body.
+// The body is automatically marshaled to JSON. Cookies and security tokens
+// are automatically included in the request headers.
 func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
 
