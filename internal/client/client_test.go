@@ -128,7 +128,7 @@ func TestPost_Success(t *testing.T) {
 				}
 
 				w.WriteHeader(tt.serverResponse)
-				w.Write([]byte(tt.responseBody))
+				_, _ = w.Write([]byte(tt.responseBody))
 			}))
 			defer server.Close()
 
@@ -317,14 +317,14 @@ func TestCookiesPersistAcrossRequests(t *testing.T) {
 	if err != nil {
 		t.Fatalf("first request failed: %v", err)
 	}
-	resp1.Body.Close()
+	_ = resp1.Body.Close()
 
 	// Second request
 	resp2, err := client.Post(ctx, "/second", nil)
 	if err != nil {
 		t.Fatalf("second request failed: %v", err)
 	}
-	resp2.Body.Close()
+	_ = resp2.Body.Close()
 
 	if callCount != 2 {
 		t.Errorf("expected 2 calls, got %d", callCount)

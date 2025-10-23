@@ -60,7 +60,7 @@ func TestStartBankID_Success(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -101,7 +101,7 @@ func TestStartBankID_HTTPError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(tt.statusCode)
-				w.Write([]byte(`{"error":"FOO"}`))
+				_, _ = w.Write([]byte(`{"error":"FOO"}`))
 			}))
 			defer server.Close()
 
@@ -120,7 +120,7 @@ func TestStartBankID_HTTPError(t *testing.T) {
 func TestStartBankID_MalformedJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{invalid json`))
+		_, _ = w.Write([]byte(`{invalid json`))
 	}))
 	defer server.Close()
 
@@ -170,7 +170,7 @@ func TestRestartBankID_Success(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -191,7 +191,7 @@ func TestRestartBankID_Success(t *testing.T) {
 func TestRestartBankID_HTTPError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error":"FOO"}`))
+		_, _ = w.Write([]byte(`{"error":"FOO"}`))
 	}))
 	defer server.Close()
 
@@ -269,7 +269,7 @@ func TestCollectBankID_AllStates(t *testing.T) {
 				}
 
 				w.WriteHeader(tt.statusCode)
-				json.NewEncoder(w).Encode(resp)
+				_ = json.NewEncoder(w).Encode(resp)
 			}))
 			defer server.Close()
 
@@ -318,7 +318,7 @@ func TestCollectBankID_HTTPError(t *testing.T) {
 func TestCollectBankID_MalformedJSON(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{invalid`))
+		_, _ = w.Write([]byte(`{invalid`))
 	}))
 	defer server.Close()
 
@@ -350,7 +350,7 @@ func TestPollBankID_Complete(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -382,7 +382,7 @@ func TestPollBankID_Failed(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -409,7 +409,7 @@ func TestPollBankID_ContextCancelled(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -433,7 +433,7 @@ func TestPollBankID_ImmediateComplete(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -456,7 +456,8 @@ func TestPollBankIDWithQRUpdates_Complete(t *testing.T) {
 	restartCalls := 0
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/_api/authentication/v2/sessions/bankid/collect" {
+		switch r.URL.Path {
+		case "/_api/authentication/v2/sessions/bankid/collect":
 			collectCalls++
 			var state string
 			if collectCalls < 3 {
@@ -471,8 +472,8 @@ func TestPollBankIDWithQRUpdates_Complete(t *testing.T) {
 			}
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(resp)
-		} else if r.URL.Path == "/_api/authentication/v2/sessions/bankid/restart" {
+			_ = json.NewEncoder(w).Encode(resp)
+		case "/_api/authentication/v2/sessions/bankid/restart":
 			restartCalls++
 
 			resp := BankIDStartResponse{
@@ -480,7 +481,7 @@ func TestPollBankIDWithQRUpdates_Complete(t *testing.T) {
 			}
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 		}
 	}))
 	defer server.Close()
@@ -512,21 +513,22 @@ func TestPollBankIDWithQRUpdates_Complete(t *testing.T) {
 
 func TestPollBankIDWithQRUpdates_Failed(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/_api/authentication/v2/sessions/bankid/collect" {
+		switch r.URL.Path {
+		case "/_api/authentication/v2/sessions/bankid/collect":
 			resp := BankIDCollectResponse{
 				State:    "FAILED",
 				HintCode: "userCancel",
 			}
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(resp)
-		} else if r.URL.Path == "/_api/authentication/v2/sessions/bankid/restart" {
+			_ = json.NewEncoder(w).Encode(resp)
+		case "/_api/authentication/v2/sessions/bankid/restart":
 			resp := BankIDStartResponse{
 				QRToken: "BAR",
 			}
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 		}
 	}))
 	defer server.Close()
@@ -545,20 +547,21 @@ func TestPollBankIDWithQRUpdates_Failed(t *testing.T) {
 
 func TestPollBankIDWithQRUpdates_ContextCancelled(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/_api/authentication/v2/sessions/bankid/collect" {
+		switch r.URL.Path {
+		case "/_api/authentication/v2/sessions/bankid/collect":
 			resp := BankIDCollectResponse{
 				State: "PENDING",
 			}
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(resp)
-		} else if r.URL.Path == "/_api/authentication/v2/sessions/bankid/restart" {
+			_ = json.NewEncoder(w).Encode(resp)
+		case "/_api/authentication/v2/sessions/bankid/restart":
 			resp := BankIDStartResponse{
 				QRToken: "BAR",
 			}
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 		}
 	}))
 	defer server.Close()
@@ -692,7 +695,7 @@ func TestCollectBankID_EmptyResponseBody(t *testing.T) {
 func TestStartBankID_EmptyResponseBody(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, "")
+		_, _ = io.WriteString(w, "")
 	}))
 	defer server.Close()
 
