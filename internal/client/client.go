@@ -23,16 +23,46 @@ type Client struct {
 	securityToken string
 }
 
-// NewClient creates a new Avanza HTTP client with default configuration.
+// Option is a functional option for configuring the Client.
+type Option func(*Client)
+
+// WithBaseURL sets a custom base URL for the client.
+// This is primarily used for testing against mock servers.
+func WithBaseURL(url string) Option {
+	return func(c *Client) {
+		c.baseURL = url
+	}
+}
+
+// WithHTTPClient sets a custom HTTP client.
+// This is useful for configuring custom timeouts or transport settings.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(c *Client) {
+		c.httpClient = httpClient
+	}
+}
+
+// NewClient creates a new Avanza HTTP client with optional configuration.
 // The client automatically manages cookies and security tokens.
-func NewClient() *Client {
-	return &Client{
+//
+// Example:
+//
+//	client := NewClient() // Default configuration
+//	client := NewClient(WithBaseURL("https://test.example.com"))
+func NewClient(opts ...Option) *Client {
+	c := &Client{
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 		baseURL: BaseURL,
 		cookies: make(map[string]string),
 	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c
 }
 
 // Post sends a POST request to the specified endpoint with the given body.
