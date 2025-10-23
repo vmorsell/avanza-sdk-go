@@ -1,6 +1,6 @@
 .PHONY: help install-lint lint test test-race vuln ci clean
 
-GOLANGCI_LINT_VERSION := latest
+GOLANGCI_LINT_VERSION := v2.5.0
 
 install-lint:
 	@echo "Installing golangci-lint $(GOLANGCI_LINT_VERSION)..."
