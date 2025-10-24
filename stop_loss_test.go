@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 func TestPlaceStopLoss_Success(t *testing.T) {
@@ -74,8 +72,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
@@ -98,7 +95,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 		},
 	}
 
-	resp, err := s.PlaceStopLoss(context.Background(), req)
+	resp, err := avanza.PlaceStopLoss(context.Background(), req)
 	if err != nil {
 		t.Fatalf("PlaceStopLoss failed: %v", err)
 	}
@@ -132,8 +129,7 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
@@ -152,7 +148,7 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 		},
 	}
 
-	resp, err := s.PlaceStopLoss(context.Background(), req)
+	resp, err := avanza.PlaceStopLoss(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -179,8 +175,7 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
@@ -199,7 +194,7 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 		},
 	}
 
-	_, err := s.PlaceStopLoss(context.Background(), req)
+	_, err := avanza.PlaceStopLoss(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -222,8 +217,7 @@ func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
@@ -245,7 +239,7 @@ func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
 		},
 	}
 
-	_, err := s.PlaceStopLoss(ctx, req)
+	_, err := avanza.PlaceStopLoss(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}

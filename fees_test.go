@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 func TestGetPreliminaryFee_Success(t *testing.T) {
@@ -78,8 +76,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PreliminaryFeeRequest{
 		AccountID:   testAccountID,
@@ -89,7 +86,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 		Side:        "BUY",
 	}
 
-	resp, err := s.GetPreliminaryFee(context.Background(), req)
+	resp, err := avanza.GetPreliminaryFee(context.Background(), req)
 	if err != nil {
 		t.Fatalf("GetPreliminaryFee failed: %v", err)
 	}
@@ -125,8 +122,7 @@ func TestGetPreliminaryFee_HTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PreliminaryFeeRequest{
 		AccountID:   testAccountID,
@@ -136,7 +132,7 @@ func TestGetPreliminaryFee_HTTPError(t *testing.T) {
 		Side:        "BUY",
 	}
 
-	_, err := s.GetPreliminaryFee(context.Background(), req)
+	_, err := avanza.GetPreliminaryFee(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -156,8 +152,7 @@ func TestGetPreliminaryFee_ContextCancellation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
@@ -170,7 +165,7 @@ func TestGetPreliminaryFee_ContextCancellation(t *testing.T) {
 		Side:        "BUY",
 	}
 
-	_, err := s.GetPreliminaryFee(ctx, req)
+	_, err := avanza.GetPreliminaryFee(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}

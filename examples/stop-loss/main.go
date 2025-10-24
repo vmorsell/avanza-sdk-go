@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go"
-	"github.com/vmorsell/avanza-sdk-go/internal/trading"
 )
 
 func main() {
@@ -45,7 +44,7 @@ func main() {
 
 	// Get trading accounts to find account ID
 	fmt.Println("Fetching trading accounts...")
-	tradingAccounts, err := client.Accounts.GetTradingAccounts(ctx)
+	tradingAccounts, err := client.GetTradingAccounts(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -73,28 +72,28 @@ func main() {
 	fmt.Printf("  Action: BUY %d shares at %.2f SEK\n", volume, orderPrice)
 	fmt.Printf("  Valid until: 2025-11-23\n")
 
-	stopLossReq := &trading.PlaceStopLossRequest{
+	stopLossReq := &avanza.PlaceStopLossRequest{
 		ParentStopLossID: "0", // New stop loss order
 		AccountID:        accountID,
 		OrderBookID:      orderbookID,
-		StopLossTrigger: trading.StopLossTrigger{
-			Type:                      trading.StopLossTriggerLessOrEqual,
+		StopLossTrigger: avanza.StopLossTrigger{
+			Type:                      avanza.StopLossTriggerLessOrEqual,
 			Value:                     triggerValue,
-			ValueType:                 trading.StopLossValueMonetary,
+			ValueType:                 avanza.StopLossValueMonetary,
 			ValidUntil:                "2025-11-23",
 			TriggerOnMarketMakerQuote: false,
 		},
-		StopLossOrderEvent: trading.StopLossOrderEvent{
-			Type:                trading.StopLossOrderEventBuy,
+		StopLossOrderEvent: avanza.StopLossOrderEvent{
+			Type:                avanza.StopLossOrderEventBuy,
 			Price:               orderPrice,
 			Volume:              volume,
 			ValidDays:           8,
-			PriceType:           trading.StopLossPriceMonetary,
+			PriceType:           avanza.StopLossPriceMonetary,
 			ShortSellingAllowed: false,
 		},
 	}
 
-	stopLossResp, err := client.Trading.PlaceStopLoss(ctx, stopLossReq)
+	stopLossResp, err := client.PlaceStopLoss(ctx, stopLossReq)
 	if err != nil {
 		log.Fatalf("Failed to place stop loss order: %v", err)
 	}

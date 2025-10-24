@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -41,8 +41,8 @@ type ValidationResult struct {
 }
 
 // ValidateOrder validates an order before placing it.
-func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) (*ValidateOrderResponse, error) {
-	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/validation/validate", req)
+func (a *Avanza) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) (*ValidateOrderResponse, error) {
+	httpResp, err := a.client.Post(ctx, "/_api/trading-critical/rest/order/validation/validate", req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate order: %w", err)
 	}

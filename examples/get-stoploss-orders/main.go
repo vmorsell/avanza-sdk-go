@@ -44,7 +44,7 @@ func main() {
 
 	// Get all active stop loss orders
 	fmt.Println("\n🛡️ Fetching active stop loss orders...")
-	stopLossOrders, err := client.Trading.GetStopLossOrders(ctx)
+	stopLossOrders, err := client.GetStopLossOrders(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get stop loss orders: %v", err)
 	}
