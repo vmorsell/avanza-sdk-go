@@ -22,6 +22,7 @@ Reverse-engineered Go client for Avanza.
 - **Account Overview** - Get categorized accounts, balances, and performance data
 - **Trading Accounts** - List all trading accounts with detailed information
 - **Account Positions** - Get detailed positions, stocks, and cash for specific accounts
+- **Order Placement** - Place buy and sell orders for stocks and funds
 
 ## Installation
 
@@ -77,6 +78,11 @@ func main() {
     fmt.Printf("You have %d accounts\n", len(overview.Accounts))
 }
 ```
+
+See the [examples](example/) directory for complete working examples, including:
+
+- [Authentication and account overview](example/accounts/)
+- [Placing orders](example/trading/)
 
 ## Configuration
 
