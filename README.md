@@ -23,6 +23,7 @@ Reverse-engineered Go client for Avanza.
 - **Trading Accounts** - List all trading accounts with detailed information
 - **Account Positions** - Get detailed positions, stocks, and cash for specific accounts
 - **Order Placement** - Place buy and sell orders for stocks and funds
+- **Order Validation** - Validate orders before placing them
 - **Preliminary Fees** - Get fee estimates before placing orders
 
 ## Installation
@@ -84,6 +85,7 @@ See the [examples](example/) directory for complete working examples, including:
 
 - [Authentication and account overview](example/accounts/)
 - [Placing orders](example/trading/)
+- [Validating orders](example/validate-order/)
 - [Getting preliminary fees](example/preliminary-fee/)
 
 ## Configuration
