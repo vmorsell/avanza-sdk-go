@@ -6,7 +6,7 @@ Reverse-engineered Go client for Avanza.
 
 ## READ THIS FIRST
 
-**TL;DR: This is for learning, not for your trading bot that's going to make you rich. It probably violates their terms and shouldn't be used by anyone.**
+**TL;DR: This is for learning, not for your trading bot that's going to make you rich. It will break, it probably violates some terms, and it should not be used by anyone.**
 
 - **Not official** - Avanza doesn't know it exists (?)
 - **ToS violation** - You're probably breaking this terms
