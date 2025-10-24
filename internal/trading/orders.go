@@ -4,21 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
-
-// Service provides trading-related operations.
-type Service struct {
-	client *client.Client
-}
-
-// NewService creates a new trading service.
-func NewService(c *client.Client) *Service {
-	return &Service{
-		client: c,
-	}
-}
 
 // OrderSide represents the side of an order (buy or sell).
 type OrderSide string

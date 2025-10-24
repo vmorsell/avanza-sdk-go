@@ -10,30 +10,6 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
-// Test constants
-const (
-	testOrderbookID = "orderbookID"
-	testAccountID   = "accountID"
-	testPrice       = 2.0
-	testVolume      = 1
-	testOrderID     = "orderID1"
-	testRequestID   = "reqID"
-	testOrderID2    = "orderID2"
-)
-
-func TestNewService(t *testing.T) {
-	c := client.NewClient()
-	s := NewService(c)
-
-	if s == nil {
-		t.Fatal("expected service to be non-nil")
-	}
-
-	if s.client == nil {
-		t.Fatal("expected client to be non-nil")
-	}
-}
-
 func TestPlaceOrder_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/_api/trading-critical/rest/order/new" {
