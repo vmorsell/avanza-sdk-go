@@ -7,6 +7,7 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/internal/accounts"
 	"github.com/vmorsell/avanza-sdk-go/internal/auth"
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/trading"
 )
 
 // Avanza is the main client for interacting with the Avanza API.
@@ -17,6 +18,8 @@ type Avanza struct {
 	Auth *auth.AuthService
 	// Accounts provides account overview and management functionality.
 	Accounts *accounts.AccountsService
+	// Trading provides order placement and trading functionality.
+	Trading *trading.Service
 }
 
 // Option is a functional option for configuring the Avanza client.
@@ -33,6 +36,7 @@ func WithBaseURL(url string) Option {
 		a.client = client.NewClient(client.WithBaseURL(url))
 		a.Auth = auth.NewAuthService(a.client)
 		a.Accounts = accounts.NewAccountsService(a.client)
+		a.Trading = trading.NewService(a.client)
 	}
 }
 
@@ -48,6 +52,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 		a.client = client.NewClient(client.WithHTTPClient(httpClient))
 		a.Auth = auth.NewAuthService(a.client)
 		a.Accounts = accounts.NewAccountsService(a.client)
+		a.Trading = trading.NewService(a.client)
 	}
 }
 
@@ -70,6 +75,7 @@ func New(opts ...Option) *Avanza {
 	}
 	a.Auth = auth.NewAuthService(a.client)
 	a.Accounts = accounts.NewAccountsService(a.client)
+	a.Trading = trading.NewService(a.client)
 
 	for _, opt := range opts {
 		opt(a)
