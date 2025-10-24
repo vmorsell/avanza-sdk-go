@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/vmorsell/avanza-sdk-go"
-	"github.com/vmorsell/avanza-sdk-go/internal/trading"
 )
 
 func main() {
@@ -41,7 +40,7 @@ func main() {
 
 	// Get trading accounts to find account ID
 	fmt.Println("Fetching trading accounts...")
-	tradingAccounts, err := client.Accounts.GetTradingAccounts(context.Background())
+	tradingAccounts, err := client.GetTradingAccounts(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -66,7 +65,7 @@ func main() {
 	volume := "1"         // Number of shares
 	side := "BUY"         // Buy order
 
-	feeReq := &trading.PreliminaryFeeRequest{
+	feeReq := &avanza.PreliminaryFeeRequest{
 		AccountID:   accountID,
 		OrderbookID: orderbookID,
 		Price:       price,
@@ -74,7 +73,7 @@ func main() {
 		Side:        side,
 	}
 
-	feeResp, err := client.Trading.GetPreliminaryFee(context.Background(), feeReq)
+	feeResp, err := client.GetPreliminaryFee(context.Background(), feeReq)
 	if err != nil {
 		log.Fatalf("Failed to get preliminary fee: %v", err)
 	}
