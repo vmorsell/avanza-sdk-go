@@ -75,3 +75,77 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 
 	return &resp, nil
 }
+
+// OrderAccount represents account information for an order.
+type OrderAccount struct {
+	AccountID string `json:"accountId"`
+	Name      struct {
+		Value string `json:"value"`
+	} `json:"name"`
+	Type struct {
+		AccountType string `json:"accountType"`
+	} `json:"type"`
+	URLParameterID string `json:"urlParameterId"`
+}
+
+// OrderOrderbook represents orderbook information for an order.
+type OrderOrderbook struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	CountryCode    string `json:"countryCode"`
+	Currency       string `json:"currency"`
+	InstrumentType string `json:"instrumentType"`
+	VolumeFactor   string `json:"volumeFactor"`
+	ISIN           string `json:"isin"`
+	MIC            string `json:"mic"`
+}
+
+// Order represents a single order.
+type Order struct {
+	Account              OrderAccount           `json:"account"`
+	OrderID              string                 `json:"orderId"`
+	Volume               int                    `json:"volume"`
+	OriginalVolume       int                    `json:"originalVolume"`
+	Price                float64                `json:"price"`
+	Amount               float64                `json:"amount"`
+	OrderbookID          string                 `json:"orderbookId"`
+	Side                 string                 `json:"side"`
+	ValidUntil           string                 `json:"validUntil"`
+	Created              string                 `json:"created"`
+	Deletable            bool                   `json:"deletable"`
+	Modifiable           bool                   `json:"modifiable"`
+	Message              string                 `json:"message"`
+	State                string                 `json:"state"`
+	StateText            string                 `json:"stateText"`
+	StateMessage         string                 `json:"stateMessage"`
+	Orderbook            OrderOrderbook         `json:"orderbook"`
+	AdditionalParameters map[string]interface{} `json:"additionalParameters"`
+	Condition            string                 `json:"condition"`
+}
+
+// GetOrdersResponse represents the response from getting orders.
+type GetOrdersResponse struct {
+	Orders          []Order       `json:"orders"`
+	FundOrders      []interface{} `json:"fundOrders"`
+	CancelledOrders []interface{} `json:"cancelledOrders"`
+}
+
+// GetOrders retrieves all current orders.
+func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
+	httpResp, err := s.client.Get(ctx, "/_api/trading/rest/orders")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get orders: %w", err)
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code: %d", httpResp.StatusCode)
+	}
+
+	var resp GetOrdersResponse
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &resp, nil
+}
