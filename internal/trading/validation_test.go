@@ -11,6 +11,13 @@ import (
 )
 
 func TestValidateOrder_Success(t *testing.T) {
+	const (
+		testOrderbookID = "orderbookID"
+		testAccountID   = "accountID"
+		testPrice       = 2.0
+		testVolume      = 1
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/_api/trading-critical/rest/order/validation/validate" {
 			t.Errorf("expected path /_api/trading-critical/rest/order/validation/validate, got %s", r.URL.Path)
@@ -122,6 +129,13 @@ func TestValidateOrder_Success(t *testing.T) {
 }
 
 func TestValidateOrder_HTTPError(t *testing.T) {
+	const (
+		testOrderbookID = "orderbookID"
+		testAccountID   = "accountID"
+		testPrice       = 2.0
+		testVolume      = 1
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("bad request"))
@@ -150,6 +164,13 @@ func TestValidateOrder_HTTPError(t *testing.T) {
 }
 
 func TestValidateOrder_ContextCancellation(t *testing.T) {
+	const (
+		testOrderbookID = "orderbookID"
+		testAccountID   = "accountID"
+		testPrice       = 2.0
+		testVolume      = 1
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Delay to allow context cancellation
 		<-r.Context().Done()

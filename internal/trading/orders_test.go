@@ -11,6 +11,15 @@ import (
 )
 
 func TestPlaceOrder_Success(t *testing.T) {
+	const (
+		testOrderbookID = "orderbookID"
+		testAccountID   = "accountID"
+		testPrice       = 2.0
+		testVolume      = 1
+		testOrderID     = "orderID1"
+		testRequestID   = "reqID"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/_api/trading-critical/rest/order/new" {
 			t.Errorf("expected path /_api/trading-critical/rest/order/new, got %s", r.URL.Path)
@@ -85,6 +94,14 @@ func TestPlaceOrder_Success(t *testing.T) {
 }
 
 func TestPlaceOrder_FailedStatus(t *testing.T) {
+	const (
+		testRequestID   = "reqID"
+		testPrice       = 2.0
+		testVolume      = 1
+		testAccountID   = "accountID"
+		testOrderbookID = "orderbookID"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
@@ -124,6 +141,14 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 }
 
 func TestPlaceOrder_HTTPError(t *testing.T) {
+	const (
+		testRequestID   = "reqID"
+		testPrice       = 2.0
+		testVolume      = 1
+		testAccountID   = "accountID"
+		testOrderbookID = "orderbookID"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("bad request"))
@@ -150,6 +175,15 @@ func TestPlaceOrder_HTTPError(t *testing.T) {
 }
 
 func TestPlaceOrder_SellOrder(t *testing.T) {
+	const (
+		testRequestID   = "reqID"
+		testPrice       = 2.0
+		testVolume      = 1
+		testAccountID   = "accountID"
+		testOrderbookID = "orderbookID"
+		testOrderID2    = "orderID2"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req PlaceOrderRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -192,6 +226,14 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 }
 
 func TestPlaceOrder_ContextCancellation(t *testing.T) {
+	const (
+		testRequestID   = "reqID"
+		testPrice       = 2.0
+		testVolume      = 1
+		testAccountID   = "accountID"
+		testOrderbookID = "orderbookID"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Delay to allow context cancellation
 		<-r.Context().Done()

@@ -10,18 +10,19 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
-// Stop loss test constants
-const (
-	testStopLossTriggerValue = 200.0
-	testStopLossOrderPrice   = 200.0
-	testStopLossOrderVolume  = 3
-	testStopLossValidDays    = 8
-	testStopLossValidUntil   = "2025-11-23"
-	testStopLossOrderID      = "A4^1758088943198^1705191"
-	testParentStopLossID     = "0"
-)
-
 func TestPlaceStopLoss_Success(t *testing.T) {
+	const (
+		testOrderbookID          = "orderbookID"
+		testAccountID            = "accountID"
+		testStopLossTriggerValue = 200.0
+		testStopLossOrderPrice   = 200.0
+		testStopLossOrderVolume  = 3
+		testStopLossValidDays    = 8
+		testStopLossValidUntil   = "2025-11-23"
+		testStopLossOrderID      = "A4^1758088943198^1705191"
+		testParentStopLossID     = "0"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/_api/trading/stoploss/new" {
 			t.Errorf("expected path /_api/trading/stoploss/new, got %s", r.URL.Path)
@@ -112,6 +113,16 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 }
 
 func TestPlaceStopLoss_FailedStatus(t *testing.T) {
+	const (
+		testOrderbookID          = "orderbookID"
+		testAccountID            = "accountID"
+		testStopLossTriggerValue = 200.0
+		testStopLossOrderPrice   = 200.0
+		testStopLossOrderVolume  = 3
+		testStopLossValidDays    = 8
+		testParentStopLossID     = "0"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceStopLossResponse{
@@ -152,6 +163,16 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 }
 
 func TestPlaceStopLoss_HTTPError(t *testing.T) {
+	const (
+		testOrderbookID          = "orderbookID"
+		testAccountID            = "accountID"
+		testStopLossTriggerValue = 200.0
+		testStopLossOrderPrice   = 200.0
+		testStopLossOrderVolume  = 3
+		testStopLossValidDays    = 8
+		testParentStopLossID     = "0"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("bad request"))
@@ -185,6 +206,16 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 }
 
 func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
+	const (
+		testOrderbookID          = "orderbookID"
+		testAccountID            = "accountID"
+		testStopLossTriggerValue = 200.0
+		testStopLossOrderPrice   = 200.0
+		testStopLossOrderVolume  = 3
+		testStopLossValidDays    = 8
+		testParentStopLossID     = "0"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Delay to allow context cancellation
 		<-r.Context().Done()

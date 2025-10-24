@@ -12,6 +12,19 @@ import (
 )
 
 func TestGetPreliminaryFee_Success(t *testing.T) {
+	const (
+		testOrderbookID         = "orderbookID"
+		testAccountID           = "accountID"
+		testPrice               = 2.0
+		testVolume              = 1
+		testCommission          = "99.00"
+		testMarketFees          = "0.00"
+		testTotalFees           = "99.00"
+		testTotalSum            = "103.00"
+		testTotalSumWithoutFees = "4.00"
+		testOrderbookCurrency   = "SEK"
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/_api/trading/preliminary-fee/preliminaryfee" {
 			t.Errorf("expected path /_api/trading/preliminary-fee/preliminaryfee, got %s", r.URL.Path)
@@ -99,6 +112,13 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 }
 
 func TestGetPreliminaryFee_HTTPError(t *testing.T) {
+	const (
+		testOrderbookID = "orderbookID"
+		testAccountID   = "accountID"
+		testPrice       = 2.0
+		testVolume      = 1
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("bad request"))
@@ -123,6 +143,13 @@ func TestGetPreliminaryFee_HTTPError(t *testing.T) {
 }
 
 func TestGetPreliminaryFee_ContextCancellation(t *testing.T) {
+	const (
+		testOrderbookID = "orderbookID"
+		testAccountID   = "accountID"
+		testPrice       = 2.0
+		testVolume      = 1
+	)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Delay to allow context cancellation
 		<-r.Context().Done()
