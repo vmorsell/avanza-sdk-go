@@ -82,13 +82,7 @@ func main() {
 }
 ```
 
-See the [examples](example/) directory for complete working examples, including:
-
-- [Authentication and account overview](example/accounts/)
-- [Placing orders](example/trading/)
-- [Stop loss orders](example/stop-loss/)
-- [Validating orders](example/validate-order/)
-- [Getting preliminary fees](example/preliminary-fee/)
+See the [examples](examples/) directory for complete working examples.
 
 ## Configuration
 

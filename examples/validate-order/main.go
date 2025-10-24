@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go"
-	"github.com/vmorsell/avanza-sdk-go/internal/trading"
 )
 
 func main() {
@@ -45,7 +44,7 @@ func main() {
 
 	// Get trading accounts to find account ID
 	fmt.Println("Fetching trading accounts...")
-	tradingAccounts, err := client.Accounts.GetTradingAccounts(ctx)
+	tradingAccounts, err := client.GetTradingAccounts(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -69,7 +68,7 @@ func main() {
 
 	fmt.Printf("\nValidating order: %s %d shares of orderbook ID %s at %.4f SEK...\n", side, volume, orderbookID, price)
 
-	validateReq := &trading.ValidateOrderRequest{
+	validateReq := &avanza.ValidateOrderRequest{
 		IsDividendReinvestment: false,
 		RequestID:              nil,
 		OrderRequestParameters: nil,
@@ -77,17 +76,17 @@ func main() {
 		Volume:                 volume,
 		OpenVolume:             nil,
 		AccountID:              accountID,
-		Side:                   trading.OrderSideBuy,
+		Side:                   avanza.OrderSideBuy,
 		OrderbookID:            orderbookID,
 		ValidUntil:             nil,
 		Metadata:               nil,
-		Condition:              trading.OrderConditionNormal,
+		Condition:              avanza.OrderConditionNormal,
 		ISIN:                   "SE0015811963",
 		Currency:               "SEK",
 		MarketPlace:            "XSTO",
 	}
 
-	validateResp, err := client.Trading.ValidateOrder(ctx, validateReq)
+	validateResp, err := client.ValidateOrder(ctx, validateReq)
 	if err != nil {
 		log.Fatalf("Failed to validate order: %v", err)
 	}

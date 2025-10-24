@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -73,8 +73,8 @@ type PlaceStopLossResponse struct {
 }
 
 // PlaceStopLoss places a new stop loss order.
-func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) (*PlaceStopLossResponse, error) {
-	httpResp, err := s.client.Post(ctx, "/_api/trading/stoploss/new", req)
+func (a *Avanza) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) (*PlaceStopLossResponse, error) {
+	httpResp, err := a.client.Post(ctx, "/_api/trading/stoploss/new", req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to place stop loss order: %w", err)
 	}

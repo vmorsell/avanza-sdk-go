@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vmorsell/avanza-sdk-go"
-	"github.com/vmorsell/avanza-sdk-go/internal/trading"
 )
 
 func main() {
@@ -42,7 +41,7 @@ func main() {
 
 	// Get trading accounts to find account ID
 	fmt.Println("Fetching trading accounts...")
-	tradingAccounts, err := client.Accounts.GetTradingAccounts(context.Background())
+	tradingAccounts, err := client.GetTradingAccounts(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -60,16 +59,16 @@ func main() {
 
 	// Place a buy order
 	// Note: This is a real order! Make sure you want to execute it.
-	orderReq := &trading.PlaceOrderRequest{
+	orderReq := &avanza.PlaceOrderRequest{
 		IsDividendReinvestment: false,
 		RequestID:              uuid.New().String(),
 		Price:                  2.0, // Low price to avoid order being filled
 		Volume:                 1,   // One share
 		AccountID:              accountID,
-		Side:                   trading.OrderSideBuy,
+		Side:                   avanza.OrderSideBuy,
 		OrderbookID:            "5247", // Orderbook ID for Investor B
-		Condition:              trading.OrderConditionNormal,
-		Metadata: trading.OrderMetadata{
+		Condition:              avanza.OrderConditionNormal,
+		Metadata: avanza.OrderMetadata{
 			OrderEntryMode:  "ADVANCED",
 			HasTouchedPrice: "true",
 		},
@@ -82,7 +81,7 @@ func main() {
 	fmt.Printf("  Volume:      %d\n", orderReq.Volume)
 	fmt.Printf("  Account:     %s\n", orderReq.AccountID)
 
-	orderResp, err := client.Trading.PlaceOrder(context.Background(), orderReq)
+	orderResp, err := client.PlaceOrder(context.Background(), orderReq)
 	if err != nil {
 		log.Fatalf("Failed to place order: %v", err)
 	}

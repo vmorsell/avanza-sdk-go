@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -53,8 +53,8 @@ type PlaceOrderResponse struct {
 }
 
 // PlaceOrder places a new order.
-func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*PlaceOrderResponse, error) {
-	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/new", req)
+func (a *Avanza) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*PlaceOrderResponse, error) {
+	httpResp, err := a.client.Post(ctx, "/_api/trading-critical/rest/order/new", req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to place order: %w", err)
 	}
@@ -131,8 +131,8 @@ type GetOrdersResponse struct {
 }
 
 // GetOrders retrieves all current orders.
-func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
-	httpResp, err := s.client.Get(ctx, "/_api/trading/rest/orders")
+func (a *Avanza) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
+	httpResp, err := a.client.Get(ctx, "/_api/trading/rest/orders")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get orders: %w", err)
 	}

@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 func TestValidateOrder_Success(t *testing.T) {
@@ -77,8 +75,7 @@ func TestValidateOrder_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &ValidateOrderRequest{
 		IsDividendReinvestment: false,
@@ -98,7 +95,7 @@ func TestValidateOrder_Success(t *testing.T) {
 		MarketPlace:            "XSTO",
 	}
 
-	resp, err := s.ValidateOrder(context.Background(), req)
+	resp, err := avanza.ValidateOrder(context.Background(), req)
 	if err != nil {
 		t.Fatalf("ValidateOrder failed: %v", err)
 	}
@@ -142,8 +139,7 @@ func TestValidateOrder_HTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &ValidateOrderRequest{
 		Price:       testPrice,
@@ -157,7 +153,7 @@ func TestValidateOrder_HTTPError(t *testing.T) {
 		MarketPlace: "XSTO",
 	}
 
-	_, err := s.ValidateOrder(context.Background(), req)
+	_, err := avanza.ValidateOrder(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -177,8 +173,7 @@ func TestValidateOrder_ContextCancellation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
@@ -195,7 +190,7 @@ func TestValidateOrder_ContextCancellation(t *testing.T) {
 		MarketPlace: "XSTO",
 	}
 
-	_, err := s.ValidateOrder(ctx, req)
+	_, err := avanza.ValidateOrder(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}

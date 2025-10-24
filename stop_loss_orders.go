@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -59,8 +59,8 @@ type StopLossOrder struct {
 }
 
 // GetStopLossOrders retrieves all active stop loss orders.
-func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error) {
-	httpResp, err := s.client.Get(ctx, "/_api/trading/stoploss/")
+func (a *Avanza) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error) {
+	httpResp, err := a.client.Get(ctx, "/_api/trading/stoploss/")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get stop loss orders: %w", err)
 	}

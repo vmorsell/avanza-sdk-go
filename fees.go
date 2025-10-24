@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -35,8 +35,8 @@ type CurrencyExchangeFee struct {
 }
 
 // GetPreliminaryFee gets the preliminary fees for an order before placing it.
-func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequest) (*PreliminaryFeeResponse, error) {
-	httpResp, err := s.client.Post(ctx, "/_api/trading/preliminary-fee/preliminaryfee", req)
+func (a *Avanza) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequest) (*PreliminaryFeeResponse, error) {
+	httpResp, err := a.client.Post(ctx, "/_api/trading/preliminary-fee/preliminaryfee", req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get preliminary fee: %w", err)
 	}

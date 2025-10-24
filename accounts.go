@@ -1,5 +1,4 @@
-// Package accounts provides account overview functionality for the Avanza API.
-package accounts
+package avanza
 
 import (
 	"context"
@@ -7,21 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
-
-// AccountsService handles account-related operations with Avanza.
-type AccountsService struct {
-	client *client.Client
-}
-
-// NewAccountsService creates a new accounts service with the given HTTP client.
-func NewAccountsService(client *client.Client) *AccountsService {
-	return &AccountsService{
-		client: client,
-	}
-}
 
 // AccountOverview represents the complete account overview response.
 type AccountOverview struct {
@@ -113,7 +98,7 @@ type PerformanceData struct {
 type Loan struct{}
 
 // GetAccountOverview retrieves the complete account overview including categories, accounts, and loans.
-func (a *AccountsService) GetAccountOverview(ctx context.Context) (*AccountOverview, error) {
+func (a *Avanza) GetAccountOverview(ctx context.Context) (*AccountOverview, error) {
 	resp, err := a.client.Get(ctx, "/_api/account-overview/overview/categorizedAccounts")
 	if err != nil {
 		return nil, err
@@ -161,7 +146,7 @@ type CurrencyBalance struct {
 }
 
 // GetTradingAccounts retrieves all trading accounts for the authenticated user.
-func (a *AccountsService) GetTradingAccounts(ctx context.Context) ([]TradingAccount, error) {
+func (a *Avanza) GetTradingAccounts(ctx context.Context) ([]TradingAccount, error) {
 	resp, err := a.client.Get(ctx, "/_api/trading-critical/rest/accounts")
 	if err != nil {
 		return nil, err
@@ -275,7 +260,7 @@ type AccountPositions struct {
 }
 
 // GetAccountPositions retrieves positions for a specific account using its URL parameter ID.
-func (a *AccountsService) GetAccountPositions(ctx context.Context, urlParameterID string) (*AccountPositions, error) {
+func (a *Avanza) GetAccountPositions(ctx context.Context, urlParameterID string) (*AccountPositions, error) {
 	endpoint := fmt.Sprintf("/_api/position-data/positions/%s", urlParameterID)
 
 	resp, err := a.client.Get(ctx, endpoint)

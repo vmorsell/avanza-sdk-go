@@ -1,4 +1,4 @@
-package trading
+package avanza
 
 import (
 	"context"
@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
 func TestPlaceOrder_Success(t *testing.T) {
@@ -61,8 +59,7 @@ func TestPlaceOrder_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceOrderRequest{
 		IsDividendReinvestment: false,
@@ -79,7 +76,7 @@ func TestPlaceOrder_Success(t *testing.T) {
 		Condition: OrderConditionNormal,
 	}
 
-	resp, err := s.PlaceOrder(context.Background(), req)
+	resp, err := avanza.PlaceOrder(context.Background(), req)
 	if err != nil {
 		t.Fatalf("PlaceOrder failed: %v", err)
 	}
@@ -113,8 +110,7 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceOrderRequest{
 		RequestID:   testRequestID,
@@ -126,7 +122,7 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	resp, err := s.PlaceOrder(context.Background(), req)
+	resp, err := avanza.PlaceOrder(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -155,8 +151,7 @@ func TestPlaceOrder_HTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceOrderRequest{
 		RequestID:   testRequestID,
@@ -168,7 +163,7 @@ func TestPlaceOrder_HTTPError(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	_, err := s.PlaceOrder(context.Background(), req)
+	_, err := avanza.PlaceOrder(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -202,8 +197,7 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	req := &PlaceOrderRequest{
 		RequestID:   testRequestID,
@@ -215,7 +209,7 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	resp, err := s.PlaceOrder(context.Background(), req)
+	resp, err := avanza.PlaceOrder(context.Background(), req)
 	if err != nil {
 		t.Fatalf("PlaceOrder failed: %v", err)
 	}
@@ -240,8 +234,7 @@ func TestPlaceOrder_ContextCancellation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	c := client.NewClient(client.WithBaseURL(server.URL))
-	s := NewService(c)
+	avanza := New(WithBaseURL(server.URL))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
@@ -256,7 +249,7 @@ func TestPlaceOrder_ContextCancellation(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	_, err := s.PlaceOrder(ctx, req)
+	_, err := avanza.PlaceOrder(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}
