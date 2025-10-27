@@ -120,7 +120,12 @@ func (s *OrderDepthSubscription) start() {
 	// Set SSE-specific headers
 	s.setSSEHeaders(req)
 
-	resp, err := s.client.HTTPClient().Do(req)
+	// Create a new HTTP client without timeout
+	httpClient := &http.Client{
+		Timeout: 0,
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		s.errors <- fmt.Errorf("request failed: %w", err)
 		return
