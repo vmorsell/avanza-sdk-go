@@ -71,3 +71,9 @@ func New(opts ...Option) *Avanza {
 
 	return a
 }
+
+// GetCookies returns the current authentication cookies.
+// This is useful for debugging authentication issues.
+func (a *Avanza) GetCookies() map[string]string {
+	return a.client.Cookies()
+}

@@ -32,7 +32,23 @@ func TestNewAuthService(t *testing.T) {
 }
 
 func TestStartBankID_Success(t *testing.T) {
+	requestCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestCount++
+
+		// First request should be GET to "/" for initial cookies
+		if requestCount == 1 {
+			if r.Method != "GET" {
+				t.Errorf("expected GET method for initial request, got %s", r.Method)
+			}
+			if r.URL.Path != "/" {
+				t.Errorf("expected path / for initial request, got %s", r.URL.Path)
+			}
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Second request should be POST to the BankID endpoint
 		if r.Method != "POST" {
 			t.Errorf("expected POST method, got %s", r.Method)
 		}
