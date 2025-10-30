@@ -23,6 +23,41 @@ type Client struct {
 	securityToken string
 }
 
+// BaseURL returns the base URL of the client.
+func (c *Client) BaseURL() string {
+	return c.baseURL
+}
+
+// HTTPClient returns the underlying HTTP client.
+func (c *Client) HTTPClient() *http.Client {
+	return c.httpClient
+}
+
+// SecurityToken returns the current security token.
+func (c *Client) SecurityToken() string {
+	return c.securityToken
+}
+
+// Cookies returns a copy of the current cookies.
+func (c *Client) Cookies() map[string]string {
+	cookies := make(map[string]string)
+	for k, v := range c.cookies {
+		cookies[k] = v
+	}
+	return cookies
+}
+
+// SetMockCookies sets mock cookies for testing purposes.
+func (c *Client) SetMockCookies(cookies map[string]string) {
+	c.cookies = make(map[string]string)
+	for k, v := range cookies {
+		c.cookies[k] = v
+		if k == "AZACSRF" {
+			c.securityToken = v
+		}
+	}
+}
+
 // Option is a functional option for configuring the Client.
 type Option func(*Client)
 

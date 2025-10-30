@@ -71,6 +71,12 @@ type BankIDRestartRequest struct{}
 // StartBankID initiates a new BankID authentication session with QR code support.
 // Returns transaction details including a QR token that can be displayed to the user.
 func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, error) {
+	// First, visit the main page to get initial cookies including AZAPERSISTENCE
+	_, err := a.client.Get(ctx, "/")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get initial cookies: %w", err)
+	}
+
 	reqBody := BankIDStartRequest{
 		Method:       "QR_START",
 		ReturnScheme: "NULL",
@@ -237,7 +243,14 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 		return fmt.Errorf("user selection failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
-	// Step 2: Verify session is established by checking session info
+	// Step 2: Visit trading page to get additional cookies like AZAPERSISTENCE
+	tradingResp, err := a.client.Get(ctx, "/handla/order.html")
+	if err != nil {
+		return fmt.Errorf("failed to visit trading page: %w", err)
+	}
+	defer tradingResp.Body.Close()
+
+	// Step 3: Verify session is established by checking session info
 	sessionResp, err := a.client.Get(ctx, "/_api/authentication/session/info/session")
 	if err != nil {
 		return fmt.Errorf("failed to verify session: %w", err)
