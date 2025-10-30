@@ -248,7 +248,7 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 	if err != nil {
 		return fmt.Errorf("failed to visit trading page: %w", err)
 	}
-	tradingResp.Body.Close()
+	defer tradingResp.Body.Close()
 
 	// Step 3: Verify session is established by checking session info
 	sessionResp, err := a.client.Get(ctx, "/_api/authentication/session/info/session")
