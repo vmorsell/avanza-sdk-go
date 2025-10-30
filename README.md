@@ -26,6 +26,7 @@ Reverse-engineered Go client for Avanza.
 - **Stop Loss Orders** - Place stop loss orders with trigger conditions
 - **Order Validation** - Validate orders before placing them
 - **Preliminary Fees** - Get fee estimates before placing orders
+- **Order Depth Subscription** - Real-time order book updates
 
 ## Installation
 
