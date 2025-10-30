@@ -35,7 +35,7 @@ read -p "Create and push tag $NEW_VERSION? [y/N] " -n 1 -r
 echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+  git tag -s "$NEW_VERSION" -m "Release $NEW_VERSION"
   git push origin "$NEW_VERSION"
   echo "✅ Released $NEW_VERSION"
 else
