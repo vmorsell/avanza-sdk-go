@@ -35,38 +35,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("BankID authentication failed: %v", err)
 	}
-
-	fmt.Printf("\n✅ Authentication successful! Welcome %s\n", collectResp.Name)
+	fmt.Printf("Authentication successful. Welcome %s\n", collectResp.Name)
 
 	// Establish session for API calls
 	fmt.Println("Establishing session...")
 	if err := client.Auth.EstablishSession(ctx, collectResp); err != nil {
 		log.Fatalf("Failed to establish session: %v", err)
 	}
-	fmt.Println("Session established successfully!")
 
-	// Get session info for debugging
-	sessionInfo, err := client.Auth.GetSessionInfo(ctx)
-	if err != nil {
-		log.Fatalf("Failed to get session info: %v", err)
-	}
-	fmt.Printf("Session info: Logged in as %s (ID: %s)\n", sessionInfo.User.GreetingName, sessionInfo.User.ID)
-
-	// Debug: Print available cookies
-	cookies := client.GetCookies()
-	fmt.Printf("Available cookies: %v\n", cookies)
-
-	// Check for specific cookies
-	requiredCookies := []string{"AZAPERSISTENCE", "csid", "cstoken", "AZACSRF"}
-	for _, cookie := range requiredCookies {
-		if value, exists := cookies[cookie]; exists {
-			fmt.Printf("✓ %s: %s\n", cookie, value)
-		} else {
-			fmt.Printf("✗ %s: missing\n", cookie)
-		}
-	}
-
-	orderbookID := "2185403" // BEAR OMX X20 AVA 73
+	orderbookID := "738784" // BULL OMX X2 AVA
 
 	// Create a new context for the subscription that can be cancelled
 	subCtx, subCancel := context.WithCancel(ctx)
@@ -81,39 +58,43 @@ func main() {
 		subCancel()
 	}()
 
-	fmt.Printf("\n📊 Subscribing to order depth for orderbook %s...\n", orderbookID)
+	fmt.Printf("\nSubscribing to order depth for orderbook %s...\n", orderbookID)
 
-	// Subscribe to order depth updates using channels (idiomatic Go)
+	// Subscribe to order depth updates
 	subscription, err := client.SubscribeToOrderDepth(subCtx, orderbookID)
 	if err != nil {
 		log.Fatalf("Failed to subscribe to order depth: %v", err)
 	}
 	defer subscription.Close()
 
-	fmt.Println("✅ Order depth subscription active. Press Ctrl+C to stop.")
-
 	// Process events using channels
 	for {
 		select {
 		case event := <-subscription.Events():
-			if event.Event == "ORDER_DEPTH" {
-				fmt.Printf("\n📈 Order Depth Update for %s:\n", event.Data.OrderbookID)
-				fmt.Printf("  Market Maker Level (Ask): %d\n", event.Data.MarketMakerLevelInAsk)
-				fmt.Printf("  Market Maker Level (Bid): %d\n", event.Data.MarketMakerLevelInBid)
-				fmt.Printf("  Price Levels:\n")
-
-				for i, level := range event.Data.Levels {
-					if level.BuyPrice > 0 || level.SellPrice > 0 {
-						fmt.Printf("    Level %d: Buy %.2f@%.2f | Sell %.2f@%.2f\n",
-							i+1, level.BuyVolume, level.BuyPrice, level.SellVolume, level.SellPrice)
+			switch event.Event {
+			case "ORDER_DEPTH":
+				for i, lvl := range event.Data.Levels {
+					buyMM := ""
+					sellMM := ""
+					if i == event.Data.MarketMakerLevelInBid {
+						buyMM = "*"
 					}
+					if i == event.Data.MarketMakerLevelInAsk {
+						sellMM = "*"
+					}
+					fmt.Printf("%d: Buy: %.0f @ %.2f%s | Sell: %.0f @ %.2f%s\n",
+						i,
+						lvl.BuyVolume, lvl.BuyPrice, buyMM,
+						lvl.SellVolume, lvl.SellPrice, sellMM,
+					)
 				}
 				fmt.Println()
-			} else if event.Event == "info" {
-				fmt.Printf("ℹ️  Info: %s\n", event.Data.OrderbookID)
+
+			case "info":
+				fmt.Println("[got heartbeat]")
 			}
 		case err := <-subscription.Errors():
-			log.Printf("❌ Subscription error: %v", err)
+			log.Printf("Subscription error: %v", err)
 			return
 		case <-subCtx.Done():
 			fmt.Println("Order depth subscription ended.")
