@@ -20,7 +20,7 @@ vuln:
 	@govulncheck ./...
 
 ci: test-race vuln lint
-	@echo "✅ All CI checks passed"
+	@echo "All CI checks passed"
 
 clean:
 	@go clean -testcache

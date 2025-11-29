@@ -1,4 +1,49 @@
 // Package avanza provides a Go client library for the Avanza trading platform API.
+//
+// This is an unofficial, reverse-engineered SDK. Use at your own risk.
+//
+// Quick Start:
+//
+//	client := avanza.New()
+//	ctx := context.Background()
+//
+//	// Authenticate with BankID
+//	startResp, err := client.Auth.StartBankID(ctx)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	client.Auth.DisplayQRCode(startResp.QRToken)
+//	collectResp, err := client.Auth.PollBankIDWithQRUpdates(ctx)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	// Establish session before making API calls
+//	if err := client.Auth.EstablishSession(ctx, collectResp); err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	// Use the client
+//	overview, err := client.Accounts.GetOverview(ctx)
+//
+// Error Handling:
+//
+// All methods return errors that should be checked. Use errors.As to check for
+// HTTPError types:
+//
+//	var httpErr *client.HTTPError
+//	if errors.As(err, &httpErr) {
+//		fmt.Printf("HTTP %d: %s\n", httpErr.StatusCode, httpErr.Body)
+//	}
+//
+// Context Usage:
+//
+// All methods accept context.Context for cancellation and timeouts. Always
+// provide a context with appropriate timeout for production code:
+//
+//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+//	defer cancel()
 package avanza
 
 import (
@@ -12,16 +57,15 @@ import (
 )
 
 // Avanza is the main client for interacting with the Avanza API.
-// It provides access to trading and account management functionality.
 type Avanza struct {
 	client *client.Client
-	// Auth provides BankID authentication functionality.
+	// Auth handles BankID authentication and session management.
 	Auth *auth.AuthService
-	// Accounts provides account management functionality.
+	// Accounts provides account overview, positions, and trading accounts.
 	Accounts *accounts.Service
-	// Trading provides trading functionality including orders, stop loss orders, validation, and fees.
+	// Trading handles order placement, validation, fees, and stop loss orders.
 	Trading *trading.Service
-	// Market provides market data functionality including real-time subscriptions.
+	// Market provides real-time market data subscriptions.
 	Market *market.Service
 }
 
@@ -33,7 +77,7 @@ type Option func(*Avanza)
 //
 // Example:
 //
-//	client := avanza.New(avanza.WithBaseURL("https://test.example.com"))
+//	client := avanza.New(avanza.WithBaseURL("http://localhost:8080"))
 func WithBaseURL(url string) Option {
 	return func(a *Avanza) {
 		a.client = client.NewClient(client.WithBaseURL(url))
@@ -85,7 +129,7 @@ func WithUserAgent(userAgent string) Option {
 //	client := avanza.New()
 //
 //	// With custom base URL for testing
-//	client := avanza.New(avanza.WithBaseURL("https://test.example.com"))
+//	client := avanza.New(avanza.WithBaseURL("http://localhost:8080"))
 //
 //	// With custom HTTP client
 //	httpClient := &http.Client{Timeout: 60 * time.Second}

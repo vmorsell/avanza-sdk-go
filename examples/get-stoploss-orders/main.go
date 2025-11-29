@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("BankID authentication failed: %v", err)
 	}
 
-	fmt.Printf("\n✅ Authentication successful! Welcome %s\n", collectResp.Name)
+	fmt.Printf("\nAuthentication successful! Welcome %s\n", collectResp.Name)
 
 	// Establish session for API calls
 	fmt.Println("Establishing session...")
@@ -43,17 +43,17 @@ func main() {
 	fmt.Println("Session established successfully!")
 
 	// Get all active stop loss orders
-	fmt.Println("\n🛡️ Fetching active stop loss orders...")
+	fmt.Println("\nFetching active stop loss orders...")
 	stopLossOrders, err := client.Trading.GetStopLossOrders(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get stop loss orders: %v", err)
 	}
 
-	fmt.Printf("✅ Found %d active stop loss orders\n", len(stopLossOrders))
+	fmt.Printf("Found %d active stop loss orders\n", len(stopLossOrders))
 
 	// Display stop loss orders
 	if len(stopLossOrders) > 0 {
-		fmt.Println("\n📊 Active Stop Loss Orders:")
+		fmt.Println("\nActive Stop Loss Orders:")
 		for i, order := range stopLossOrders {
 			fmt.Printf("\n--- Stop Loss Order %d ---\n", i+1)
 			fmt.Printf("ID: %s\n", order.ID)
@@ -90,6 +90,6 @@ func main() {
 			}
 		}
 	} else {
-		fmt.Println("\n📭 No active stop loss orders found")
+		fmt.Println("\nNo active stop loss orders found")
 	}
 }

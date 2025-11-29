@@ -31,7 +31,7 @@ type Client struct {
 	rateLimiter   RateLimiter
 }
 
-// BaseURL returns the base URL of the client.
+// BaseURL returns the base URL configured for the client.
 func (c *Client) BaseURL() string {
 	return c.baseURL
 }
@@ -41,12 +41,12 @@ func (c *Client) HTTPClient() *http.Client {
 	return c.httpClient
 }
 
-// SecurityToken returns the current security token.
+// SecurityToken returns the current CSRF security token.
 func (c *Client) SecurityToken() string {
 	return c.securityToken
 }
 
-// Cookies returns a copy of the current cookies.
+// Cookies returns a copy of the current session cookies.
 func (c *Client) Cookies() map[string]string {
 	cookies := make(map[string]string)
 	for k, v := range c.cookies {
@@ -60,7 +60,8 @@ func (c *Client) UserAgent() string {
 	return c.userAgent
 }
 
-// SetMockCookies sets mock cookies for testing purposes.
+// SetMockCookies sets cookies for testing. The AZACSRF cookie is also
+// set as the security token.
 func (c *Client) SetMockCookies(cookies map[string]string) {
 	c.cookies = make(map[string]string)
 	for k, v := range cookies {
@@ -125,7 +126,7 @@ func WithRateLimiter(limiter RateLimiter) Option {
 // Example:
 //
 //	client := NewClient() // Default configuration with rate limiting
-//	client := NewClient(WithBaseURL("https://test.example.com"))
+//	client := NewClient(WithBaseURL("http://localhost:8080"))
 func NewClient(opts ...Option) *Client {
 	c := &Client{
 		httpClient: &http.Client{
@@ -146,7 +147,8 @@ func NewClient(opts ...Option) *Client {
 
 // Post sends a POST request to the specified endpoint with the given body.
 // The body is automatically marshaled to JSON. Cookies and security tokens
-// are automatically included in the request headers.
+// are automatically included in the request headers. Rate limiting is
+// applied if configured.
 func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
 
@@ -183,6 +185,7 @@ func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*
 
 // Get sends a GET request to the specified endpoint.
 // Cookies and security tokens are automatically included in the request headers.
+// Rate limiting is applied if configured.
 func (c *Client) Get(ctx context.Context, endpoint string) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
 

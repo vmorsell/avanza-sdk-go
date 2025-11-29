@@ -34,7 +34,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestWithBaseURL(t *testing.T) {
-	newURL := "https://test.example.com"
+	newURL := "http://localhost:8080"
 	client := NewClient(WithBaseURL(newURL))
 
 	if client.baseURL != newURL {
@@ -59,7 +59,7 @@ func TestWithHTTPClient(t *testing.T) {
 }
 
 func TestMultipleOptions(t *testing.T) {
-	customURL := "https://test.example.com"
+	customURL := "http://localhost:8080"
 	customClient := &http.Client{
 		Timeout: 45 * time.Second,
 	}

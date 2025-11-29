@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("BankID authentication failed: %v", err)
 	}
 
-	fmt.Printf("\n✅ Authentication successful! Welcome %s\n", collectResp.Name)
+	fmt.Printf("\nAuthentication successful! Welcome %s\n", collectResp.Name)
 
 	// Establish session for API calls
 	fmt.Println("Establishing session...")
@@ -61,7 +61,7 @@ func main() {
 	fmt.Printf("Available for purchase: %.2f SEK\n", account.AvailableForPurchase)
 
 	// Place a stop loss order
-	orderbookID := "5247" // Example: Ericsson B
+	orderbookID := "5247" // Ericsson B
 	triggerValue := 200.0
 	orderPrice := 200.0
 	volume := 3
@@ -73,7 +73,7 @@ func main() {
 	fmt.Printf("  Valid until: 2025-11-23\n")
 
 	stopLossReq := &avanza.PlaceStopLossRequest{
-		ParentStopLossID: "0", // New stop loss order
+		ParentStopLossID: "0",
 		AccountID:        accountID,
 		OrderbookID:      orderbookID,
 		StopLossTrigger: avanza.StopLossTrigger{
@@ -98,11 +98,11 @@ func main() {
 		log.Fatalf("Failed to place stop loss order: %v", err)
 	}
 
-	fmt.Printf("\n✅ Stop loss order placed successfully!")
+	fmt.Printf("\nStop loss order placed successfully!")
 	fmt.Printf("  Status: %s\n", stopLossResp.Status)
 	fmt.Printf("  Stop Loss Order ID: %s\n", stopLossResp.StopLossOrderID)
 
-	fmt.Println("\n📋 Stop Loss Order Details:")
+	fmt.Println("\nStop Loss Order Details:")
 	fmt.Printf("  Trigger Condition: Price <= %.2f SEK\n", triggerValue)
 	fmt.Printf("  Trigger Type: %s\n", stopLossReq.StopLossTrigger.Type)
 	fmt.Printf("  Value Type: %s\n", stopLossReq.StopLossTrigger.ValueType)

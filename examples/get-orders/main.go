@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("BankID authentication failed: %v", err)
 	}
 
-	fmt.Printf("\n✅ Authentication successful! Welcome %s\n", collectResp.Name)
+	fmt.Printf("\nAuthentication successful! Welcome %s\n", collectResp.Name)
 
 	// Establish session for API calls
 	fmt.Println("Establishing session...")
@@ -43,19 +43,19 @@ func main() {
 	fmt.Println("Session established successfully!")
 
 	// Get all current orders
-	fmt.Println("\n📋 Fetching current orders...")
+	fmt.Println("\nFetching current orders...")
 	orders, err := client.Trading.GetOrders(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get orders: %v", err)
 	}
 
-	fmt.Printf("✅ Found %d orders\n", len(orders.Orders))
+	fmt.Printf("Found %d orders\n", len(orders.Orders))
 	fmt.Printf("Fund orders: %d\n", len(orders.FundOrders))
 	fmt.Printf("Cancelled orders: %d\n", len(orders.CancelledOrders))
 
 	// Display orders
 	if len(orders.Orders) > 0 {
-		fmt.Println("\n📊 Current Orders:")
+		fmt.Println("\nCurrent Orders:")
 		for i, order := range orders.Orders {
 			fmt.Printf("\n--- Order %d ---\n", i+1)
 			fmt.Printf("Order ID: %s\n", order.OrderID)
@@ -80,6 +80,6 @@ func main() {
 			fmt.Printf("Modifiable: %t\n", order.Modifiable)
 		}
 	} else {
-		fmt.Println("\n📭 No current orders found")
+		fmt.Println("\nNo current orders found")
 	}
 }

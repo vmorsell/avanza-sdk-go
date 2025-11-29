@@ -1,7 +1,7 @@
 // Package market provides market data functionality for the Avanza API.
 package market
 
-// OrderDepthLevel represents a single price level in the order depth.
+// OrderDepthLevel contains bid/ask prices and volumes at a single price level.
 type OrderDepthLevel struct {
 	BuyPrice   float64 `json:"buyPrice"`
 	BuyVolume  float64 `json:"buyVolume"`
@@ -9,7 +9,7 @@ type OrderDepthLevel struct {
 	SellVolume float64 `json:"sellVolume"`
 }
 
-// OrderDepthData represents the order depth data received from the stream.
+// OrderDepthData contains the complete order book snapshot.
 type OrderDepthData struct {
 	OrderbookID           string            `json:"orderbookId"`
 	Levels                []OrderDepthLevel `json:"levels"`
@@ -17,7 +17,7 @@ type OrderDepthData struct {
 	MarketMakerLevelInBid int               `json:"marketMakerLevelInBid"`
 }
 
-// OrderDepthEvent represents a complete order depth event from the SSE stream.
+// OrderDepthEvent is a single event from the order depth subscription stream.
 type OrderDepthEvent struct {
 	Event string         `json:"event"`
 	Data  OrderDepthData `json:"data"`

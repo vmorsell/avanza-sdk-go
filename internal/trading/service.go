@@ -23,6 +23,11 @@ func NewService(client *client.Client) *Service {
 }
 
 // PlaceOrder places a new order.
+//
+// It's recommended to validate the order first using ValidateOrder
+// and check fees using GetPreliminaryFee.
+//
+// See also: ValidateOrder, GetPreliminaryFee
 func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*PlaceOrderResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)
@@ -71,6 +76,10 @@ func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 }
 
 // ValidateOrder validates an order before placing it.
+//
+// Use this to check for validation warnings before calling PlaceOrder.
+//
+// See also: PlaceOrder
 func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) (*ValidateOrderResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)
@@ -95,6 +104,10 @@ func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) 
 }
 
 // GetPreliminaryFee gets the preliminary fees for an order before placing it.
+//
+// Use this to estimate costs before calling PlaceOrder.
+//
+// See also: PlaceOrder
 func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequest) (*PreliminaryFeeResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)

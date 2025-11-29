@@ -8,20 +8,23 @@ import (
 )
 
 const (
+	// DefaultRateLimitInterval is the default minimum interval between HTTP requests.
+	// This helps prevent overwhelming the API and reduces the risk of being blocked.
 	DefaultRateLimitInterval = 100 * time.Millisecond
 )
 
-// RateLimiter is an interface for rate limiting HTTP requests.
-// Implementations should block until the request is allowed to proceed.
+// RateLimiter controls the rate of HTTP requests.
+// Implementations should block until the next request is allowed.
 type RateLimiter interface {
 	// Wait blocks until the rate limiter allows a request to proceed.
-	// It should respect context cancellation.
+	// Returns an error if the context is cancelled.
 	Wait(ctx context.Context) error
 }
 
-// SimpleRateLimiter is a simple rate limiter that enforces a minimum interval between requests.
+// SimpleRateLimiter enforces a minimum interval between requests.
 // It is safe for concurrent use.
 type SimpleRateLimiter struct {
+	// Interval is the minimum time between requests.
 	Interval time.Duration
 	mu       sync.Mutex
 	lastCall time.Time

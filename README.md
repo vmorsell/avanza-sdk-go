@@ -6,15 +6,7 @@ Reverse-engineered Go client for Avanza.
 
 ## READ THIS FIRST
 
-**TL;DR: This is for learning, not for your trading bot that's going to make you rich. It will break, it probably violates some terms, and it should not be used by anyone.**
-
-- **Not official** - Avanza doesn't know it exists (?)
-- **ToS violation** - You're probably breaking this terms
-- **Educational only** - Experiment away, don't build your retirement fund on this
-- **Rate limits** - Don't be that person who DDoSes their servers
-- **No warranty** - Use at your own risk, no support provided
-- **Reverse engineered** - This was built by sniffing network traffic and will likely break when Avanza changes their API
-- **Incomplete** - Only covers a tiny fraction of Avanza's actual API surface
+**Unofficial, reverse-engineered SDK. Use at your own risk. Not affiliated with Avanza.**
 
 ## Features
 
@@ -45,7 +37,7 @@ import (
     "log"
     "time"
 
-        "github.com/vmorsell/avanza-sdk-go"
+    "github.com/vmorsell/avanza-sdk-go"
 )
 
 func main() {
@@ -73,6 +65,11 @@ func main() {
 
     fmt.Printf("Welcome %s\n", collectResp.Name)
 
+    // Establish session before making API calls
+    if err := client.Auth.EstablishSession(ctx, collectResp); err != nil {
+        log.Fatal(err)
+    }
+
     // Get account overview
     overview, err := client.Accounts.GetOverview(ctx)
     if err != nil {
@@ -88,17 +85,24 @@ See the [examples](examples/) directory for complete working examples.
 ## Configuration
 
 ```go
-// Default configuration
-client := avanza.New()
+client := avanza.New() // Default (includes rate limiting)
 
-// Custom HTTP timeout
+// Custom options
 httpClient := &http.Client{Timeout: 60 * time.Second}
-client := avanza.New(avanza.WithHTTPClient(httpClient))
-
-// Custom base URL (useful for testing)
-client := avanza.New(avanza.WithBaseURL("https://test.example.com"))
+client := avanza.New(
+    avanza.WithHTTPClient(httpClient),
+    avanza.WithBaseURL("http://localhost:8080"),
+    avanza.WithUserAgent("MyApp/1.0"),
+)
 ```
 
-## Legal Notice
+## Error Handling
 
-This is an **unofficial** client library created for educational purposes. It is not affiliated with, endorsed by, or supported by Avanza Bank AB. The use of this library may violate Avanza's Terms of Service. Users are responsible for ensuring their use complies with all applicable terms and conditions.
+Check for HTTP errors using `errors.As`:
+
+```go
+var httpErr *client.HTTPError
+if errors.As(err, &httpErr) {
+    fmt.Printf("HTTP %d: %s\n", httpErr.StatusCode, httpErr.Body)
+}
+```

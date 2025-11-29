@@ -37,9 +37,9 @@ echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   git tag -s "$NEW_VERSION" -m "Release $NEW_VERSION"
   git push origin "$NEW_VERSION"
-  echo "✅ Released $NEW_VERSION"
+  echo "Released $NEW_VERSION"
 else
-  echo "❌ Release cancelled"
+  echo "Release cancelled"
   exit 1
 fi
 

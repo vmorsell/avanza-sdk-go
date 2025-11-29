@@ -1,45 +1,46 @@
 // Package trading provides trading functionality for the Avanza API.
 package trading
 
-// OrderSide represents the side of an order (buy or sell).
+// OrderSide indicates whether to buy or sell.
 type OrderSide string
 
 const (
-	OrderSideBuy  OrderSide = "BUY"
-	OrderSideSell OrderSide = "SELL"
+	OrderSideBuy  OrderSide = "BUY"  // Buy order
+	OrderSideSell OrderSide = "SELL" // Sell order
 )
 
-// OrderCondition represents the condition type for an order.
+// OrderCondition specifies how the order should be executed.
 type OrderCondition string
 
 const (
-	OrderConditionNormal     OrderCondition = "NORMAL"
-	OrderConditionFillOrKill OrderCondition = "FILL_OR_KILL"
+	OrderConditionNormal     OrderCondition = "NORMAL"       // Standard order execution
+	OrderConditionFillOrKill OrderCondition = "FILL_OR_KILL" // Execute immediately or cancel
 )
 
-// OrderRequestStatus represents the status of an order request.
+// OrderRequestStatus indicates the result of placing an order.
 type OrderRequestStatus string
 
 const (
-	OrderRequestStatusSuccess OrderRequestStatus = "SUCCESS"
-	OrderRequestStatusError   OrderRequestStatus = "ERROR"
+	OrderRequestStatusSuccess OrderRequestStatus = "SUCCESS" // Order placed successfully
+	OrderRequestStatusError   OrderRequestStatus = "ERROR"   // Order placement failed
 )
 
-// StopLossStatus represents the status of a stop loss order.
+// StopLossStatus indicates the result of placing a stop loss order.
 type StopLossStatus string
 
 const (
-	StopLossStatusSuccess StopLossStatus = "SUCCESS"
-	StopLossStatusError   StopLossStatus = "ERROR"
+	StopLossStatusSuccess StopLossStatus = "SUCCESS" // Stop loss order placed successfully
+	StopLossStatusError   StopLossStatus = "ERROR"   // Stop loss order placement failed
 )
 
-// OrderMetadata contains additional metadata about the order.
+// OrderMetadata contains order entry details.
 type OrderMetadata struct {
 	OrderEntryMode  string `json:"orderEntryMode"`
 	HasTouchedPrice string `json:"hasTouchedPrice"`
 }
 
-// PlaceOrderRequest represents a request to place a new order.
+// PlaceOrderRequest contains all parameters needed to place an order.
+// Use Validate() before sending to ensure all required fields are set.
 type PlaceOrderRequest struct {
 	IsDividendReinvestment bool           `json:"isDividendReinvestment"`
 	RequestID              string         `json:"requestId"`
@@ -55,7 +56,8 @@ type PlaceOrderRequest struct {
 	Condition              OrderCondition `json:"condition"`
 }
 
-// PlaceOrderResponse represents the response from placing an order.
+// PlaceOrderResponse contains the result of placing an order.
+// Check OrderRequestStatus to determine success or failure.
 type PlaceOrderResponse struct {
 	OrderRequestStatus OrderRequestStatus `json:"orderRequestStatus"`
 	Message            string             `json:"message"`
@@ -63,7 +65,7 @@ type PlaceOrderResponse struct {
 	OrderID            string             `json:"orderId"`
 }
 
-// OrderAccount represents account information for an order.
+// OrderAccount contains account details associated with an order.
 type OrderAccount struct {
 	AccountID string `json:"accountId"`
 	Name      struct {
@@ -75,7 +77,7 @@ type OrderAccount struct {
 	URLParameterID string `json:"urlParameterId"`
 }
 
-// OrderOrderbook represents orderbook information for an order.
+// OrderOrderbook contains instrument details for an order.
 type OrderOrderbook struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`
@@ -87,7 +89,7 @@ type OrderOrderbook struct {
 	MIC            string `json:"mic"`
 }
 
-// Order represents a single order.
+// Order represents an active or completed order.
 type Order struct {
 	Account              OrderAccount           `json:"account"`
 	OrderID              string                 `json:"orderId"`
@@ -110,14 +112,15 @@ type Order struct {
 	Condition            OrderCondition         `json:"condition"`
 }
 
-// GetOrdersResponse represents the response from getting orders.
+// GetOrdersResponse contains all orders for the authenticated user.
 type GetOrdersResponse struct {
 	Orders          []Order       `json:"orders"`
 	FundOrders      []interface{} `json:"fundOrders"`
 	CancelledOrders []interface{} `json:"cancelledOrders"`
 }
 
-// ValidateOrderRequest represents a request to validate an order before placing it.
+// ValidateOrderRequest contains order parameters to validate before placing.
+// Use Validate() before sending to ensure all required fields are set.
 type ValidateOrderRequest struct {
 	IsDividendReinvestment bool           `json:"isDividendReinvestment"`
 	RequestID              *string        `json:"requestId"`
@@ -136,7 +139,8 @@ type ValidateOrderRequest struct {
 	MarketPlace            string         `json:"marketPlace"`
 }
 
-// ValidateOrderResponse represents the response from order validation.
+// ValidateOrderResponse contains validation results for various checks.
+// Each field indicates whether that validation passed (Valid=true).
 type ValidateOrderResponse struct {
 	CommissionWarning      ValidationResult `json:"commissionWarning"`
 	EmployeeValidation     ValidationResult `json:"employeeValidation"`
@@ -146,12 +150,13 @@ type ValidateOrderResponse struct {
 	CanadaOddLotWarning    ValidationResult `json:"canadaOddLotWarning"`
 }
 
-// ValidationResult represents the result of a validation check.
+// ValidationResult indicates whether a validation check passed.
 type ValidationResult struct {
 	Valid bool `json:"valid"`
 }
 
-// PreliminaryFeeRequest represents a request to get preliminary fees for an order.
+// PreliminaryFeeRequest contains order parameters to calculate fees.
+// Use Validate() before sending to ensure all required fields are set.
 type PreliminaryFeeRequest struct {
 	AccountID   string    `json:"accountId"`
 	OrderbookID string    `json:"orderbookId"`
@@ -160,7 +165,8 @@ type PreliminaryFeeRequest struct {
 	Side        OrderSide `json:"side"`
 }
 
-// PreliminaryFeeResponse represents the response from getting preliminary fees.
+// PreliminaryFeeResponse contains fee calculations for an order.
+// All monetary values are strings in the orderbook currency.
 type PreliminaryFeeResponse struct {
 	Commission          string              `json:"commission"`
 	MarketFees          string              `json:"marketFees"`
@@ -173,45 +179,45 @@ type PreliminaryFeeResponse struct {
 	Campaign            *string             `json:"campaign"`
 }
 
-// CurrencyExchangeFee represents currency exchange fee information.
+// CurrencyExchangeFee contains exchange rate and fee for currency conversion.
 type CurrencyExchangeFee struct {
 	Rate string `json:"rate"`
 	Sum  string `json:"sum"`
 }
 
-// StopLossTriggerType represents the type of stop loss trigger.
+// StopLossTriggerType determines when the stop loss triggers.
 type StopLossTriggerType string
 
 const (
-	StopLossTriggerLessOrEqual    StopLossTriggerType = "LESS_OR_EQUAL"
-	StopLossTriggerGreaterOrEqual StopLossTriggerType = "GREATER_OR_EQUAL"
+	StopLossTriggerLessOrEqual    StopLossTriggerType = "LESS_OR_EQUAL"    // Trigger when price drops to or below value
+	StopLossTriggerGreaterOrEqual StopLossTriggerType = "GREATER_OR_EQUAL" // Trigger when price rises to or above value
 )
 
-// StopLossValueType represents the type of stop loss value.
+// StopLossValueType specifies how the trigger value is interpreted.
 type StopLossValueType string
 
 const (
-	StopLossValueMonetary   StopLossValueType = "MONETARY"
-	StopLossValuePercentage StopLossValueType = "PERCENTAGE"
+	StopLossValueMonetary   StopLossValueType = "MONETARY"   // Value is an absolute price
+	StopLossValuePercentage StopLossValueType = "PERCENTAGE" // Value is a percentage change
 )
 
-// StopLossOrderEventType represents the type of stop loss order event.
+// StopLossOrderEventType indicates what action to take when triggered.
 type StopLossOrderEventType string
 
 const (
-	StopLossOrderEventBuy  StopLossOrderEventType = "BUY"
-	StopLossOrderEventSell StopLossOrderEventType = "SELL"
+	StopLossOrderEventBuy  StopLossOrderEventType = "BUY"  // Place a buy order when triggered
+	StopLossOrderEventSell StopLossOrderEventType = "SELL" // Place a sell order when triggered
 )
 
-// StopLossPriceType represents the type of stop loss price.
+// StopLossPriceType specifies how the order price is determined.
 type StopLossPriceType string
 
 const (
-	StopLossPriceMonetary   StopLossPriceType = "MONETARY"
-	StopLossPricePercentage StopLossPriceType = "PERCENTAGE"
+	StopLossPriceMonetary   StopLossPriceType = "MONETARY"   // Price is an absolute value
+	StopLossPricePercentage StopLossPriceType = "PERCENTAGE" // Price is a percentage of current price
 )
 
-// StopLossTrigger represents the trigger conditions for a stop loss order.
+// StopLossTrigger defines when the stop loss order should activate.
 type StopLossTrigger struct {
 	Type                      StopLossTriggerType `json:"type"`
 	Value                     float64             `json:"value"`
@@ -220,7 +226,7 @@ type StopLossTrigger struct {
 	TriggerOnMarketMakerQuote bool                `json:"triggerOnMarketMakerQuote"`
 }
 
-// StopLossOrderEvent represents the order event that will be triggered.
+// StopLossOrderEvent defines the order to place when the trigger activates.
 type StopLossOrderEvent struct {
 	Type                StopLossOrderEventType `json:"type"`
 	Price               float64                `json:"price"`
@@ -230,7 +236,8 @@ type StopLossOrderEvent struct {
 	ShortSellingAllowed bool                   `json:"shortSellingAllowed"`
 }
 
-// PlaceStopLossRequest represents a request to place a stop loss order.
+// PlaceStopLossRequest contains all parameters needed to place a stop loss order.
+// Use Validate() before sending to ensure all required fields are set.
 type PlaceStopLossRequest struct {
 	ParentStopLossID   string             `json:"parentStopLossId"`
 	AccountID          string             `json:"accountId"`
@@ -239,13 +246,14 @@ type PlaceStopLossRequest struct {
 	StopLossOrderEvent StopLossOrderEvent `json:"stopLossOrderEvent"`
 }
 
-// PlaceStopLossResponse represents the response from placing a stop loss order.
+// PlaceStopLossResponse contains the result of placing a stop loss order.
+// Check Status to determine success or failure.
 type PlaceStopLossResponse struct {
 	Status          StopLossStatus `json:"status"`
 	StopLossOrderID string         `json:"stoplossOrderId"`
 }
 
-// StopLossAccount represents account information for a stop loss order.
+// StopLossAccount contains account details for a stop loss order.
 type StopLossAccount struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`
@@ -253,7 +261,7 @@ type StopLossAccount struct {
 	URLParameterID string `json:"urlParameterId"`
 }
 
-// StopLossOrderbook represents orderbook information for a stop loss order.
+// StopLossOrderbook contains instrument details for a stop loss order.
 type StopLossOrderbook struct {
 	ID                       string `json:"id"`
 	Name                     string `json:"name"`
@@ -264,7 +272,7 @@ type StopLossOrderbook struct {
 	StoplossMarketMakerQuote bool   `json:"stoplossMarketMakerQuote"`
 }
 
-// StopLossTriggerResponse represents trigger information from the API response.
+// StopLossTriggerResponse contains trigger configuration from the API.
 type StopLossTriggerResponse struct {
 	Value                     float64             `json:"value"`
 	Type                      StopLossTriggerType `json:"type"`
@@ -273,7 +281,7 @@ type StopLossTriggerResponse struct {
 	TriggerOnMarketMakerQuote bool                `json:"triggerOnMarketMakerQuote"`
 }
 
-// StopLossOrderDetails represents order details for a stop loss order.
+// StopLossOrderDetails contains the order configuration for a stop loss.
 type StopLossOrderDetails struct {
 	Type                  StopLossOrderEventType `json:"type"`
 	Price                 float64                `json:"price"`
@@ -284,7 +292,7 @@ type StopLossOrderDetails struct {
 	PriceDecimalPrecision int                    `json:"priceDecimalPrecision"`
 }
 
-// StopLossOrder represents a single stop loss order.
+// StopLossOrder represents an active stop loss order.
 type StopLossOrder struct {
 	ID        string                  `json:"id"`
 	Status    StopLossStatus          `json:"status"`

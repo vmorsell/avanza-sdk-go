@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	maxErrorBodySize = 1024 // 1KB
+	maxErrorBodySize = 1024
 )
 
 // HTTPError represents an HTTP error response from the Avanza API.

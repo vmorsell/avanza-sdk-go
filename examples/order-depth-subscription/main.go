@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("BankID authentication failed: %v", err)
 	}
-	fmt.Printf("Authentication successful. Welcome %s\n", collectResp.Name)
+	fmt.Printf("\nAuthentication successful! Welcome %s\n", collectResp.Name)
 
 	// Establish session for API calls
 	fmt.Println("Establishing session...")

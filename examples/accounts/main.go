@@ -16,7 +16,6 @@ func main() {
 	// Create client
 	client := avanza.New()
 
-	// First authenticate (you'll need to do this before accessing accounts)
 	fmt.Println("Starting BankID authentication...")
 
 	startResp, err := client.Auth.StartBankID(ctx)

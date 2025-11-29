@@ -36,9 +36,11 @@ func (s *OrderDepthSubscription) Errors() <-chan error {
 
 // Close stops the subscription and cleans up resources.
 // It waits for the background goroutine to finish before closing channels.
+//
+// Always call Close() when done with the subscription to prevent resource leaks.
 func (s *OrderDepthSubscription) Close() {
 	s.cancel()
-	s.wg.Wait() // Wait for goroutine to finish
+	s.wg.Wait()
 	close(s.events)
 	close(s.errors)
 }
@@ -62,14 +64,13 @@ func (s *OrderDepthSubscription) start() {
 		return
 	}
 
-	// Set SSE-specific headers
 	s.setSSEHeaders(req)
 
-	// Reuse transport from base client for connection pooling, but remove timeout for SSE
+	// Reuse transport for connection pooling, disable timeout for long-lived SSE
 	baseClient := s.client.HTTPClient()
 	httpClient := &http.Client{
 		Transport: baseClient.Transport,
-		Timeout:   0, // No timeout for long-lived SSE connections
+		Timeout:   0,
 	}
 
 	resp, err := httpClient.Do(req)
@@ -106,12 +107,10 @@ func (s *OrderDepthSubscription) setSSEHeaders(req *http.Request) {
 	req.Header.Set("Sec-Gpc", "1")
 	req.Header.Set("User-Agent", s.client.UserAgent())
 
-	// Add security token
 	if token := s.client.SecurityToken(); token != "" {
 		req.Header.Set("X-Securitytoken", token)
 	}
 
-	// Add cookies
 	if cookies := s.client.Cookies(); len(cookies) > 0 {
 		var cookiePairs []string
 		for name, value := range cookies {
@@ -141,7 +140,7 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 		line := strings.TrimSpace(scanner.Text())
 
 		if line == "" {
-			// Empty line indicates end of event
+			// SSE protocol: empty line marks end of event
 			if event.Event != "" {
 				s.events <- event
 				event = OrderDepthEvent{}

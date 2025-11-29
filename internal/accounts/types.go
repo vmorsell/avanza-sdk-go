@@ -1,14 +1,14 @@
 // Package accounts provides account management functionality for the Avanza API.
 package accounts
 
-// AccountOverview represents the complete account overview response.
+// AccountOverview contains all accounts, categorized and with loans.
 type AccountOverview struct {
 	Categories []Category `json:"categories"`
 	Accounts   []Account  `json:"accounts"`
 	Loans      []Loan     `json:"loans"`
 }
 
-// Category represents an account category (e.g., SPARANDE, BUFFERT).
+// Category groups accounts by type (e.g., SPARANDE, BUFFERT).
 type Category struct {
 	ID              string      `json:"id"`
 	Name            string      `json:"name"`
@@ -17,7 +17,7 @@ type Category struct {
 	SavingsGoalView interface{} `json:"savingsGoalView"`
 }
 
-// Account represents a single account.
+// Account represents a single account (ISK, KF, AF, etc.).
 type Account struct {
 	ID                       string          `json:"id"`
 	CategoryID               string          `json:"categoryId"`
@@ -45,18 +45,20 @@ type Account struct {
 	Owner                    bool            `json:"owner"`
 }
 
-// AccountName represents the account name structure.
+// AccountName contains both the default and user-defined account name.
 type AccountName struct {
 	DefaultName     string `json:"defaultName"`
 	UserDefinedName string `json:"userDefinedName"`
 }
 
-// AccountSettings represents account settings.
+// AccountSettings contains account configuration.
 type AccountSettings struct {
 	IsHidden bool `json:"IS_HIDDEN"`
 }
 
-// Money represents a monetary value with precision.
+// Money represents a monetary value with currency and precision.
+// Unit is typically a currency code (e.g., "SEK", "USD").
+// DecimalPrecision indicates the number of decimal places for display.
 type Money struct {
 	Value            float64 `json:"value"`
 	Unit             string  `json:"unit"`
@@ -64,13 +66,14 @@ type Money struct {
 	DecimalPrecision int     `json:"decimalPrecision"`
 }
 
-// Profit represents profit information.
+// Profit contains both absolute and relative profit values.
 type Profit struct {
 	Absolute Money `json:"absolute"`
 	Relative Money `json:"relative"`
 }
 
-// Performance represents performance data for different time periods.
+// Performance contains performance metrics for various time periods.
+// Fields may be nil if data is not available for that period.
 type Performance struct {
 	OneWeek     *PerformanceData `json:"ONE_WEEK,omitempty"`
 	ThisYear    *PerformanceData `json:"THIS_YEAR,omitempty"`
@@ -81,16 +84,16 @@ type Performance struct {
 	AllTime     *PerformanceData `json:"ALL_TIME,omitempty"`
 }
 
-// PerformanceData represents performance data for a specific time period.
+// PerformanceData contains absolute and relative performance for a time period.
 type PerformanceData struct {
 	Absolute Money `json:"absolute"`
 	Relative Money `json:"relative"`
 }
 
-// Loan represents a loan (currently empty in the API response).
+// Loan represents a loan account.
 type Loan struct{}
 
-// TradingAccount represents a trading account with its details.
+// TradingAccount represents a trading account with balances and capabilities.
 type TradingAccount struct {
 	Name                              string            `json:"name"`
 	AccountID                         string            `json:"accountId"`
@@ -110,14 +113,14 @@ type TradingAccount struct {
 	URLParameterID                   string            `json:"urlParameterId"`
 }
 
-// CurrencyBalance represents the balance for a specific currency.
+// CurrencyBalance contains the balance for a specific currency.
 type CurrencyBalance struct {
 	Currency    string  `json:"currency"`
 	CountryCode string  `json:"countryCode"`
 	Balance     float64 `json:"balance"`
 }
 
-// AccountPosition represents a position in an account.
+// AccountPosition represents a holding (stock, fund, etc.) in an account.
 type AccountPosition struct {
 	Account                                AccountInfo         `json:"account"`
 	Instrument                             Instrument          `json:"instrument"`
@@ -132,7 +135,7 @@ type AccountPosition struct {
 	CollateralFactor                       Money               `json:"collateralFactor"`
 }
 
-// AccountInfo represents account information in a position.
+// AccountInfo contains account details used in positions.
 type AccountInfo struct {
 	ID                  string `json:"id"`
 	Type                string `json:"type"`
@@ -142,7 +145,7 @@ type AccountInfo struct {
 	HasAutoDistribution bool   `json:"hasAutoDistribution"`
 }
 
-// Instrument represents an instrument in a position.
+// Instrument represents a financial instrument (stock, fund, etc.).
 type Instrument struct {
 	ID           string    `json:"id"`
 	Type         string    `json:"type"`
@@ -153,7 +156,7 @@ type Instrument struct {
 	VolumeFactor float64   `json:"volumeFactor"`
 }
 
-// Orderbook represents orderbook information for an instrument.
+// Orderbook contains market data for an instrument.
 type Orderbook struct {
 	ID          string   `json:"id"`
 	FlagCode    string   `json:"flagCode"`
@@ -165,7 +168,7 @@ type Orderbook struct {
 	LastDeal    LastDeal `json:"lastDeal"`
 }
 
-// Quote represents quote information for an instrument.
+// Quote contains current bid/ask prices and latest trade information.
 type Quote struct {
 	Highest       Money  `json:"highest"`
 	Lowest        Money  `json:"lowest"`
@@ -177,32 +180,32 @@ type Quote struct {
 	Updated       string `json:"updated"`
 }
 
-// Turnover represents turnover information.
+// Turnover contains trading volume and value for a period.
 type Turnover struct {
 	Volume Money `json:"volume"`
 	Value  Money `json:"value"`
 }
 
-// LastDeal represents the last deal information.
+// LastDeal contains the timestamp of the last trade.
 type LastDeal struct {
 	Date string `json:"date"`
 	Time string `json:"time"`
 }
 
-// PositionPerformance represents performance information for a position.
+// PositionPerformance contains profit/loss for a position.
 type PositionPerformance struct {
 	Absolute Money `json:"absolute"`
 	Relative Money `json:"relative"`
 }
 
-// CashPosition represents a cash position in an account.
+// CashPosition represents uninvested cash in an account.
 type CashPosition struct {
 	Account      AccountInfo `json:"account"`
 	TotalBalance Money       `json:"totalBalance"`
 	ID           string      `json:"id"`
 }
 
-// AccountPositions represents the positions for a specific account.
+// AccountPositions contains all positions for an account.
 type AccountPositions struct {
 	WithOrderbook     []AccountPosition `json:"withOrderbook"`
 	WithoutOrderbook  []interface{}     `json:"withoutOrderbook"`

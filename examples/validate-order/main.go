@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("BankID authentication failed: %v", err)
 	}
 
-	fmt.Printf("\n✅ Authentication successful! Welcome %s\n", collectResp.Name)
+	fmt.Printf("\nAuthentication successful! Welcome %s\n", collectResp.Name)
 
 	// Establish session for API calls
 	fmt.Println("Establishing session...")
@@ -61,7 +61,7 @@ func main() {
 	fmt.Printf("Available for purchase: %.2f SEK\n", account.AvailableForPurchase)
 
 	// Validate an order before placing it
-	orderbookID := "5247" // Example: Ericsson B
+	orderbookID := "5247" // Ericsson B
 	price := 1.9998
 	volume := 2
 	side := avanza.OrderSideBuy
@@ -91,7 +91,7 @@ func main() {
 		log.Fatalf("Failed to validate order: %v", err)
 	}
 
-	fmt.Println("\n📋 Order Validation Results:")
+	fmt.Println("\nOrder Validation Results:")
 	fmt.Println("  Commission Warning:      ", formatValidation(validateResp.CommissionWarning.Valid))
 	fmt.Println("  Employee Validation:    ", formatValidation(validateResp.EmployeeValidation.Valid))
 	fmt.Println("  Large In Scale Warning: ", formatValidation(validateResp.LargeInScaleWarning.Valid))
@@ -108,15 +108,15 @@ func main() {
 		validateResp.CanadaOddLotWarning.Valid
 
 	if allValid {
-		fmt.Println("\n✅ Order validation passed! Order can be placed.")
+		fmt.Println("\nOrder validation passed! Order can be placed.")
 	} else {
-		fmt.Println("\n⚠️  Order validation failed! Check the warnings above.")
+		fmt.Println("\nOrder validation failed! Check the warnings above.")
 	}
 }
 
 func formatValidation(valid bool) string {
 	if valid {
-		return "✅ Valid"
+		return "Valid"
 	}
-	return "❌ Invalid"
+	return "Invalid"
 }

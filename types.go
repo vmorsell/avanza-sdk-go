@@ -7,7 +7,8 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/internal/trading"
 )
 
-// Re-export types from internal packages for backward compatibility and convenience.
+// Re-export types from internal packages for convenience.
+// These are type aliases that point to the internal package types.
 
 // Account types
 type (
@@ -77,38 +78,38 @@ type (
 	OrderDepthSubscription = market.OrderDepthSubscription
 )
 
-// Re-export constants
+// Re-export constants for convenience.
 const (
 	// OrderSide constants
-	OrderSideBuy  = trading.OrderSideBuy
-	OrderSideSell = trading.OrderSideSell
+	OrderSideBuy  = trading.OrderSideBuy  // Buy order
+	OrderSideSell = trading.OrderSideSell // Sell order
 
 	// OrderCondition constants
-	OrderConditionNormal     = trading.OrderConditionNormal
-	OrderConditionFillOrKill = trading.OrderConditionFillOrKill
+	OrderConditionNormal     = trading.OrderConditionNormal     // Standard order execution
+	OrderConditionFillOrKill = trading.OrderConditionFillOrKill // Execute immediately or cancel
 
 	// OrderRequestStatus constants
-	OrderRequestStatusSuccess = trading.OrderRequestStatusSuccess
-	OrderRequestStatusError   = trading.OrderRequestStatusError
+	OrderRequestStatusSuccess = trading.OrderRequestStatusSuccess // Order placed successfully
+	OrderRequestStatusError   = trading.OrderRequestStatusError   // Order placement failed
 
 	// StopLossStatus constants
-	StopLossStatusSuccess = trading.StopLossStatusSuccess
-	StopLossStatusError   = trading.StopLossStatusError
+	StopLossStatusSuccess = trading.StopLossStatusSuccess // Stop loss order placed successfully
+	StopLossStatusError   = trading.StopLossStatusError   // Stop loss order placement failed
 
 	// StopLossTriggerType constants
-	StopLossTriggerLessOrEqual    = trading.StopLossTriggerLessOrEqual
-	StopLossTriggerGreaterOrEqual = trading.StopLossTriggerGreaterOrEqual
+	StopLossTriggerLessOrEqual    = trading.StopLossTriggerLessOrEqual    // Trigger when price drops to or below value
+	StopLossTriggerGreaterOrEqual = trading.StopLossTriggerGreaterOrEqual // Trigger when price rises to or above value
 
 	// StopLossValueType constants
-	StopLossValueMonetary   = trading.StopLossValueMonetary
-	StopLossValuePercentage = trading.StopLossValuePercentage
+	StopLossValueMonetary   = trading.StopLossValueMonetary   // Value is an absolute price
+	StopLossValuePercentage = trading.StopLossValuePercentage // Value is a percentage change
 
 	// StopLossOrderEventType constants
-	StopLossOrderEventBuy  = trading.StopLossOrderEventBuy
-	StopLossOrderEventSell = trading.StopLossOrderEventSell
+	StopLossOrderEventBuy  = trading.StopLossOrderEventBuy  // Place a buy order when triggered
+	StopLossOrderEventSell = trading.StopLossOrderEventSell // Place a sell order when triggered
 
 	// StopLossPriceType constants
-	StopLossPriceMonetary   = trading.StopLossPriceMonetary
-	StopLossPricePercentage = trading.StopLossPricePercentage
+	StopLossPriceMonetary   = trading.StopLossPriceMonetary   // Price is an absolute value
+	StopLossPricePercentage = trading.StopLossPricePercentage // Price is a percentage of current price
 )
 
