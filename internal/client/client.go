@@ -11,8 +11,14 @@ import (
 	"time"
 )
 
-// BaseURL is the base URL for the Avanza API.
-const BaseURL = "https://www.avanza.se"
+const (
+	// BaseURL is the base URL for the Avanza API.
+	BaseURL = "https://www.avanza.se"
+
+	// DefaultUserAgent is the default User-Agent string used by the client.
+	// It mimics a browser to avoid detection, which is necessary for this reverse-engineered SDK.
+	DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+)
 
 // Client is an HTTP client that manages sessions, cookies, and security tokens
 // for authenticated requests to the Avanza API.
@@ -21,6 +27,7 @@ type Client struct {
 	baseURL       string
 	cookies       map[string]string
 	securityToken string
+	userAgent     string
 }
 
 // BaseURL returns the base URL of the client.
@@ -45,6 +52,11 @@ func (c *Client) Cookies() map[string]string {
 		cookies[k] = v
 	}
 	return cookies
+}
+
+// UserAgent returns the current User-Agent string.
+func (c *Client) UserAgent() string {
+	return c.userAgent
 }
 
 // SetMockCookies sets mock cookies for testing purposes.
@@ -77,6 +89,18 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
+// WithUserAgent sets a custom User-Agent string for HTTP requests.
+// If not set, DefaultUserAgent is used.
+//
+// Example:
+//
+//	client := NewClient(WithUserAgent("MyApp/1.0"))
+func WithUserAgent(userAgent string) Option {
+	return func(c *Client) {
+		c.userAgent = userAgent
+	}
+}
+
 // NewClient creates a new Avanza HTTP client with optional configuration.
 // The client automatically manages cookies and security tokens.
 //
@@ -89,8 +113,9 @@ func NewClient(opts ...Option) *Client {
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
-		baseURL: BaseURL,
-		cookies: make(map[string]string),
+		baseURL:   BaseURL,
+		cookies:   make(map[string]string),
+		userAgent: DefaultUserAgent,
 	}
 
 	for _, opt := range opts {
@@ -160,7 +185,7 @@ func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Origin", "https://www.avanza.se")
 	req.Header.Set("Pragma", "no-cache")
 	req.Header.Set("Referer", "https://www.avanza.se/logga-in.html")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+	req.Header.Set("User-Agent", c.userAgent)
 
 	if c.securityToken != "" {
 		req.Header.Set("X-SecurityToken", c.securityToken)

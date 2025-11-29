@@ -61,6 +61,22 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
+// WithUserAgent sets a custom User-Agent string for HTTP requests.
+// If not set, a default User-Agent is used.
+//
+// Example:
+//
+//	client := avanza.New(avanza.WithUserAgent("MyApp/1.0"))
+func WithUserAgent(userAgent string) Option {
+	return func(a *Avanza) {
+		a.client = client.NewClient(client.WithUserAgent(userAgent))
+		a.Auth = auth.NewAuthService(a.client)
+		a.Accounts = accounts.NewService(a.client)
+		a.Trading = trading.NewService(a.client)
+		a.Market = market.NewService(a.client)
+	}
+}
+
 // New creates a new Avanza client with optional configuration.
 //
 // Example:
@@ -74,6 +90,9 @@ func WithHTTPClient(httpClient *http.Client) Option {
 //	// With custom HTTP client
 //	httpClient := &http.Client{Timeout: 60 * time.Second}
 //	client := avanza.New(avanza.WithHTTPClient(httpClient))
+//
+//	// With custom User-Agent
+//	client := avanza.New(avanza.WithUserAgent("MyApp/1.0"))
 func New(opts ...Option) *Avanza {
 	a := &Avanza{
 		client: client.NewClient(),

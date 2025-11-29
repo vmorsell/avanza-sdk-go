@@ -104,7 +104,7 @@ func (s *OrderDepthSubscription) setSSEHeaders(req *http.Request) {
 	req.Header.Set("Sec-Fetch-Mode", "cors")
 	req.Header.Set("Sec-Fetch-Site", "same-origin")
 	req.Header.Set("Sec-Gpc", "1")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
+	req.Header.Set("User-Agent", s.client.UserAgent())
 
 	// Add security token
 	if token := s.client.SecurityToken(); token != "" {

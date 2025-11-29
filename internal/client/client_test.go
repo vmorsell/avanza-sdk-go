@@ -456,3 +456,52 @@ func TestNewHTTPError_SizeLimit(t *testing.T) {
 		}
 	}
 }
+
+func TestWithUserAgent(t *testing.T) {
+	customUserAgent := "MyApp/1.0"
+	client := NewClient(WithUserAgent(customUserAgent))
+
+	if client.UserAgent() != customUserAgent {
+		t.Errorf("expected User-Agent to be %s, got %s", customUserAgent, client.UserAgent())
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userAgent := r.Header.Get("User-Agent")
+		if userAgent != customUserAgent {
+			t.Errorf("expected User-Agent to be %s, got %s", customUserAgent, userAgent)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	ctx := context.Background()
+	resp, err := client.Post(ctx, "/test", nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+}
+
+func TestDefaultUserAgent(t *testing.T) {
+	client := NewClient()
+
+	if client.UserAgent() != DefaultUserAgent {
+		t.Errorf("expected User-Agent to be %s, got %s", DefaultUserAgent, client.UserAgent())
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userAgent := r.Header.Get("User-Agent")
+		if userAgent != DefaultUserAgent {
+			t.Errorf("expected User-Agent to be %s, got %s", DefaultUserAgent, userAgent)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	ctx := context.Background()
+	resp, err := client.Post(ctx, "/test", nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+}
