@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
@@ -32,8 +31,7 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(httpResp.Body, 1024))
-		return nil, fmt.Errorf("place order: unexpected status code %d: %s", httpResp.StatusCode, string(body))
+		return nil, fmt.Errorf("place order: %w", client.NewHTTPError(httpResp))
 	}
 
 	var resp PlaceOrderResponse
@@ -57,8 +55,7 @@ func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(httpResp.Body, 1024))
-		return nil, fmt.Errorf("get orders: unexpected status code %d: %s", httpResp.StatusCode, string(body))
+		return nil, fmt.Errorf("get orders: %w", client.NewHTTPError(httpResp))
 	}
 
 	var resp GetOrdersResponse
@@ -78,8 +75,7 @@ func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) 
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(httpResp.Body, 1024))
-		return nil, fmt.Errorf("validate order: unexpected status code %d: %s", httpResp.StatusCode, string(body))
+		return nil, fmt.Errorf("validate order: %w", client.NewHTTPError(httpResp))
 	}
 
 	var resp ValidateOrderResponse
@@ -99,8 +95,7 @@ func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequ
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(httpResp.Body, 1024))
-		return nil, fmt.Errorf("get preliminary fee: unexpected status code %d: %s", httpResp.StatusCode, string(body))
+		return nil, fmt.Errorf("get preliminary fee: %w", client.NewHTTPError(httpResp))
 	}
 
 	var resp PreliminaryFeeResponse
@@ -120,8 +115,7 @@ func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) 
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(httpResp.Body, 1024))
-		return nil, fmt.Errorf("place stop loss order: unexpected status code %d: %s", httpResp.StatusCode, string(body))
+		return nil, fmt.Errorf("place stop loss order: %w", client.NewHTTPError(httpResp))
 	}
 
 	var resp PlaceStopLossResponse
@@ -145,8 +139,7 @@ func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(httpResp.Body, 1024))
-		return nil, fmt.Errorf("get stop loss orders: unexpected status code %d: %s", httpResp.StatusCode, string(body))
+		return nil, fmt.Errorf("get stop loss orders: %w", client.NewHTTPError(httpResp))
 	}
 
 	var orders []StopLossOrder
@@ -156,4 +149,3 @@ func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error
 
 	return orders, nil
 }
-

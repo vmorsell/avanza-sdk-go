@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
@@ -32,8 +31,7 @@ func (s *Service) GetOverview(ctx context.Context) (*AccountOverview, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("get account overview: unexpected status code %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("get account overview: %w", client.NewHTTPError(resp))
 	}
 
 	var overview AccountOverview
@@ -53,8 +51,7 @@ func (s *Service) GetTradingAccounts(ctx context.Context) ([]TradingAccount, err
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("get trading accounts: unexpected status code %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("get trading accounts: %w", client.NewHTTPError(resp))
 	}
 
 	var accounts []TradingAccount
@@ -76,8 +73,7 @@ func (s *Service) GetPositions(ctx context.Context, urlParameterID string) (*Acc
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("get account positions: unexpected status code %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("get account positions: %w", client.NewHTTPError(resp))
 	}
 
 	var positions AccountPositions
@@ -87,4 +83,3 @@ func (s *Service) GetPositions(ctx context.Context, urlParameterID string) (*Acc
 
 	return &positions, nil
 }
-

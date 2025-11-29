@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -89,8 +88,7 @@ func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, er
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("start bankid: %w", client.NewHTTPError(resp))
 	}
 
 	var response BankIDStartResponse
@@ -111,8 +109,7 @@ func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("start bankid: %w", client.NewHTTPError(resp))
 	}
 
 	var response BankIDStartResponse
@@ -133,8 +130,7 @@ func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("start bankid: %w", client.NewHTTPError(resp))
 	}
 
 	var response BankIDCollectResponse
@@ -239,8 +235,7 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("user selection failed with status %d: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("select user: %w", client.NewHTTPError(resp))
 	}
 
 	// Step 2: Visit trading page to get additional cookies like AZAPERSISTENCE
@@ -258,8 +253,7 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 	defer sessionResp.Body.Close()
 
 	if sessionResp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(sessionResp.Body)
-		return fmt.Errorf("session verification failed with status %d: %s", sessionResp.StatusCode, string(body))
+		return fmt.Errorf("verify session: %w", client.NewHTTPError(sessionResp))
 	}
 
 	return nil
@@ -294,8 +288,7 @@ func (a *AuthService) GetSessionInfo(ctx context.Context) (*SessionInfo, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("session info failed with status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("get session info: %w", client.NewHTTPError(resp))
 	}
 
 	var sessionInfo SessionInfo

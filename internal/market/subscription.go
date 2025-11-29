@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
@@ -72,8 +71,7 @@ func (s *OrderDepthSubscription) start() {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
-		s.errors <- fmt.Errorf("subscription failed with status %d: %s", resp.StatusCode, string(body))
+		s.errors <- fmt.Errorf("subscription failed: %w", client.NewHTTPError(resp))
 		return
 	}
 
@@ -175,4 +173,3 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 		s.errors <- fmt.Errorf("stream error: %w", err)
 	}
 }
-
