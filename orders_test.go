@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func TestPlaceOrder_Success(t *testing.T) {
@@ -28,12 +30,12 @@ func TestPlaceOrder_Success(t *testing.T) {
 		}
 
 		// Verify request body
-		var req PlaceOrderRequest
+		var req trading.PlaceOrderRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Fatalf("failed to decode request: %v", err)
 		}
 
-		if got, want := req.Side, OrderSideBuy; got != want {
+		if got, want := req.Side, trading.OrderSideBuy; got != want {
 			t.Errorf("req.Side = %v, want %v", got, want)
 		}
 
@@ -50,8 +52,8 @@ func TestPlaceOrder_Success(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
-			OrderRequestStatus: OrderRequestStatusSuccess,
+		_ = json.NewEncoder(w).Encode(trading.PlaceOrderResponse{
+			OrderRequestStatus: trading.OrderRequestStatusSuccess,
 			Message:            "",
 			Parameters:         []string{""},
 			OrderID:            testOrderID,
@@ -61,19 +63,19 @@ func TestPlaceOrder_Success(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceOrderRequest{
+	req := &trading.PlaceOrderRequest{
 		IsDividendReinvestment: false,
 		RequestID:              testRequestID,
 		Price:                  testPrice,
 		Volume:                 testVolume,
 		AccountID:              testAccountID,
-		Side:                   OrderSideBuy,
+		Side:                   trading.OrderSideBuy,
 		OrderbookID:            testOrderbookID,
-		Metadata: OrderMetadata{
+		Metadata: trading.OrderMetadata{
 			OrderEntryMode:  "ADVANCED",
 			HasTouchedPrice: "true",
 		},
-		Condition: OrderConditionNormal,
+		Condition: trading.OrderConditionNormal,
 	}
 
 	resp, err := avanza.Trading.PlaceOrder(context.Background(), req)
@@ -81,7 +83,7 @@ func TestPlaceOrder_Success(t *testing.T) {
 		t.Fatalf("PlaceOrder failed: %v", err)
 	}
 
-	if got, want := resp.OrderRequestStatus, OrderRequestStatusSuccess; got != want {
+	if got, want := resp.OrderRequestStatus, trading.OrderRequestStatusSuccess; got != want {
 		t.Errorf("resp.OrderRequestStatus = %v, want %v", got, want)
 	}
 
@@ -101,8 +103,8 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
-			OrderRequestStatus: OrderRequestStatusError,
+		_ = json.NewEncoder(w).Encode(trading.PlaceOrderResponse{
+			OrderRequestStatus: trading.OrderRequestStatusError,
 			Message:            "Insufficient funds",
 			Parameters:         []string{},
 			OrderID:            "",
@@ -112,14 +114,14 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceOrderRequest{
+	req := &trading.PlaceOrderRequest{
 		RequestID:   testRequestID,
 		Price:       testPrice,
 		Volume:      testVolume,
 		AccountID:   testAccountID,
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 		OrderbookID: testOrderbookID,
-		Condition:   OrderConditionNormal,
+		Condition:   trading.OrderConditionNormal,
 	}
 
 	resp, err := avanza.Trading.PlaceOrder(context.Background(), req)
@@ -127,7 +129,7 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 
-	if got, want := resp.OrderRequestStatus, OrderRequestStatusError; got != want {
+	if got, want := resp.OrderRequestStatus, trading.OrderRequestStatusError; got != want {
 		t.Errorf("resp.OrderRequestStatus = %v, want %v", got, want)
 	}
 
@@ -153,14 +155,14 @@ func TestPlaceOrder_HTTPError(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceOrderRequest{
+	req := &trading.PlaceOrderRequest{
 		RequestID:   testRequestID,
 		Price:       testPrice,
 		Volume:      testVolume,
 		AccountID:   testAccountID,
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 		OrderbookID: testOrderbookID,
-		Condition:   OrderConditionNormal,
+		Condition:   trading.OrderConditionNormal,
 	}
 
 	_, err := avanza.Trading.PlaceOrder(context.Background(), req)
@@ -180,18 +182,18 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 	)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var req PlaceOrderRequest
+		var req trading.PlaceOrderRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Fatalf("failed to decode request: %v", err)
 		}
 
-		if got, want := req.Side, OrderSideSell; got != want {
+		if got, want := req.Side, trading.OrderSideSell; got != want {
 			t.Errorf("req.Side = %v, want %v", got, want)
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
-			OrderRequestStatus: OrderRequestStatusSuccess,
+		_ = json.NewEncoder(w).Encode(trading.PlaceOrderResponse{
+			OrderRequestStatus: trading.OrderRequestStatusSuccess,
 			OrderID:            testOrderID2,
 		})
 	}))
@@ -199,14 +201,14 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceOrderRequest{
+	req := &trading.PlaceOrderRequest{
 		RequestID:   testRequestID,
 		Price:       testPrice,
 		Volume:      testVolume,
 		AccountID:   testAccountID,
-		Side:        OrderSideSell,
+		Side:        trading.OrderSideSell,
 		OrderbookID: testOrderbookID,
-		Condition:   OrderConditionNormal,
+		Condition:   trading.OrderConditionNormal,
 	}
 
 	resp, err := avanza.Trading.PlaceOrder(context.Background(), req)
@@ -214,7 +216,7 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 		t.Fatalf("PlaceOrder failed: %v", err)
 	}
 
-	if got, want := resp.OrderRequestStatus, OrderRequestStatusSuccess; got != want {
+	if got, want := resp.OrderRequestStatus, trading.OrderRequestStatusSuccess; got != want {
 		t.Errorf("resp.OrderRequestStatus = %v, want %v", got, want)
 	}
 }
@@ -239,14 +241,14 @@ func TestPlaceOrder_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	req := &PlaceOrderRequest{
+	req := &trading.PlaceOrderRequest{
 		RequestID:   testRequestID,
 		Price:       testPrice,
 		Volume:      testVolume,
 		AccountID:   testAccountID,
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 		OrderbookID: testOrderbookID,
-		Condition:   OrderConditionNormal,
+		Condition:   trading.OrderConditionNormal,
 	}
 
 	_, err := avanza.Trading.PlaceOrder(ctx, req)

@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func TestPlaceStopLoss_Success(t *testing.T) {
@@ -31,7 +33,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 		}
 
 		// Verify request body
-		var req PlaceStopLossRequest
+		var req trading.PlaceStopLossRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Fatalf("failed to decode request: %v", err)
 		}
@@ -44,7 +46,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 			t.Errorf("req.OrderbookID = %v, want %v", got, want)
 		}
 
-		if got, want := req.StopLossTrigger.Type, StopLossTriggerLessOrEqual; got != want {
+		if got, want := req.StopLossTrigger.Type, trading.StopLossTriggerLessOrEqual; got != want {
 			t.Errorf("req.StopLossTrigger.Type = %v, want %v", got, want)
 		}
 
@@ -52,7 +54,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 			t.Errorf("req.StopLossTrigger.Value = %v, want %v", got, want)
 		}
 
-		if got, want := req.StopLossOrderEvent.Type, StopLossOrderEventBuy; got != want {
+		if got, want := req.StopLossOrderEvent.Type, trading.StopLossOrderEventBuy; got != want {
 			t.Errorf("req.StopLossOrderEvent.Type = %v, want %v", got, want)
 		}
 
@@ -65,8 +67,8 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(PlaceStopLossResponse{
-			Status:          StopLossStatusSuccess,
+		_ = json.NewEncoder(w).Encode(trading.PlaceStopLossResponse{
+			Status:          trading.StopLossStatusSuccess,
 			StopLossOrderID: testStopLossOrderID,
 		})
 	}))
@@ -74,23 +76,23 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceStopLossRequest{
+	req := &trading.PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
 		OrderbookID:      testOrderbookID,
-		StopLossTrigger: StopLossTrigger{
-			Type:                      StopLossTriggerLessOrEqual,
+		StopLossTrigger: trading.StopLossTrigger{
+			Type:                      trading.StopLossTriggerLessOrEqual,
 			Value:                     testStopLossTriggerValue,
-			ValueType:                 StopLossValueMonetary,
+			ValueType:                 trading.StopLossValueMonetary,
 			ValidUntil:                testStopLossValidUntil,
 			TriggerOnMarketMakerQuote: false,
 		},
-		StopLossOrderEvent: StopLossOrderEvent{
-			Type:                StopLossOrderEventBuy,
+		StopLossOrderEvent: trading.StopLossOrderEvent{
+			Type:                trading.StopLossOrderEventBuy,
 			Price:               testStopLossOrderPrice,
 			Volume:              testStopLossOrderVolume,
 			ValidDays:           testStopLossValidDays,
-			PriceType:           StopLossPriceMonetary,
+			PriceType:           trading.StopLossPriceMonetary,
 			ShortSellingAllowed: false,
 		},
 	}
@@ -100,7 +102,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 		t.Fatalf("PlaceStopLoss failed: %v", err)
 	}
 
-	if got, want := resp.Status, StopLossStatusSuccess; got != want {
+	if got, want := resp.Status, trading.StopLossStatusSuccess; got != want {
 		t.Errorf("resp.Status = %v, want %v", got, want)
 	}
 
@@ -122,8 +124,8 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(PlaceStopLossResponse{
-			Status:          StopLossStatusError,
+		_ = json.NewEncoder(w).Encode(trading.PlaceStopLossResponse{
+			Status:          trading.StopLossStatusError,
 			StopLossOrderID: "",
 		})
 	}))
@@ -131,21 +133,21 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceStopLossRequest{
+	req := &trading.PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
 		OrderbookID:      testOrderbookID,
-		StopLossTrigger: StopLossTrigger{
-			Type:      StopLossTriggerLessOrEqual,
+		StopLossTrigger: trading.StopLossTrigger{
+			Type:      trading.StopLossTriggerLessOrEqual,
 			Value:     testStopLossTriggerValue,
-			ValueType: StopLossValueMonetary,
+			ValueType: trading.StopLossValueMonetary,
 		},
-		StopLossOrderEvent: StopLossOrderEvent{
-			Type:      StopLossOrderEventBuy,
+		StopLossOrderEvent: trading.StopLossOrderEvent{
+			Type:      trading.StopLossOrderEventBuy,
 			Price:     testStopLossOrderPrice,
 			Volume:    testStopLossOrderVolume,
 			ValidDays: testStopLossValidDays,
-			PriceType: StopLossPriceMonetary,
+			PriceType: trading.StopLossPriceMonetary,
 		},
 	}
 
@@ -154,7 +156,7 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 
-	if got, want := resp.Status, StopLossStatusError; got != want {
+	if got, want := resp.Status, trading.StopLossStatusError; got != want {
 		t.Errorf("resp.Status = %v, want %v", got, want)
 	}
 }
@@ -178,21 +180,21 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PlaceStopLossRequest{
+	req := &trading.PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
 		OrderbookID:      testOrderbookID,
-		StopLossTrigger: StopLossTrigger{
-			Type:      StopLossTriggerLessOrEqual,
+		StopLossTrigger: trading.StopLossTrigger{
+			Type:      trading.StopLossTriggerLessOrEqual,
 			Value:     testStopLossTriggerValue,
-			ValueType: StopLossValueMonetary,
+			ValueType: trading.StopLossValueMonetary,
 		},
-		StopLossOrderEvent: StopLossOrderEvent{
-			Type:      StopLossOrderEventBuy,
+		StopLossOrderEvent: trading.StopLossOrderEvent{
+			Type:      trading.StopLossOrderEventBuy,
 			Price:     testStopLossOrderPrice,
 			Volume:    testStopLossOrderVolume,
 			ValidDays: testStopLossValidDays,
-			PriceType: StopLossPriceMonetary,
+			PriceType: trading.StopLossPriceMonetary,
 		},
 	}
 
@@ -224,21 +226,21 @@ func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	req := &PlaceStopLossRequest{
+	req := &trading.PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
 		OrderbookID:      testOrderbookID,
-		StopLossTrigger: StopLossTrigger{
-			Type:      StopLossTriggerLessOrEqual,
+		StopLossTrigger: trading.StopLossTrigger{
+			Type:      trading.StopLossTriggerLessOrEqual,
 			Value:     testStopLossTriggerValue,
-			ValueType: StopLossValueMonetary,
+			ValueType: trading.StopLossValueMonetary,
 		},
-		StopLossOrderEvent: StopLossOrderEvent{
-			Type:      StopLossOrderEventBuy,
+		StopLossOrderEvent: trading.StopLossOrderEvent{
+			Type:      trading.StopLossOrderEventBuy,
 			Price:     testStopLossOrderPrice,
 			Volume:    testStopLossOrderVolume,
 			ValidDays: testStopLossValidDays,
-			PriceType: StopLossPriceMonetary,
+			PriceType: trading.StopLossPriceMonetary,
 		},
 	}
 

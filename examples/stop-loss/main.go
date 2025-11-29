@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func main() {
@@ -72,23 +73,23 @@ func main() {
 	fmt.Printf("  Action: BUY %d shares at %.2f SEK\n", volume, orderPrice)
 	fmt.Printf("  Valid until: 2025-11-23\n")
 
-	stopLossReq := &avanza.PlaceStopLossRequest{
+	stopLossReq := &trading.PlaceStopLossRequest{
 		ParentStopLossID: "0",
 		AccountID:        accountID,
 		OrderbookID:      orderbookID,
-		StopLossTrigger: avanza.StopLossTrigger{
-			Type:                      avanza.StopLossTriggerLessOrEqual,
+		StopLossTrigger: trading.StopLossTrigger{
+			Type:                      trading.StopLossTriggerLessOrEqual,
 			Value:                     triggerValue,
-			ValueType:                 avanza.StopLossValueMonetary,
+			ValueType:                 trading.StopLossValueMonetary,
 			ValidUntil:                "2025-11-23",
 			TriggerOnMarketMakerQuote: false,
 		},
-		StopLossOrderEvent: avanza.StopLossOrderEvent{
-			Type:                avanza.StopLossOrderEventBuy,
+		StopLossOrderEvent: trading.StopLossOrderEvent{
+			Type:                trading.StopLossOrderEventBuy,
 			Price:               orderPrice,
 			Volume:              volume,
 			ValidDays:           8,
-			PriceType:           avanza.StopLossPriceMonetary,
+			PriceType:           trading.StopLossPriceMonetary,
 			ShortSellingAllowed: false,
 		},
 	}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func main() {
@@ -64,11 +65,11 @@ func main() {
 	orderbookID := "5247" // Ericsson B
 	price := 1.9998
 	volume := 2
-	side := avanza.OrderSideBuy
+	side := trading.OrderSideBuy
 
 	fmt.Printf("\nValidating order: %s %d shares of orderbook ID %s at %.4f SEK...\n", string(side), volume, orderbookID, price)
 
-	validateReq := &avanza.ValidateOrderRequest{
+	validateReq := &trading.ValidateOrderRequest{
 		IsDividendReinvestment: false,
 		RequestID:              nil,
 		OrderRequestParameters: nil,
@@ -76,11 +77,11 @@ func main() {
 		Volume:                 volume,
 		OpenVolume:             nil,
 		AccountID:              accountID,
-		Side:                   avanza.OrderSideBuy,
+		Side:                   trading.OrderSideBuy,
 		OrderbookID:            orderbookID,
 		ValidUntil:             nil,
 		Metadata:               nil,
-		Condition:              avanza.OrderConditionNormal,
+		Condition:              trading.OrderConditionNormal,
 		ISIN:                   "SE0015811963",
 		Currency:               "SEK",
 		MarketPlace:            "XSTO",

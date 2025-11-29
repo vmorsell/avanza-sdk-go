@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func TestValidateOrder_Success(t *testing.T) {
@@ -26,12 +28,12 @@ func TestValidateOrder_Success(t *testing.T) {
 		}
 
 		// Verify request body
-		var req ValidateOrderRequest
+		var req trading.ValidateOrderRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Fatalf("failed to decode request: %v", err)
 		}
 
-		if got, want := req.Side, OrderSideBuy; got != want {
+		if got, want := req.Side, trading.OrderSideBuy; got != want {
 			t.Errorf("req.Side = %v, want %v", got, want)
 		}
 
@@ -52,23 +54,23 @@ func TestValidateOrder_Success(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(ValidateOrderResponse{
-			CommissionWarning: ValidationResult{
+		_ = json.NewEncoder(w).Encode(trading.ValidateOrderResponse{
+			CommissionWarning: trading.ValidationResult{
 				Valid: false,
 			},
-			EmployeeValidation: ValidationResult{
+			EmployeeValidation: trading.ValidationResult{
 				Valid: true,
 			},
-			LargeInScaleWarning: ValidationResult{
+			LargeInScaleWarning: trading.ValidationResult{
 				Valid: true,
 			},
-			OrderValueLimitWarning: ValidationResult{
+			OrderValueLimitWarning: trading.ValidationResult{
 				Valid: true,
 			},
-			PriceRampingWarning: ValidationResult{
+			PriceRampingWarning: trading.ValidationResult{
 				Valid: true,
 			},
-			CanadaOddLotWarning: ValidationResult{
+			CanadaOddLotWarning: trading.ValidationResult{
 				Valid: true,
 			},
 		})
@@ -77,7 +79,7 @@ func TestValidateOrder_Success(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &ValidateOrderRequest{
+	req := &trading.ValidateOrderRequest{
 		IsDividendReinvestment: false,
 		RequestID:              nil,
 		OrderRequestParameters: nil,
@@ -85,11 +87,11 @@ func TestValidateOrder_Success(t *testing.T) {
 		Volume:                 testVolume,
 		OpenVolume:             nil,
 		AccountID:              testAccountID,
-		Side:                   OrderSideBuy,
+		Side:                   trading.OrderSideBuy,
 		OrderbookID:            testOrderbookID,
 		ValidUntil:             nil,
 		Metadata:               nil,
-		Condition:              OrderConditionNormal,
+		Condition:              trading.OrderConditionNormal,
 		ISIN:                   "SE0015811963",
 		Currency:               "SEK",
 		MarketPlace:            "XSTO",
@@ -141,13 +143,13 @@ func TestValidateOrder_HTTPError(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &ValidateOrderRequest{
+	req := &trading.ValidateOrderRequest{
 		Price:       testPrice,
 		Volume:      testVolume,
 		AccountID:   testAccountID,
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 		OrderbookID: testOrderbookID,
-		Condition:   OrderConditionNormal,
+		Condition:   trading.OrderConditionNormal,
 		ISIN:        "SE0015811963",
 		Currency:    "SEK",
 		MarketPlace: "XSTO",
@@ -178,13 +180,13 @@ func TestValidateOrder_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	req := &ValidateOrderRequest{
+	req := &trading.ValidateOrderRequest{
 		Price:       testPrice,
 		Volume:      testVolume,
 		AccountID:   testAccountID,
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 		OrderbookID: testOrderbookID,
-		Condition:   OrderConditionNormal,
+		Condition:   trading.OrderConditionNormal,
 		ISIN:        "SE0015811963",
 		Currency:    "SEK",
 		MarketPlace: "XSTO",

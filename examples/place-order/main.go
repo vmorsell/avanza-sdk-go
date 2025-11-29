@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vmorsell/avanza-sdk-go"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func main() {
@@ -62,16 +63,16 @@ func main() {
 	fmt.Printf("Available for purchase: %.2f SEK\n", account.AvailableForPurchase)
 
 	// Place a buy order
-	orderReq := &avanza.PlaceOrderRequest{
+	orderReq := &trading.PlaceOrderRequest{
 		IsDividendReinvestment: false,
 		RequestID:              uuid.New().String(),
 		Price:                  2.0, // Price out of bound to avoid it being filled
 		Volume:                 1,   // One share
 		AccountID:              accountID,
-		Side:                   avanza.OrderSideBuy,
+		Side:                   trading.OrderSideBuy,
 		OrderbookID:            "5247", // Investor B
-		Condition:              avanza.OrderConditionNormal,
-		Metadata: avanza.OrderMetadata{
+		Condition:              trading.OrderConditionNormal,
+		Metadata: trading.OrderMetadata{
 			OrderEntryMode:  "ADVANCED",
 			HasTouchedPrice: "true",
 		},

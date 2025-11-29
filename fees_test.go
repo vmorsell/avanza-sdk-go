@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func TestGetPreliminaryFee_Success(t *testing.T) {
@@ -33,7 +35,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 		}
 
 		// Verify request body
-		var req PreliminaryFeeRequest
+		var req trading.PreliminaryFeeRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			t.Fatalf("failed to decode request: %v", err)
 		}
@@ -54,12 +56,12 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 			t.Errorf("req.Volume = %v, want %v", got, want)
 		}
 
-		if got, want := req.Side, OrderSideBuy; got != want {
+		if got, want := req.Side, trading.OrderSideBuy; got != want {
 			t.Errorf("req.Side = %v, want %v", got, want)
 		}
 
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(PreliminaryFeeResponse{
+		_ = json.NewEncoder(w).Encode(trading.PreliminaryFeeResponse{
 			Commission:          testCommission,
 			MarketFees:          testMarketFees,
 			TotalFees:           testTotalFees,
@@ -67,7 +69,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 			TotalSumWithoutFees: testTotalSumWithoutFees,
 			OrderbookCurrency:   testOrderbookCurrency,
 			TransactionTax:      nil,
-			CurrencyExchangeFee: CurrencyExchangeFee{
+			CurrencyExchangeFee: trading.CurrencyExchangeFee{
 				Rate: "",
 				Sum:  "",
 			},
@@ -78,12 +80,12 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PreliminaryFeeRequest{
+	req := &trading.PreliminaryFeeRequest{
 		AccountID:   testAccountID,
 		OrderbookID: testOrderbookID,
 		Price:       fmt.Sprintf("%.4f", testPrice),
 		Volume:      fmt.Sprintf("%d", testVolume),
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 	}
 
 	resp, err := avanza.Trading.GetPreliminaryFee(context.Background(), req)
@@ -124,12 +126,12 @@ func TestGetPreliminaryFee_HTTPError(t *testing.T) {
 
 	avanza := New(WithBaseURL(server.URL))
 
-	req := &PreliminaryFeeRequest{
+	req := &trading.PreliminaryFeeRequest{
 		AccountID:   testAccountID,
 		OrderbookID: testOrderbookID,
 		Price:       fmt.Sprintf("%.4f", testPrice),
 		Volume:      fmt.Sprintf("%d", testVolume),
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 	}
 
 	_, err := avanza.Trading.GetPreliminaryFee(context.Background(), req)
@@ -157,12 +159,12 @@ func TestGetPreliminaryFee_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	req := &PreliminaryFeeRequest{
+	req := &trading.PreliminaryFeeRequest{
 		AccountID:   testAccountID,
 		OrderbookID: testOrderbookID,
 		Price:       fmt.Sprintf("%.4f", testPrice),
 		Volume:      fmt.Sprintf("%d", testVolume),
-		Side:        OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 	}
 
 	_, err := avanza.Trading.GetPreliminaryFee(ctx, req)

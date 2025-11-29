@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func ExampleNew() {
@@ -49,8 +50,8 @@ func ExampleAvanza_Trading() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	req := &avanza.PlaceOrderRequest{
-		Side:        avanza.OrderSideBuy,
+	req := &trading.PlaceOrderRequest{
+		Side:        trading.OrderSideBuy,
 		OrderbookID: "5247",
 		Price:       100.0,
 		Volume:      1,
@@ -65,13 +66,13 @@ func Example_placeOrder() {
 	ctx := context.Background()
 
 	// Validate order first
-	validateReq := &avanza.ValidateOrderRequest{
+	validateReq := &trading.ValidateOrderRequest{
 		AccountID:   "account123",
 		OrderbookID: "5247",
 		Price:       100.0,
 		Volume:      1,
-		Side:        avanza.OrderSideBuy,
-		Condition:   avanza.OrderConditionNormal,
+		Side:        trading.OrderSideBuy,
+		Condition:   trading.OrderConditionNormal,
 		ISIN:        "SE0000108656",
 		Currency:    "SEK",
 		MarketPlace: "STO",
@@ -82,13 +83,13 @@ func Example_placeOrder() {
 	}
 
 	// Place order
-	req := &avanza.PlaceOrderRequest{
+	req := &trading.PlaceOrderRequest{
 		AccountID:   "account123",
 		OrderbookID: "5247",
 		Price:       100.0,
 		Volume:      1,
-		Side:        avanza.OrderSideBuy,
-		Condition:   avanza.OrderConditionNormal,
+		Side:        trading.OrderSideBuy,
+		Condition:   trading.OrderConditionNormal,
 	}
 	resp, err := client.Trading.PlaceOrder(ctx, req)
 	if err != nil {
@@ -101,13 +102,13 @@ func Example_validateOrder() {
 	client := avanza.New()
 	ctx := context.Background()
 
-	req := &avanza.ValidateOrderRequest{
+	req := &trading.ValidateOrderRequest{
 		AccountID:   "account123",
 		OrderbookID: "5247",
 		Price:       100.0,
 		Volume:      1,
-		Side:        avanza.OrderSideBuy,
-		Condition:   avanza.OrderConditionNormal,
+		Side:        trading.OrderSideBuy,
+		Condition:   trading.OrderConditionNormal,
 		ISIN:        "SE0000108656",
 		Currency:    "SEK",
 		MarketPlace: "STO",
@@ -129,12 +130,12 @@ func Example_getPreliminaryFee() {
 	client := avanza.New()
 	ctx := context.Background()
 
-	req := &avanza.PreliminaryFeeRequest{
+	req := &trading.PreliminaryFeeRequest{
 		AccountID:   "account123",
 		OrderbookID: "5247",
 		Price:       "100.0",
 		Volume:      "1",
-		Side:        avanza.OrderSideBuy,
+		Side:        trading.OrderSideBuy,
 	}
 
 	fee, err := client.Trading.GetPreliminaryFee(ctx, req)
@@ -148,19 +149,19 @@ func Example_placeStopLoss() {
 	client := avanza.New()
 	ctx := context.Background()
 
-	req := &avanza.PlaceStopLossRequest{
+	req := &trading.PlaceStopLossRequest{
 		AccountID:   "account123",
 		OrderbookID: "5247",
-		StopLossTrigger: avanza.StopLossTrigger{
-			Type:      avanza.StopLossTriggerLessOrEqual,
+		StopLossTrigger: trading.StopLossTrigger{
+			Type:      trading.StopLossTriggerLessOrEqual,
 			Value:     90.0,
-			ValueType: avanza.StopLossValueMonetary,
+			ValueType: trading.StopLossValueMonetary,
 		},
-		StopLossOrderEvent: avanza.StopLossOrderEvent{
-			Type:      avanza.StopLossOrderEventSell,
+		StopLossOrderEvent: trading.StopLossOrderEvent{
+			Type:      trading.StopLossOrderEventSell,
 			Price:     90.0,
 			Volume:    1,
-			PriceType: avanza.StopLossPriceMonetary,
+			PriceType: trading.StopLossPriceMonetary,
 			ValidDays: 30,
 		},
 	}

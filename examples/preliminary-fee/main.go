@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
 func main() {
@@ -66,9 +67,9 @@ func main() {
 	orderbookID := "5247" // Investor B
 	price := "350.0"
 	volume := "1"
-	side := avanza.OrderSideBuy
+	side := trading.OrderSideBuy
 
-	feeReq := &avanza.PreliminaryFeeRequest{
+	feeReq := &trading.PreliminaryFeeRequest{
 		AccountID:   accountID,
 		OrderbookID: orderbookID,
 		Price:       price,

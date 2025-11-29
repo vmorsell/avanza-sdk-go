@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
+	"github.com/vmorsell/avanza-sdk-go/market"
 )
 
 func TestOrderDepthSubscription(t *testing.T) {
@@ -69,7 +70,7 @@ func TestOrderDepthSubscription(t *testing.T) {
 	defer subscription.Close()
 
 	// Collect events
-	var events []OrderDepthEvent
+	var events []market.OrderDepthEvent
 	var errors []error
 
 	done := make(chan bool)
@@ -95,7 +96,7 @@ func TestOrderDepthSubscription(t *testing.T) {
 	}
 
 	// Check for ORDER_DEPTH event
-	var orderDepthEvent *OrderDepthEvent
+	var orderDepthEvent *market.OrderDepthEvent
 	for _, event := range events {
 		if event.Event == "ORDER_DEPTH" {
 			orderDepthEvent = &event
@@ -144,7 +145,7 @@ func TestOrderDepthDataUnmarshal(t *testing.T) {
 		"marketMakerLevelInBid": 1
 	}`
 
-	var data OrderDepthData
+	var data market.OrderDepthData
 	err := json.Unmarshal([]byte(jsonData), &data)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal order depth data: %v", err)
