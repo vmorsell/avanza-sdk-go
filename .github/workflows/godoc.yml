@@ -1,0 +1,29 @@
+name: Trigger pkg.go.dev
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  trigger-godoc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version from tag
+        id: tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Trigger GoDoc generation
+        run: |
+          VERSION="${{ steps.tag.outputs.VERSION }}"
+          REPO="${{ github.repository }}"
+          URL="https://pkg.go.dev/github.com/${REPO}@${VERSION}"
+
+          curl -sSfL "$URL" \
+            -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+            -H 'user-agent: Mozilla/5.0 (compatible; GoDoc-CI/1.0)' \
+            -H "referer: ${URL}" \
+            > /dev/null
+
+          echo "Triggered GoDoc generation for ${VERSION}"
+          echo "View at: ${URL}"
