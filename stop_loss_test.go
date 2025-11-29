@@ -145,6 +145,7 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 			Price:     testStopLossOrderPrice,
 			Volume:    testStopLossOrderVolume,
 			ValidDays: testStopLossValidDays,
+			PriceType: StopLossPriceMonetary,
 		},
 	}
 
@@ -191,6 +192,7 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 			Price:     testStopLossOrderPrice,
 			Volume:    testStopLossOrderVolume,
 			ValidDays: testStopLossValidDays,
+			PriceType: StopLossPriceMonetary,
 		},
 	}
 
@@ -236,6 +238,7 @@ func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
 			Price:     testStopLossOrderPrice,
 			Volume:    testStopLossOrderVolume,
 			ValidDays: testStopLossValidDays,
+			PriceType: StopLossPriceMonetary,
 		},
 	}
 
