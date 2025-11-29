@@ -234,7 +234,7 @@ type StopLossOrderEvent struct {
 type PlaceStopLossRequest struct {
 	ParentStopLossID   string             `json:"parentStopLossId"`
 	AccountID          string             `json:"accountId"`
-	OrderBookID        string             `json:"orderBookId"`
+	OrderbookID        string             `json:"orderbookId"`
 	StopLossTrigger    StopLossTrigger    `json:"stopLossTrigger"`
 	StopLossOrderEvent StopLossOrderEvent `json:"stopLossOrderEvent"`
 }

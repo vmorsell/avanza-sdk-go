@@ -75,7 +75,7 @@ func main() {
 	stopLossReq := &avanza.PlaceStopLossRequest{
 		ParentStopLossID: "0", // New stop loss order
 		AccountID:        accountID,
-		OrderBookID:      orderbookID,
+		OrderbookID:      orderbookID,
 		StopLossTrigger: avanza.StopLossTrigger{
 			Type:                      avanza.StopLossTriggerLessOrEqual,
 			Value:                     triggerValue,

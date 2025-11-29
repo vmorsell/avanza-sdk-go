@@ -40,8 +40,8 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 			t.Errorf("req.AccountID = %v, want %v", got, want)
 		}
 
-		if got, want := req.OrderBookID, testOrderbookID; got != want {
-			t.Errorf("req.OrderBookID = %v, want %v", got, want)
+		if got, want := req.OrderbookID, testOrderbookID; got != want {
+			t.Errorf("req.OrderbookID = %v, want %v", got, want)
 		}
 
 		if got, want := req.StopLossTrigger.Type, StopLossTriggerLessOrEqual; got != want {
@@ -77,7 +77,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
-		OrderBookID:      testOrderbookID,
+		OrderbookID:      testOrderbookID,
 		StopLossTrigger: StopLossTrigger{
 			Type:                      StopLossTriggerLessOrEqual,
 			Value:                     testStopLossTriggerValue,
@@ -134,7 +134,7 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
-		OrderBookID:      testOrderbookID,
+		OrderbookID:      testOrderbookID,
 		StopLossTrigger: StopLossTrigger{
 			Type:      StopLossTriggerLessOrEqual,
 			Value:     testStopLossTriggerValue,
@@ -180,7 +180,7 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
-		OrderBookID:      testOrderbookID,
+		OrderbookID:      testOrderbookID,
 		StopLossTrigger: StopLossTrigger{
 			Type:      StopLossTriggerLessOrEqual,
 			Value:     testStopLossTriggerValue,
@@ -225,7 +225,7 @@ func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
 	req := &PlaceStopLossRequest{
 		ParentStopLossID: testParentStopLossID,
 		AccountID:        testAccountID,
-		OrderBookID:      testOrderbookID,
+		OrderbookID:      testOrderbookID,
 		StopLossTrigger: StopLossTrigger{
 			Type:      StopLossTriggerLessOrEqual,
 			Value:     testStopLossTriggerValue,
