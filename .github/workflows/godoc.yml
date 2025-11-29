@@ -17,7 +17,7 @@ jobs:
         run: |
           VERSION="${{ steps.tag.outputs.VERSION }}"
           REPO="${{ github.repository }}"
-          URL="https://pkg.go.dev/github.com/${REPO}@${VERSION}"
+          URL="https://sum.golang.org/lookup/github.com/${REPO}@${VERSION}"
 
           curl -sSfL "$URL" \
             -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
