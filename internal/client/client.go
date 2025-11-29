@@ -28,6 +28,7 @@ type Client struct {
 	cookies       map[string]string
 	securityToken string
 	userAgent     string
+	rateLimiter   RateLimiter
 }
 
 // BaseURL returns the base URL of the client.
@@ -101,21 +102,39 @@ func WithUserAgent(userAgent string) Option {
 	}
 }
 
-// NewClient creates a new Avanza HTTP client with optional configuration.
-// The client automatically manages cookies and security tokens.
+// WithRateLimiter sets a rate limiter for HTTP requests.
+// The rate limiter will be called before each request to ensure rate limits are respected.
+// By default, a SimpleRateLimiter with DefaultRateLimitInterval is used.
+// Pass nil to disable rate limiting (not recommended).
 //
 // Example:
 //
-//	client := NewClient() // Default configuration
+//	limiter := &SimpleRateLimiter{Interval: 200 * time.Millisecond}
+//	client := NewClient(WithRateLimiter(limiter))
+func WithRateLimiter(limiter RateLimiter) Option {
+	return func(c *Client) {
+		c.rateLimiter = limiter
+	}
+}
+
+// NewClient creates a new Avanza HTTP client with optional configuration.
+// The client automatically manages cookies and security tokens.
+// By default, a rate limiter with DefaultRateLimitInterval (100ms) is enabled
+// to prevent overwhelming the API. This can be customized or disabled using WithRateLimiter.
+//
+// Example:
+//
+//	client := NewClient() // Default configuration with rate limiting
 //	client := NewClient(WithBaseURL("https://test.example.com"))
 func NewClient(opts ...Option) *Client {
 	c := &Client{
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
-		baseURL:   BaseURL,
-		cookies:   make(map[string]string),
-		userAgent: DefaultUserAgent,
+		baseURL:     BaseURL,
+		cookies:     make(map[string]string),
+		userAgent:   DefaultUserAgent,
+		rateLimiter: &SimpleRateLimiter{Interval: DefaultRateLimitInterval},
 	}
 
 	for _, opt := range opts {
@@ -147,6 +166,12 @@ func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*
 
 	c.setHeaders(req)
 
+	if c.rateLimiter != nil {
+		if err := c.rateLimiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("rate limiter: %w", err)
+		}
+	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("do: %w", err)
@@ -167,6 +192,12 @@ func (c *Client) Get(ctx context.Context, endpoint string) (*http.Response, erro
 	}
 
 	c.setHeaders(req)
+
+	if c.rateLimiter != nil {
+		if err := c.rateLimiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("rate limiter: %w", err)
+		}
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
