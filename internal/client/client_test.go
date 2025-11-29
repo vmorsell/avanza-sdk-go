@@ -417,3 +417,42 @@ func TestSetHeaders_WithCookies(t *testing.T) {
 	}
 	defer resp.Body.Close()
 }
+
+func TestNewHTTPError_SizeLimit(t *testing.T) {
+	// Create a large error response body (larger than maxErrorBodySize)
+	largeBody := make([]byte, 2048) // 2KB
+	for i := range largeBody {
+		largeBody[i] = 'A'
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(largeBody)
+	}))
+	defer server.Close()
+
+	resp, err := http.Get(server.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	httpErr := NewHTTPError(resp)
+
+	// Verify the error body is limited to maxErrorBodySize (1024 bytes)
+	if len(httpErr.Body) > 1024 {
+		t.Errorf("expected error body to be limited to 1024 bytes, got %d bytes", len(httpErr.Body))
+	}
+
+	// Verify the body contains the first part of the response
+	if len(httpErr.Body) != 1024 {
+		t.Errorf("expected error body to be exactly 1024 bytes (truncated), got %d bytes", len(httpErr.Body))
+	}
+
+	// Verify all characters are 'A' (the first 1024 bytes)
+	for i, b := range []byte(httpErr.Body) {
+		if b != 'A' {
+			t.Errorf("expected byte at index %d to be 'A', got %c", i, b)
+		}
+	}
+}
