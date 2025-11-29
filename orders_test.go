@@ -51,7 +51,7 @@ func TestPlaceOrder_Success(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
-			OrderRequestStatus: "SUCCESS",
+			OrderRequestStatus: OrderRequestStatusSuccess,
 			Message:            "",
 			Parameters:         []string{""},
 			OrderID:            testOrderID,
@@ -102,7 +102,7 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
-			OrderRequestStatus: "ERROR",
+			OrderRequestStatus: OrderRequestStatusError,
 			Message:            "Insufficient funds",
 			Parameters:         []string{},
 			OrderID:            "",
@@ -191,7 +191,7 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceOrderResponse{
-			OrderRequestStatus: "SUCCESS",
+			OrderRequestStatus: OrderRequestStatusSuccess,
 			OrderID:            testOrderID2,
 		})
 	}))

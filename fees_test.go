@@ -54,7 +54,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 			t.Errorf("req.Volume = %v, want %v", got, want)
 		}
 
-		if got, want := req.Side, "BUY"; got != want {
+		if got, want := req.Side, OrderSideBuy; got != want {
 			t.Errorf("req.Side = %v, want %v", got, want)
 		}
 
@@ -83,7 +83,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 		OrderbookID: testOrderbookID,
 		Price:       fmt.Sprintf("%.4f", testPrice),
 		Volume:      fmt.Sprintf("%d", testVolume),
-		Side:        "BUY",
+		Side:        OrderSideBuy,
 	}
 
 	resp, err := avanza.Trading.GetPreliminaryFee(context.Background(), req)
@@ -129,7 +129,7 @@ func TestGetPreliminaryFee_HTTPError(t *testing.T) {
 		OrderbookID: testOrderbookID,
 		Price:       fmt.Sprintf("%.4f", testPrice),
 		Volume:      fmt.Sprintf("%d", testVolume),
-		Side:        "BUY",
+		Side:        OrderSideBuy,
 	}
 
 	_, err := avanza.Trading.GetPreliminaryFee(context.Background(), req)
@@ -162,7 +162,7 @@ func TestGetPreliminaryFee_ContextCancellation(t *testing.T) {
 		OrderbookID: testOrderbookID,
 		Price:       fmt.Sprintf("%.4f", testPrice),
 		Volume:      fmt.Sprintf("%d", testVolume),
-		Side:        "BUY",
+		Side:        OrderSideBuy,
 	}
 
 	_, err := avanza.Trading.GetPreliminaryFee(ctx, req)

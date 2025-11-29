@@ -60,10 +60,10 @@ func main() {
 	fmt.Println("\nCalculating preliminary fees...")
 
 	// Example order parameters
-	orderbookID := "5247" // Example stock/fund ID
-	price := "350.0"      // Price per share
-	volume := "1"         // Number of shares
-	side := "BUY"         // Buy order
+	orderbookID := "5247"       // Example stock/fund ID
+	price := "350.0"            // Price per share
+	volume := "1"               // Number of shares
+	side := avanza.OrderSideBuy // Buy order
 
 	feeReq := &avanza.PreliminaryFeeRequest{
 		AccountID:   accountID,
@@ -81,7 +81,7 @@ func main() {
 	// Display fee breakdown
 	fmt.Printf("\n📊 Order Fee Breakdown:\n")
 	fmt.Printf("  Order Details:\n")
-	fmt.Printf("    Side:        %s\n", side)
+	fmt.Printf("    Side:        %s\n", string(side))
 	fmt.Printf("    OrderbookID: %s\n", orderbookID)
 	fmt.Printf("    Price:       %s %s per share\n", price, feeResp.OrderbookCurrency)
 	fmt.Printf("    Volume:      %s shares\n", volume)

@@ -58,9 +58,9 @@ type PlaceOrderRequest struct {
 // PlaceOrderResponse represents the response from placing an order.
 type PlaceOrderResponse struct {
 	OrderRequestStatus OrderRequestStatus `json:"orderRequestStatus"`
-	Message            string              `json:"message"`
-	Parameters         []string            `json:"parameters"`
-	OrderID            string              `json:"orderId"`
+	Message            string             `json:"message"`
+	Parameters         []string           `json:"parameters"`
+	OrderID            string             `json:"orderId"`
 }
 
 // OrderAccount represents account information for an order.
@@ -107,7 +107,7 @@ type Order struct {
 	StateMessage         string                 `json:"stateMessage"`
 	Orderbook            OrderOrderbook         `json:"orderbook"`
 	AdditionalParameters map[string]interface{} `json:"additionalParameters"`
-	Condition            OrderCondition        `json:"condition"`
+	Condition            OrderCondition         `json:"condition"`
 }
 
 // GetOrdersResponse represents the response from getting orders.
@@ -153,11 +153,11 @@ type ValidationResult struct {
 
 // PreliminaryFeeRequest represents a request to get preliminary fees for an order.
 type PreliminaryFeeRequest struct {
-	AccountID   string `json:"accountId"`
-	OrderbookID string `json:"orderbookId"`
-	Price       string `json:"price"`
-	Volume      string `json:"volume"`
-	Side        string `json:"side"`
+	AccountID   string    `json:"accountId"`
+	OrderbookID string    `json:"orderbookId"`
+	Price       string    `json:"price"`
+	Volume      string    `json:"volume"`
+	Side        OrderSide `json:"side"`
 }
 
 // PreliminaryFeeResponse represents the response from getting preliminary fees.
@@ -266,28 +266,28 @@ type StopLossOrderbook struct {
 
 // StopLossTriggerResponse represents trigger information from the API response.
 type StopLossTriggerResponse struct {
-	Value                     float64 `json:"value"`
-	Type                      string  `json:"type"`
-	ValidUntil                string  `json:"validUntil"`
-	ValueType                 string  `json:"valueType"`
-	TriggerOnMarketMakerQuote bool    `json:"triggerOnMarketMakerQuote"`
+	Value                     float64             `json:"value"`
+	Type                      StopLossTriggerType `json:"type"`
+	ValidUntil                string              `json:"validUntil"`
+	ValueType                 StopLossValueType   `json:"valueType"`
+	TriggerOnMarketMakerQuote bool                `json:"triggerOnMarketMakerQuote"`
 }
 
 // StopLossOrderDetails represents order details for a stop loss order.
 type StopLossOrderDetails struct {
-	Type                  string  `json:"type"`
-	Price                 float64 `json:"price"`
-	Volume                int     `json:"volume"`
-	ShortSellingAllowed   bool    `json:"shortSellingAllowed"`
-	ValidDays             int     `json:"validDays"`
-	PriceType             string  `json:"priceType"`
-	PriceDecimalPrecision int     `json:"priceDecimalPrecision"`
+	Type                  StopLossOrderEventType `json:"type"`
+	Price                 float64                `json:"price"`
+	Volume                int                    `json:"volume"`
+	ShortSellingAllowed   bool                   `json:"shortSellingAllowed"`
+	ValidDays             int                    `json:"validDays"`
+	PriceType             StopLossPriceType      `json:"priceType"`
+	PriceDecimalPrecision int                    `json:"priceDecimalPrecision"`
 }
 
 // StopLossOrder represents a single stop loss order.
 type StopLossOrder struct {
 	ID        string                  `json:"id"`
-	Status    string                  `json:"status"`
+	Status    StopLossStatus          `json:"status"`
 	Account   StopLossAccount         `json:"account"`
 	Orderbook StopLossOrderbook       `json:"orderbook"`
 	Message   string                  `json:"message"`
@@ -296,4 +296,3 @@ type StopLossOrder struct {
 	Editable  bool                    `json:"editable"`
 	Deletable bool                    `json:"deletable"`
 }
-

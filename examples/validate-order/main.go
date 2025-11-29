@@ -64,9 +64,9 @@ func main() {
 	orderbookID := "5247" // Example: Ericsson B
 	price := 1.9998
 	volume := 2
-	side := "BUY"
+	side := avanza.OrderSideBuy
 
-	fmt.Printf("\nValidating order: %s %d shares of orderbook ID %s at %.4f SEK...\n", side, volume, orderbookID, price)
+	fmt.Printf("\nValidating order: %s %d shares of orderbook ID %s at %.4f SEK...\n", string(side), volume, orderbookID, price)
 
 	validateReq := &avanza.ValidateOrderRequest{
 		IsDividendReinvestment: false,

@@ -66,7 +66,7 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceStopLossResponse{
-			Status:          "SUCCESS",
+			Status:          StopLossStatusSuccess,
 			StopLossOrderID: testStopLossOrderID,
 		})
 	}))
@@ -123,7 +123,7 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(PlaceStopLossResponse{
-			Status:          "ERROR",
+			Status:          StopLossStatusError,
 			StopLossOrderID: "",
 		})
 	}))
