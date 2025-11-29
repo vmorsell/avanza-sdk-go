@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
@@ -20,6 +21,7 @@ type OrderDepthSubscription struct {
 	cancel      context.CancelFunc
 	events      chan OrderDepthEvent
 	errors      chan error
+	wg          sync.WaitGroup
 }
 
 // Events returns a channel that receives order depth events.
@@ -33,14 +35,19 @@ func (s *OrderDepthSubscription) Errors() <-chan error {
 }
 
 // Close stops the subscription and cleans up resources.
+// It waits for the background goroutine to finish before closing channels.
 func (s *OrderDepthSubscription) Close() {
 	s.cancel()
+	s.wg.Wait() // Wait for goroutine to finish
 	close(s.events)
 	close(s.errors)
 }
 
 // start begins the SSE stream processing.
 func (s *OrderDepthSubscription) start() {
+	s.wg.Add(1)
+	defer s.wg.Done()
+
 	defer func() {
 		if r := recover(); r != nil {
 			s.errors <- fmt.Errorf("subscription panic: %v", r)
@@ -58,9 +65,11 @@ func (s *OrderDepthSubscription) start() {
 	// Set SSE-specific headers
 	s.setSSEHeaders(req)
 
-	// Create a new HTTP client without timeout for SSE
+	// Reuse transport from base client for connection pooling, but remove timeout for SSE
+	baseClient := s.client.HTTPClient()
 	httpClient := &http.Client{
-		Timeout: 0,
+		Transport: baseClient.Transport,
+		Timeout:   0, // No timeout for long-lived SSE connections
 	}
 
 	resp, err := httpClient.Do(req)
