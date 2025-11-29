@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
 func TestOrderDepthSubscription(t *testing.T) {

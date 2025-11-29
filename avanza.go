@@ -27,55 +27,37 @@
 //	// Use the client
 //	overview, err := client.Accounts.GetOverview(ctx)
 //
-// Error Handling:
-//
-// All methods return errors that should be checked. Use errors.As to check for
-// HTTPError types:
+// Error handling:
 //
 //	var httpErr *client.HTTPError
 //	if errors.As(err, &httpErr) {
 //		fmt.Printf("HTTP %d: %s\n", httpErr.StatusCode, httpErr.Body)
 //	}
-//
-// Context Usage:
-//
-// All methods accept context.Context for cancellation and timeouts. Always
-// provide a context with appropriate timeout for production code:
-//
-//	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-//	defer cancel()
 package avanza
 
 import (
 	"net/http"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/accounts"
-	"github.com/vmorsell/avanza-sdk-go/internal/auth"
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
-	"github.com/vmorsell/avanza-sdk-go/internal/market"
-	"github.com/vmorsell/avanza-sdk-go/internal/trading"
+	"github.com/vmorsell/avanza-sdk-go/accounts"
+	"github.com/vmorsell/avanza-sdk-go/auth"
+	"github.com/vmorsell/avanza-sdk-go/client"
+	"github.com/vmorsell/avanza-sdk-go/market"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
-// Avanza is the main client for interacting with the Avanza API.
+// Avanza is the main client for the Avanza API.
 type Avanza struct {
-	client *client.Client
-	// Auth handles BankID authentication and session management.
-	Auth *auth.AuthService
-	// Accounts provides account overview, positions, and trading accounts.
+	client   *client.Client
+	Auth     *auth.AuthService
 	Accounts *accounts.Service
-	// Trading handles order placement, validation, fees, and stop loss orders.
-	Trading *trading.Service
-	// Market provides real-time market data subscriptions.
-	Market *market.Service
+	Trading  *trading.Service
+	Market   *market.Service
 }
 
 // Option is a functional option for configuring the Avanza client.
 type Option func(*Avanza)
 
-// WithBaseURL sets a custom base URL for the client.
-// This is primarily used for testing against mock servers.
-//
-// Example:
+// WithBaseURL sets a custom base URL. Useful for testing.
 //
 //	client := avanza.New(avanza.WithBaseURL("http://localhost:8080"))
 func WithBaseURL(url string) Option {
@@ -89,9 +71,6 @@ func WithBaseURL(url string) Option {
 }
 
 // WithHTTPClient sets a custom HTTP client.
-// This is useful for configuring custom timeouts or transport settings.
-//
-// Example:
 //
 //	httpClient := &http.Client{Timeout: 60 * time.Second}
 //	client := avanza.New(avanza.WithHTTPClient(httpClient))
@@ -105,10 +84,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
-// WithUserAgent sets a custom User-Agent string for HTTP requests.
-// If not set, a default User-Agent is used.
-//
-// Example:
+// WithUserAgent sets a custom User-Agent string.
 //
 //	client := avanza.New(avanza.WithUserAgent("MyApp/1.0"))
 func WithUserAgent(userAgent string) Option {
@@ -121,22 +97,25 @@ func WithUserAgent(userAgent string) Option {
 	}
 }
 
-// New creates a new Avanza client with optional configuration.
+// WithRateLimiter sets a rate limiter. Defaults to 100ms interval.
+// Pass nil to disable (not recommended).
 //
-// Example:
+//	limiter := &client.SimpleRateLimiter{Interval: 200 * time.Millisecond}
+//	client := avanza.New(avanza.WithRateLimiter(limiter))
+func WithRateLimiter(limiter client.RateLimiter) Option {
+	return func(a *Avanza) {
+		a.client = client.NewClient(client.WithRateLimiter(limiter))
+		a.Auth = auth.NewAuthService(a.client)
+		a.Accounts = accounts.NewService(a.client)
+		a.Trading = trading.NewService(a.client)
+		a.Market = market.NewService(a.client)
+	}
+}
+
+// New creates a new Avanza client.
 //
-//	// Default configuration
 //	client := avanza.New()
-//
-//	// With custom base URL for testing
 //	client := avanza.New(avanza.WithBaseURL("http://localhost:8080"))
-//
-//	// With custom HTTP client
-//	httpClient := &http.Client{Timeout: 60 * time.Second}
-//	client := avanza.New(avanza.WithHTTPClient(httpClient))
-//
-//	// With custom User-Agent
-//	client := avanza.New(avanza.WithUserAgent("MyApp/1.0"))
 func New(opts ...Option) *Avanza {
 	a := &Avanza{
 		client: client.NewClient(),

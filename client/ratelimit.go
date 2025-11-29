@@ -8,16 +8,12 @@ import (
 )
 
 const (
-	// DefaultRateLimitInterval is the default minimum interval between HTTP requests.
-	// This helps prevent overwhelming the API and reduces the risk of being blocked.
+	// DefaultRateLimitInterval is the default minimum interval between requests.
 	DefaultRateLimitInterval = 100 * time.Millisecond
 )
 
-// RateLimiter controls the rate of HTTP requests.
-// Implementations should block until the next request is allowed.
+// RateLimiter controls request rate. Implementations block until the next request is allowed.
 type RateLimiter interface {
-	// Wait blocks until the rate limiter allows a request to proceed.
-	// Returns an error if the context is cancelled.
 	Wait(ctx context.Context) error
 }
 

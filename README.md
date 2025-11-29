@@ -101,6 +101,8 @@ client := avanza.New(
 Check for HTTP errors using `errors.As`:
 
 ```go
+import "github.com/vmorsell/avanza-sdk-go/client"
+
 var httpErr *client.HTTPError
 if errors.As(err, &httpErr) {
     fmt.Printf("HTTP %d: %s\n", httpErr.StatusCode, httpErr.Body)

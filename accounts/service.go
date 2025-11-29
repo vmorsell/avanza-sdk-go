@@ -7,22 +7,22 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
-// Service handles account-related operations.
+// Service handles account operations.
 type Service struct {
 	client *client.Client
 }
 
-// NewService creates a new accounts service with the given HTTP client.
+// NewService creates a new accounts service.
 func NewService(client *client.Client) *Service {
 	return &Service{
 		client: client,
 	}
 }
 
-// GetOverview retrieves the complete account overview including categories, accounts, and loans.
+// GetOverview returns the account overview with categories, accounts, and loans.
 func (s *Service) GetOverview(ctx context.Context) (*AccountOverview, error) {
 	resp, err := s.client.Get(ctx, "/_api/account-overview/overview/categorizedAccounts")
 	if err != nil {
@@ -42,7 +42,7 @@ func (s *Service) GetOverview(ctx context.Context) (*AccountOverview, error) {
 	return &overview, nil
 }
 
-// GetTradingAccounts retrieves all trading accounts for the authenticated user.
+// GetTradingAccounts returns all trading accounts.
 func (s *Service) GetTradingAccounts(ctx context.Context) ([]TradingAccount, error) {
 	resp, err := s.client.Get(ctx, "/_api/trading-critical/rest/accounts")
 	if err != nil {
@@ -62,7 +62,7 @@ func (s *Service) GetTradingAccounts(ctx context.Context) ([]TradingAccount, err
 	return accounts, nil
 }
 
-// GetPositions retrieves positions for a specific account using its URL parameter ID.
+// GetPositions returns positions for an account by its URL parameter ID.
 func (s *Service) GetPositions(ctx context.Context, urlParameterID string) (*AccountPositions, error) {
 	endpoint := fmt.Sprintf("/_api/position-data/positions/%s", urlParameterID)
 

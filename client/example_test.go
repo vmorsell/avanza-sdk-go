@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
 func ExampleNewClient() {

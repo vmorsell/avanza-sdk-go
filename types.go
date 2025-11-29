@@ -2,72 +2,72 @@
 package avanza
 
 import (
-	"github.com/vmorsell/avanza-sdk-go/internal/accounts"
-	"github.com/vmorsell/avanza-sdk-go/internal/market"
-	"github.com/vmorsell/avanza-sdk-go/internal/trading"
+	"github.com/vmorsell/avanza-sdk-go/accounts"
+	"github.com/vmorsell/avanza-sdk-go/market"
+	"github.com/vmorsell/avanza-sdk-go/trading"
 )
 
-// Re-export types from internal packages for convenience.
-// These are type aliases that point to the internal package types.
+// Type aliases from subpackages. Import from root for consistency,
+// or directly from subpackages if you only need specific types.
 
 // Account types
 type (
-	AccountOverview    = accounts.AccountOverview
-	Category           = accounts.Category
-	Account            = accounts.Account
-	AccountName        = accounts.AccountName
+	AccountOverview     = accounts.AccountOverview
+	Category            = accounts.Category
+	Account             = accounts.Account
+	AccountName         = accounts.AccountName
 	AccountSettings     = accounts.AccountSettings
-	Money              = accounts.Money
-	Profit             = accounts.Profit
-	Performance        = accounts.Performance
-	PerformanceData    = accounts.PerformanceData
-	Loan               = accounts.Loan
-	TradingAccount     = accounts.TradingAccount
-	CurrencyBalance    = accounts.CurrencyBalance
-	AccountPosition    = accounts.AccountPosition
-	AccountInfo        = accounts.AccountInfo
-	Instrument         = accounts.Instrument
-	Orderbook          = accounts.Orderbook
-	Quote              = accounts.Quote
-	Turnover           = accounts.Turnover
-	LastDeal           = accounts.LastDeal
+	Money               = accounts.Money
+	Profit              = accounts.Profit
+	Performance         = accounts.Performance
+	PerformanceData     = accounts.PerformanceData
+	Loan                = accounts.Loan
+	TradingAccount      = accounts.TradingAccount
+	CurrencyBalance     = accounts.CurrencyBalance
+	AccountPosition     = accounts.AccountPosition
+	AccountInfo         = accounts.AccountInfo
+	Instrument          = accounts.Instrument
+	Orderbook           = accounts.Orderbook
+	Quote               = accounts.Quote
+	Turnover            = accounts.Turnover
+	LastDeal            = accounts.LastDeal
 	PositionPerformance = accounts.PositionPerformance
-	CashPosition       = accounts.CashPosition
-	AccountPositions   = accounts.AccountPositions
+	CashPosition        = accounts.CashPosition
+	AccountPositions    = accounts.AccountPositions
 )
 
 // Trading types
 type (
-	OrderSide              = trading.OrderSide
-	OrderCondition         = trading.OrderCondition
-	OrderRequestStatus     = trading.OrderRequestStatus
-	StopLossStatus         = trading.StopLossStatus
-	OrderMetadata          = trading.OrderMetadata
-	PlaceOrderRequest      = trading.PlaceOrderRequest
-	PlaceOrderResponse     = trading.PlaceOrderResponse
-	OrderAccount           = trading.OrderAccount
-	OrderOrderbook         = trading.OrderOrderbook
-	Order                  = trading.Order
-	GetOrdersResponse      = trading.GetOrdersResponse
-	ValidateOrderRequest   = trading.ValidateOrderRequest
-	ValidateOrderResponse  = trading.ValidateOrderResponse
-	ValidationResult       = trading.ValidationResult
-	PreliminaryFeeRequest  = trading.PreliminaryFeeRequest
-	PreliminaryFeeResponse = trading.PreliminaryFeeResponse
-	CurrencyExchangeFee    = trading.CurrencyExchangeFee
-	StopLossTriggerType    = trading.StopLossTriggerType
-	StopLossValueType      = trading.StopLossValueType
-	StopLossOrderEventType = trading.StopLossOrderEventType
-	StopLossPriceType      = trading.StopLossPriceType
-	StopLossTrigger        = trading.StopLossTrigger
-	StopLossOrderEvent     = trading.StopLossOrderEvent
-	PlaceStopLossRequest   = trading.PlaceStopLossRequest
-	PlaceStopLossResponse  = trading.PlaceStopLossResponse
-	StopLossAccount        = trading.StopLossAccount
-	StopLossOrderbook      = trading.StopLossOrderbook
+	OrderSide               = trading.OrderSide
+	OrderCondition          = trading.OrderCondition
+	OrderRequestStatus      = trading.OrderRequestStatus
+	StopLossStatus          = trading.StopLossStatus
+	OrderMetadata           = trading.OrderMetadata
+	PlaceOrderRequest       = trading.PlaceOrderRequest
+	PlaceOrderResponse      = trading.PlaceOrderResponse
+	OrderAccount            = trading.OrderAccount
+	OrderOrderbook          = trading.OrderOrderbook
+	Order                   = trading.Order
+	GetOrdersResponse       = trading.GetOrdersResponse
+	ValidateOrderRequest    = trading.ValidateOrderRequest
+	ValidateOrderResponse   = trading.ValidateOrderResponse
+	ValidationResult        = trading.ValidationResult
+	PreliminaryFeeRequest   = trading.PreliminaryFeeRequest
+	PreliminaryFeeResponse  = trading.PreliminaryFeeResponse
+	CurrencyExchangeFee     = trading.CurrencyExchangeFee
+	StopLossTriggerType     = trading.StopLossTriggerType
+	StopLossValueType       = trading.StopLossValueType
+	StopLossOrderEventType  = trading.StopLossOrderEventType
+	StopLossPriceType       = trading.StopLossPriceType
+	StopLossTrigger         = trading.StopLossTrigger
+	StopLossOrderEvent      = trading.StopLossOrderEvent
+	PlaceStopLossRequest    = trading.PlaceStopLossRequest
+	PlaceStopLossResponse   = trading.PlaceStopLossResponse
+	StopLossAccount         = trading.StopLossAccount
+	StopLossOrderbook       = trading.StopLossOrderbook
 	StopLossTriggerResponse = trading.StopLossTriggerResponse
-	StopLossOrderDetails   = trading.StopLossOrderDetails
-	StopLossOrder          = trading.StopLossOrder
+	StopLossOrderDetails    = trading.StopLossOrderDetails
+	StopLossOrder           = trading.StopLossOrder
 )
 
 // Market types
@@ -78,38 +78,28 @@ type (
 	OrderDepthSubscription = market.OrderDepthSubscription
 )
 
-// Re-export constants for convenience.
 const (
-	// OrderSide constants
-	OrderSideBuy  = trading.OrderSideBuy  // Buy order
-	OrderSideSell = trading.OrderSideSell // Sell order
+	OrderSideBuy  = trading.OrderSideBuy
+	OrderSideSell = trading.OrderSideSell
 
-	// OrderCondition constants
-	OrderConditionNormal     = trading.OrderConditionNormal     // Standard order execution
-	OrderConditionFillOrKill = trading.OrderConditionFillOrKill // Execute immediately or cancel
+	OrderConditionNormal     = trading.OrderConditionNormal
+	OrderConditionFillOrKill = trading.OrderConditionFillOrKill
 
-	// OrderRequestStatus constants
-	OrderRequestStatusSuccess = trading.OrderRequestStatusSuccess // Order placed successfully
-	OrderRequestStatusError   = trading.OrderRequestStatusError   // Order placement failed
+	OrderRequestStatusSuccess = trading.OrderRequestStatusSuccess
+	OrderRequestStatusError   = trading.OrderRequestStatusError
 
-	// StopLossStatus constants
-	StopLossStatusSuccess = trading.StopLossStatusSuccess // Stop loss order placed successfully
-	StopLossStatusError   = trading.StopLossStatusError   // Stop loss order placement failed
+	StopLossStatusSuccess = trading.StopLossStatusSuccess
+	StopLossStatusError   = trading.StopLossStatusError
 
-	// StopLossTriggerType constants
-	StopLossTriggerLessOrEqual    = trading.StopLossTriggerLessOrEqual    // Trigger when price drops to or below value
-	StopLossTriggerGreaterOrEqual = trading.StopLossTriggerGreaterOrEqual // Trigger when price rises to or above value
+	StopLossTriggerLessOrEqual    = trading.StopLossTriggerLessOrEqual
+	StopLossTriggerGreaterOrEqual = trading.StopLossTriggerGreaterOrEqual
 
-	// StopLossValueType constants
-	StopLossValueMonetary   = trading.StopLossValueMonetary   // Value is an absolute price
-	StopLossValuePercentage = trading.StopLossValuePercentage // Value is a percentage change
+	StopLossValueMonetary   = trading.StopLossValueMonetary
+	StopLossValuePercentage = trading.StopLossValuePercentage
 
-	// StopLossOrderEventType constants
-	StopLossOrderEventBuy  = trading.StopLossOrderEventBuy  // Place a buy order when triggered
-	StopLossOrderEventSell = trading.StopLossOrderEventSell // Place a sell order when triggered
+	StopLossOrderEventBuy  = trading.StopLossOrderEventBuy
+	StopLossOrderEventSell = trading.StopLossOrderEventSell
 
-	// StopLossPriceType constants
-	StopLossPriceMonetary   = trading.StopLossPriceMonetary   // Price is an absolute value
-	StopLossPricePercentage = trading.StopLossPricePercentage // Price is a percentage of current price
+	StopLossPriceMonetary   = trading.StopLossPriceMonetary
+	StopLossPricePercentage = trading.StopLossPricePercentage
 )
-

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
 // newTestClient creates a client configured to use the test server URL.

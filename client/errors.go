@@ -11,10 +11,7 @@ const (
 	maxErrorBodySize = 1024
 )
 
-// HTTPError represents an HTTP error response from the Avanza API.
-// It includes the status code and response body for debugging.
-//
-// Users can check for HTTPError using errors.As:
+// HTTPError represents an HTTP error response.
 //
 //	var httpErr *client.HTTPError
 //	if errors.As(err, &httpErr) {
@@ -34,8 +31,7 @@ func (e *HTTPError) Error() string {
 }
 
 // NewHTTPError creates an HTTPError from an HTTP response.
-// It reads the response body to include in the error message, limiting
-// the size to prevent memory exhaustion.
+// Response body is limited to maxErrorBodySize.
 func NewHTTPError(resp *http.Response) *HTTPError {
 	limitedReader := io.LimitReader(resp.Body, maxErrorBodySize)
 	body, _ := io.ReadAll(limitedReader)

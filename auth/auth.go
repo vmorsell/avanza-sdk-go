@@ -10,38 +10,36 @@ import (
 	"time"
 
 	"github.com/mdp/qrterminal/v3"
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
-// AuthService handles authentication operations with Avanza using BankID.
+// AuthService handles BankID authentication.
 type AuthService struct {
 	client *client.Client
 }
 
-// NewAuthService creates a new authentication service with the given HTTP client.
+// NewAuthService creates a new authentication service.
 func NewAuthService(client *client.Client) *AuthService {
 	return &AuthService{
 		client: client,
 	}
 }
 
-// BankIDStartRequest is sent to initiate a BankID authentication session.
+// BankIDStartRequest initiates a BankID authentication session.
 type BankIDStartRequest struct {
 	Method       string `json:"method"`
 	ReturnScheme string `json:"returnScheme"`
 }
 
 // BankIDStartResponse contains the QR token and transaction details.
-// Use QRToken with DisplayQRCode() to show the QR code to the user.
 type BankIDStartResponse struct {
 	TransactionID string `json:"transactionId"`
 	Expires       string `json:"expires"`
 	QRToken       string `json:"qrToken"`
 }
 
-// BankIDCollectResponse contains authentication status and user information.
-// State can be "PENDING", "COMPLETE", or "FAILED".
-// When State is "COMPLETE", Logins contains available user accounts.
+// BankIDCollectResponse contains authentication status.
+// State is "PENDING", "COMPLETE", or "FAILED". Logins is populated when State is "COMPLETE".
 type BankIDCollectResponse struct {
 	Name                       string        `json:"name"`
 	TransactionID              string        `json:"transactionId"`
@@ -53,7 +51,7 @@ type BankIDCollectResponse struct {
 	Poa                        []interface{} `json:"poa"`
 }
 
-// Login represents a user account available after authentication.
+// Login represents a user account available after authentication completes.
 type Login struct {
 	CustomerID string    `json:"customerId"`
 	Username   string    `json:"username"`
@@ -67,15 +65,11 @@ type Account struct {
 	AccountType string `json:"accountType"`
 }
 
-// BankIDRestartRequest is sent to refresh an expiring QR code.
+// BankIDRestartRequest refreshes an expiring QR code.
 type BankIDRestartRequest struct{}
 
-// StartBankID initiates a new BankID authentication session with QR code support.
-// Returns transaction details including a QR token that can be displayed to the user.
-//
-// For automatic QR refresh, use PollBankIDWithQRUpdates instead.
-//
-// See also: PollBankIDWithQRUpdates, DisplayQRCode
+// StartBankID initiates a BankID authentication session. Returns a QR token.
+// For automatic QR refresh, use PollBankIDWithQRUpdates.
 func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, error) {
 	// Get initial cookies (AZAPERSISTENCE, etc.)
 	_, err := a.client.Get(ctx, "/")
@@ -106,8 +100,7 @@ func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, er
 	return &response, nil
 }
 
-// RestartBankID refreshes an existing BankID session, generating a new QR code.
-// This prevents the QR code from expiring during the authentication process.
+// RestartBankID refreshes the BankID session with a new QR code.
 func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, error) {
 	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/restart", BankIDRestartRequest{})
 	if err != nil {
@@ -127,8 +120,7 @@ func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, 
 	return &response, nil
 }
 
-// CollectBankID checks the current status of the BankID authentication.
-// Returns the current state and user information if authentication is complete.
+// CollectBankID checks the BankID authentication status.
 func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse, error) {
 	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/collect", BankIDRestartRequest{})
 	if err != nil {
@@ -148,8 +140,7 @@ func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse
 	return &response, nil
 }
 
-// PollBankID continuously polls the authentication status until completion or failure.
-// Checks every second until the context is cancelled or authentication completes.
+// PollBankID polls authentication status every second until completion or failure.
 func (a *AuthService) PollBankID(ctx context.Context) (*BankIDCollectResponse, error) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -175,9 +166,8 @@ func (a *AuthService) PollBankID(ctx context.Context) (*BankIDCollectResponse, e
 	}
 }
 
-// PollBankIDWithQRUpdates polls for authentication completion while automatically
-// refreshing the QR code every second to prevent expiration.
-// This is the recommended method for QR-based authentication.
+// PollBankIDWithQRUpdates polls authentication and refreshes the QR code every second.
+// Recommended for QR-based authentication.
 func (a *AuthService) PollBankIDWithQRUpdates(ctx context.Context) (*BankIDCollectResponse, error) {
 	qrCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -211,9 +201,7 @@ func (a *AuthService) ClearScreen() {
 	fmt.Print("\033[H\033[2J")
 }
 
-// DisplayQRCode renders a QR code in the terminal for BankID scanning.
-// The screen is cleared first. Typically used with QRToken from StartBankID
-// or RestartBankID. For automatic QR refresh, use PollBankIDWithQRUpdates instead.
+// DisplayQRCode renders a QR code in the terminal. Clears the screen first.
 func (a *AuthService) DisplayQRCode(qrCodeData string) error {
 	if qrCodeData == "" {
 		return fmt.Errorf("empty qr code data")
@@ -225,8 +213,8 @@ func (a *AuthService) DisplayQRCode(qrCodeData string) error {
 	return nil
 }
 
-// EstablishSession establishes a session after successful BankID authentication.
-// This is required before making other API calls.
+// EstablishSession establishes a session after BankID authentication.
+// Required before making other API calls.
 func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDCollectResponse) error {
 	if collectResp == nil || len(collectResp.Logins) == 0 {
 		return fmt.Errorf("no logins available in authentication response")
@@ -286,7 +274,7 @@ type User struct {
 	ID                 string `json:"id"`
 }
 
-// GetSessionInfo returns the current session state and user information.
+// GetSessionInfo returns the current session state.
 func (a *AuthService) GetSessionInfo(ctx context.Context) (*SessionInfo, error) {
 	resp, err := a.client.Get(ctx, "/_api/authentication/session/info/session")
 	if err != nil {

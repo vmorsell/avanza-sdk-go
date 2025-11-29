@@ -7,27 +7,23 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
-// Service handles trading-related operations including orders, stop loss orders, validation, and fees.
+// Service handles trading operations: orders, stop loss, validation, and fees.
 type Service struct {
 	client *client.Client
 }
 
-// NewService creates a new trading service with the given HTTP client.
+// NewService creates a new trading service.
 func NewService(client *client.Client) *Service {
 	return &Service{
 		client: client,
 	}
 }
 
-// PlaceOrder places a new order.
-//
-// It's recommended to validate the order first using ValidateOrder
-// and check fees using GetPreliminaryFee.
-//
-// See also: ValidateOrder, GetPreliminaryFee
+// PlaceOrder places a new order. Consider validating first with ValidateOrder
+// and checking fees with GetPreliminaryFee.
 func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*PlaceOrderResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)
@@ -55,7 +51,7 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 	return &resp, nil
 }
 
-// GetOrders retrieves all current orders.
+// GetOrders returns all current orders.
 func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 	httpResp, err := s.client.Get(ctx, "/_api/trading/rest/orders")
 	if err != nil {
@@ -76,10 +72,6 @@ func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 }
 
 // ValidateOrder validates an order before placing it.
-//
-// Use this to check for validation warnings before calling PlaceOrder.
-//
-// See also: PlaceOrder
 func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) (*ValidateOrderResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)
@@ -103,11 +95,7 @@ func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) 
 	return &resp, nil
 }
 
-// GetPreliminaryFee gets the preliminary fees for an order before placing it.
-//
-// Use this to estimate costs before calling PlaceOrder.
-//
-// See also: PlaceOrder
+// GetPreliminaryFee estimates fees for an order.
 func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequest) (*PreliminaryFeeResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, fmt.Errorf("validate: %w", err)
@@ -159,7 +147,7 @@ func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) 
 	return &resp, nil
 }
 
-// GetStopLossOrders retrieves all active stop loss orders.
+// GetStopLossOrders returns all active stop loss orders.
 func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error) {
 	httpResp, err := s.client.Get(ctx, "/_api/trading/stoploss/")
 	if err != nil {

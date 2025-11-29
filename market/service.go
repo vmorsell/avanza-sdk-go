@@ -5,27 +5,22 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
-// Service handles market data operations including real-time subscriptions.
+// Service handles market data and real-time subscriptions.
 type Service struct {
 	client *client.Client
 }
 
-// NewService creates a new market service with the given HTTP client.
+// NewService creates a new market service.
 func NewService(client *client.Client) *Service {
 	return &Service{
 		client: client,
 	}
 }
 
-// SubscribeToOrderDepth subscribes to order depth updates for a specific orderbook.
-// Returns a subscription that can be used to receive events and handle errors.
-//
-// Remember to call Close() on the subscription when done to clean up resources.
-//
-// See also: OrderDepthSubscription.Close
+// SubscribeToOrderDepth subscribes to order depth updates. Call Close() when done.
 func (s *Service) SubscribeToOrderDepth(ctx context.Context, orderbookID string) (*OrderDepthSubscription, error) {
 	cookies := s.client.Cookies()
 	if len(cookies) == 0 {

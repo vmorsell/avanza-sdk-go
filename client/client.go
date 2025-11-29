@@ -15,13 +15,11 @@ const (
 	// BaseURL is the base URL for the Avanza API.
 	BaseURL = "https://www.avanza.se"
 
-	// DefaultUserAgent is the default User-Agent string used by the client.
-	// It mimics a browser to avoid detection, which is necessary for this reverse-engineered SDK.
+	// DefaultUserAgent mimics a browser to avoid detection.
 	DefaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 )
 
-// Client is an HTTP client that manages sessions, cookies, and security tokens
-// for authenticated requests to the Avanza API.
+// Client manages sessions, cookies, and security tokens for Avanza API requests.
 type Client struct {
 	httpClient    *http.Client
 	baseURL       string
@@ -60,8 +58,7 @@ func (c *Client) UserAgent() string {
 	return c.userAgent
 }
 
-// SetMockCookies sets cookies for testing. The AZACSRF cookie is also
-// set as the security token.
+// SetMockCookies sets cookies for testing. AZACSRF is also set as the security token.
 func (c *Client) SetMockCookies(cookies map[string]string) {
 	c.cookies = make(map[string]string)
 	for k, v := range cookies {
@@ -91,10 +88,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
-// WithUserAgent sets a custom User-Agent string for HTTP requests.
-// If not set, DefaultUserAgent is used.
-//
-// Example:
+// WithUserAgent sets a custom User-Agent string.
 //
 //	client := NewClient(WithUserAgent("MyApp/1.0"))
 func WithUserAgent(userAgent string) Option {
@@ -103,12 +97,8 @@ func WithUserAgent(userAgent string) Option {
 	}
 }
 
-// WithRateLimiter sets a rate limiter for HTTP requests.
-// The rate limiter will be called before each request to ensure rate limits are respected.
-// By default, a SimpleRateLimiter with DefaultRateLimitInterval is used.
-// Pass nil to disable rate limiting (not recommended).
-//
-// Example:
+// WithRateLimiter sets a rate limiter. Defaults to 100ms interval.
+// Pass nil to disable (not recommended).
 //
 //	limiter := &SimpleRateLimiter{Interval: 200 * time.Millisecond}
 //	client := NewClient(WithRateLimiter(limiter))
@@ -118,14 +108,10 @@ func WithRateLimiter(limiter RateLimiter) Option {
 	}
 }
 
-// NewClient creates a new Avanza HTTP client with optional configuration.
-// The client automatically manages cookies and security tokens.
-// By default, a rate limiter with DefaultRateLimitInterval (100ms) is enabled
-// to prevent overwhelming the API. This can be customized or disabled using WithRateLimiter.
+// NewClient creates a new HTTP client. Manages cookies and security tokens automatically.
+// Rate limiting is enabled by default (100ms interval).
 //
-// Example:
-//
-//	client := NewClient() // Default configuration with rate limiting
+//	client := NewClient()
 //	client := NewClient(WithBaseURL("http://localhost:8080"))
 func NewClient(opts ...Option) *Client {
 	c := &Client{
@@ -145,10 +131,8 @@ func NewClient(opts ...Option) *Client {
 	return c
 }
 
-// Post sends a POST request to the specified endpoint with the given body.
-// The body is automatically marshaled to JSON. Cookies and security tokens
-// are automatically included in the request headers. Rate limiting is
-// applied if configured.
+// Post sends a POST request. Body is marshaled to JSON.
+// Cookies, security tokens, and rate limiting are handled automatically.
 func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
 
@@ -183,9 +167,7 @@ func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*
 	return resp, nil
 }
 
-// Get sends a GET request to the specified endpoint.
-// Cookies and security tokens are automatically included in the request headers.
-// Rate limiting is applied if configured.
+// Get sends a GET request. Cookies, security tokens, and rate limiting are handled automatically.
 func (c *Client) Get(ctx context.Context, endpoint string) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
 

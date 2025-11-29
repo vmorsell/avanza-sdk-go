@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vmorsell/avanza-sdk-go/internal/client"
+	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
 // OrderDepthSubscription represents an active order depth subscription.
