@@ -95,12 +95,12 @@ func TestPlaceStopLoss_Success(t *testing.T) {
 		},
 	}
 
-	resp, err := avanza.PlaceStopLoss(context.Background(), req)
+	resp, err := avanza.Trading.PlaceStopLoss(context.Background(), req)
 	if err != nil {
 		t.Fatalf("PlaceStopLoss failed: %v", err)
 	}
 
-	if got, want := resp.Status, "SUCCESS"; got != want {
+	if got, want := resp.Status, StopLossStatusSuccess; got != want {
 		t.Errorf("resp.Status = %v, want %v", got, want)
 	}
 
@@ -148,12 +148,12 @@ func TestPlaceStopLoss_FailedStatus(t *testing.T) {
 		},
 	}
 
-	resp, err := avanza.PlaceStopLoss(context.Background(), req)
+	resp, err := avanza.Trading.PlaceStopLoss(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
 
-	if got, want := resp.Status, "ERROR"; got != want {
+	if got, want := resp.Status, StopLossStatusError; got != want {
 		t.Errorf("resp.Status = %v, want %v", got, want)
 	}
 }
@@ -194,7 +194,7 @@ func TestPlaceStopLoss_HTTPError(t *testing.T) {
 		},
 	}
 
-	_, err := avanza.PlaceStopLoss(context.Background(), req)
+	_, err := avanza.Trading.PlaceStopLoss(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -239,7 +239,7 @@ func TestPlaceStopLoss_ContextCancellation(t *testing.T) {
 		},
 	}
 
-	_, err := avanza.PlaceStopLoss(ctx, req)
+	_, err := avanza.Trading.PlaceStopLoss(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}

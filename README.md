@@ -74,7 +74,7 @@ func main() {
     fmt.Printf("Welcome %s\n", collectResp.Name)
 
     // Get account overview
-    overview, err := client.Accounts.GetAccountOverview(ctx)
+    overview, err := client.Accounts.GetOverview(ctx)
     if err != nil {
         log.Fatal(err)
     }

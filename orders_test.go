@@ -76,12 +76,12 @@ func TestPlaceOrder_Success(t *testing.T) {
 		Condition: OrderConditionNormal,
 	}
 
-	resp, err := avanza.PlaceOrder(context.Background(), req)
+	resp, err := avanza.Trading.PlaceOrder(context.Background(), req)
 	if err != nil {
 		t.Fatalf("PlaceOrder failed: %v", err)
 	}
 
-	if got, want := resp.OrderRequestStatus, "SUCCESS"; got != want {
+	if got, want := resp.OrderRequestStatus, OrderRequestStatusSuccess; got != want {
 		t.Errorf("resp.OrderRequestStatus = %v, want %v", got, want)
 	}
 
@@ -122,12 +122,12 @@ func TestPlaceOrder_FailedStatus(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	resp, err := avanza.PlaceOrder(context.Background(), req)
+	resp, err := avanza.Trading.PlaceOrder(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
 
-	if got, want := resp.OrderRequestStatus, "ERROR"; got != want {
+	if got, want := resp.OrderRequestStatus, OrderRequestStatusError; got != want {
 		t.Errorf("resp.OrderRequestStatus = %v, want %v", got, want)
 	}
 
@@ -163,7 +163,7 @@ func TestPlaceOrder_HTTPError(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	_, err := avanza.PlaceOrder(context.Background(), req)
+	_, err := avanza.Trading.PlaceOrder(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -209,12 +209,12 @@ func TestPlaceOrder_SellOrder(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	resp, err := avanza.PlaceOrder(context.Background(), req)
+	resp, err := avanza.Trading.PlaceOrder(context.Background(), req)
 	if err != nil {
 		t.Fatalf("PlaceOrder failed: %v", err)
 	}
 
-	if got, want := resp.OrderRequestStatus, "SUCCESS"; got != want {
+	if got, want := resp.OrderRequestStatus, OrderRequestStatusSuccess; got != want {
 		t.Errorf("resp.OrderRequestStatus = %v, want %v", got, want)
 	}
 }
@@ -249,7 +249,7 @@ func TestPlaceOrder_ContextCancellation(t *testing.T) {
 		Condition:   OrderConditionNormal,
 	}
 
-	_, err := avanza.PlaceOrder(ctx, req)
+	_, err := avanza.Trading.PlaceOrder(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}

@@ -95,7 +95,7 @@ func TestValidateOrder_Success(t *testing.T) {
 		MarketPlace:            "XSTO",
 	}
 
-	resp, err := avanza.ValidateOrder(context.Background(), req)
+	resp, err := avanza.Trading.ValidateOrder(context.Background(), req)
 	if err != nil {
 		t.Fatalf("ValidateOrder failed: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestValidateOrder_HTTPError(t *testing.T) {
 		MarketPlace: "XSTO",
 	}
 
-	_, err := avanza.ValidateOrder(context.Background(), req)
+	_, err := avanza.Trading.ValidateOrder(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -190,7 +190,7 @@ func TestValidateOrder_ContextCancellation(t *testing.T) {
 		MarketPlace: "XSTO",
 	}
 
-	_, err := avanza.ValidateOrder(ctx, req)
+	_, err := avanza.Trading.ValidateOrder(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}

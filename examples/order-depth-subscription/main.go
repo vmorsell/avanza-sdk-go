@@ -61,7 +61,7 @@ func main() {
 	fmt.Printf("\nSubscribing to order depth for orderbook %s...\n", orderbookID)
 
 	// Subscribe to order depth updates
-	subscription, err := client.SubscribeToOrderDepth(subCtx, orderbookID)
+	subscription, err := client.Market.SubscribeToOrderDepth(subCtx, orderbookID)
 	if err != nil {
 		log.Fatalf("Failed to subscribe to order depth: %v", err)
 	}

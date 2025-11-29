@@ -41,7 +41,7 @@ func main() {
 
 	// Get trading accounts to find account ID
 	fmt.Println("Fetching trading accounts...")
-	tradingAccounts, err := client.GetTradingAccounts(context.Background())
+	tradingAccounts, err := client.Accounts.GetTradingAccounts(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -81,7 +81,7 @@ func main() {
 	fmt.Printf("  Volume:      %d\n", orderReq.Volume)
 	fmt.Printf("  Account:     %s\n", orderReq.AccountID)
 
-	orderResp, err := client.PlaceOrder(context.Background(), orderReq)
+	orderResp, err := client.Trading.PlaceOrder(context.Background(), orderReq)
 	if err != nil {
 		log.Fatalf("Failed to place order: %v", err)
 	}

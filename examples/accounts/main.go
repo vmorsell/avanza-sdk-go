@@ -51,7 +51,7 @@ func main() {
 
 	// Now get account overview
 	fmt.Println("\nFetching account overview...")
-	overview, err := client.GetAccountOverview(ctx)
+	overview, err := client.Accounts.GetOverview(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get account overview: %v", err)
 	}
@@ -80,7 +80,7 @@ func main() {
 
 	// Get trading accounts for detailed information
 	fmt.Println("\nFetching trading accounts...")
-	tradingAccounts, err := client.GetTradingAccounts(ctx)
+	tradingAccounts, err := client.Accounts.GetTradingAccounts(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -98,7 +98,7 @@ func main() {
 		firstAccount := tradingAccounts[0]
 		fmt.Printf("\nFetching positions for account: %s\n", firstAccount.Name)
 
-		positions, err := client.GetAccountPositions(ctx, firstAccount.URLParameterID)
+		positions, err := client.Accounts.GetPositions(ctx, firstAccount.URLParameterID)
 		if err != nil {
 			log.Fatalf("Failed to get account positions: %v", err)
 		}

@@ -44,7 +44,7 @@ func main() {
 
 	// Get trading accounts to find account ID
 	fmt.Println("Fetching trading accounts...")
-	tradingAccounts, err := client.GetTradingAccounts(ctx)
+	tradingAccounts, err := client.Accounts.GetTradingAccounts(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get trading accounts: %v", err)
 	}
@@ -86,7 +86,7 @@ func main() {
 		MarketPlace:            "XSTO",
 	}
 
-	validateResp, err := client.ValidateOrder(ctx, validateReq)
+	validateResp, err := client.Trading.ValidateOrder(ctx, validateReq)
 	if err != nil {
 		log.Fatalf("Failed to validate order: %v", err)
 	}

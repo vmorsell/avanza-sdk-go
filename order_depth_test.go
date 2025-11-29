@@ -62,7 +62,7 @@ func TestOrderDepthSubscription(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	subscription, err := avanzaClient.SubscribeToOrderDepth(ctx, "2185403")
+	subscription, err := avanzaClient.Market.SubscribeToOrderDepth(ctx, "2185403")
 	if err != nil {
 		t.Fatalf("Failed to subscribe: %v", err)
 	}

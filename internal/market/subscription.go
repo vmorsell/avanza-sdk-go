@@ -1,4 +1,5 @@
-package avanza
+// Package market provides market data functionality for the Avanza API.
+package market
 
 import (
 	"bufio"
@@ -12,30 +13,6 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/internal/client"
 )
 
-// OrderDepthLevel represents a single price level in the order depth.
-type OrderDepthLevel struct {
-	BuyPrice   float64 `json:"buyPrice"`
-	BuyVolume  float64 `json:"buyVolume"`
-	SellPrice  float64 `json:"sellPrice"`
-	SellVolume float64 `json:"sellVolume"`
-}
-
-// OrderDepthData represents the order depth data received from the stream.
-type OrderDepthData struct {
-	OrderbookID           string            `json:"orderbookId"`
-	Levels                []OrderDepthLevel `json:"levels"`
-	MarketMakerLevelInAsk int               `json:"marketMakerLevelInAsk"`
-	MarketMakerLevelInBid int               `json:"marketMakerLevelInBid"`
-}
-
-// OrderDepthEvent represents a complete order depth event from the SSE stream.
-type OrderDepthEvent struct {
-	Event string         `json:"event"`
-	Data  OrderDepthData `json:"data"`
-	ID    string         `json:"id"`
-	Retry int            `json:"retry"`
-}
-
 // OrderDepthSubscription represents an active order depth subscription.
 type OrderDepthSubscription struct {
 	orderbookID string
@@ -44,44 +21,6 @@ type OrderDepthSubscription struct {
 	cancel      context.CancelFunc
 	events      chan OrderDepthEvent
 	errors      chan error
-}
-
-// SubscribeToOrderDepth subscribes to order depth updates for a specific orderbook.
-// Returns a subscription that can be used to receive events and handle errors.
-func (a *Avanza) SubscribeToOrderDepth(ctx context.Context, orderbookID string) (*OrderDepthSubscription, error) {
-	// Verify we have authentication cookies
-	cookies := a.client.Cookies()
-	if len(cookies) == 0 {
-		return nil, fmt.Errorf("no authentication cookies found - please authenticate first")
-	}
-
-	// Check for essential authentication cookies
-	essentialCookies := []string{"csid", "cstoken", "AZACSRF"}
-	for _, cookie := range essentialCookies {
-		if _, exists := cookies[cookie]; !exists {
-			return nil, fmt.Errorf("missing essential cookie: %s - please authenticate first", cookie)
-		}
-	}
-
-	// Warn if AZAPERSISTENCE is missing but don't fail
-	if _, exists := cookies["AZAPERSISTENCE"]; !exists {
-		fmt.Printf("Warning: AZAPERSISTENCE cookie not found. This may cause issues with some endpoints.\n")
-	}
-
-	subscriptionCtx, cancel := context.WithCancel(ctx)
-
-	subscription := &OrderDepthSubscription{
-		orderbookID: orderbookID,
-		client:      a.client,
-		ctx:         subscriptionCtx,
-		cancel:      cancel,
-		events:      make(chan OrderDepthEvent, 100),
-		errors:      make(chan error, 10),
-	}
-
-	go subscription.start()
-
-	return subscription, nil
 }
 
 // Events returns a channel that receives order depth events.
@@ -120,7 +59,7 @@ func (s *OrderDepthSubscription) start() {
 	// Set SSE-specific headers
 	s.setSSEHeaders(req)
 
-	// Create a new HTTP client without timeout
+	// Create a new HTTP client without timeout for SSE
 	httpClient := &http.Client{
 		Timeout: 0,
 	}
@@ -133,7 +72,7 @@ func (s *OrderDepthSubscription) start() {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
 		s.errors <- fmt.Errorf("subscription failed with status %d: %s", resp.StatusCode, string(body))
 		return
 	}
@@ -236,3 +175,4 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 		s.errors <- fmt.Errorf("stream error: %w", err)
 	}
 }
+

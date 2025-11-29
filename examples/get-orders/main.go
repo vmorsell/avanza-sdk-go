@@ -44,7 +44,7 @@ func main() {
 
 	// Get all current orders
 	fmt.Println("\n📋 Fetching current orders...")
-	orders, err := client.GetOrders(ctx)
+	orders, err := client.Trading.GetOrders(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get orders: %v", err)
 	}

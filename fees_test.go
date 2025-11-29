@@ -86,7 +86,7 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 		Side:        "BUY",
 	}
 
-	resp, err := avanza.GetPreliminaryFee(context.Background(), req)
+	resp, err := avanza.Trading.GetPreliminaryFee(context.Background(), req)
 	if err != nil {
 		t.Fatalf("GetPreliminaryFee failed: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestGetPreliminaryFee_HTTPError(t *testing.T) {
 		Side:        "BUY",
 	}
 
-	_, err := avanza.GetPreliminaryFee(context.Background(), req)
+	_, err := avanza.Trading.GetPreliminaryFee(context.Background(), req)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -165,7 +165,7 @@ func TestGetPreliminaryFee_ContextCancellation(t *testing.T) {
 		Side:        "BUY",
 	}
 
-	_, err := avanza.GetPreliminaryFee(ctx, req)
+	_, err := avanza.Trading.GetPreliminaryFee(ctx, req)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
 	}
