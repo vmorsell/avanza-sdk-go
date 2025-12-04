@@ -24,4 +24,3 @@ type OrderDepthEvent struct {
 	ID    string         `json:"id"`
 	Retry int            `json:"retry"`
 }
-

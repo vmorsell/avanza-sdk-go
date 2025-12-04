@@ -110,7 +110,7 @@ type TradingAccount struct {
 	IsHidden                          bool              `json:"isHidden"`
 	Positions                         []interface{}     `json:"positions"`
 	CurrencyBalances                  []CurrencyBalance `json:"currencyBalances"`
-	URLParameterID                   string            `json:"urlParameterId"`
+	URLParameterID                    string            `json:"urlParameterId"`
 }
 
 // CurrencyBalance contains the balance for a specific currency.
@@ -212,4 +212,3 @@ type AccountPositions struct {
 	CashPositions     []CashPosition    `json:"cashPositions"`
 	WithCreditAccount bool              `json:"withCreditAccount"`
 }
-
