@@ -81,30 +81,3 @@ func main() {
 ```
 
 See the [examples](examples/) directory for complete working examples.
-
-## Configuration
-
-```go
-client := avanza.New() // Default (includes rate limiting)
-
-// Custom options
-httpClient := &http.Client{Timeout: 60 * time.Second}
-client := avanza.New(
-    avanza.WithHTTPClient(httpClient),
-    avanza.WithBaseURL("http://localhost:8080"),
-    avanza.WithUserAgent("MyApp/1.0"),
-)
-```
-
-## Error Handling
-
-Check for HTTP errors using `errors.As`:
-
-```go
-import "github.com/vmorsell/avanza-sdk-go/client"
-
-var httpErr *client.HTTPError
-if errors.As(err, &httpErr) {
-    fmt.Printf("HTTP %d: %s\n", httpErr.StatusCode, httpErr.Body)
-}
-```
