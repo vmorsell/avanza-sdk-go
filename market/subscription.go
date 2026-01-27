@@ -5,24 +5,34 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
+const (
+	defaultRetryInterval = 3 * time.Second
+	maxRetryInterval     = 30 * time.Second
+)
+
 // OrderDepthSubscription represents an active order depth subscription.
 type OrderDepthSubscription struct {
-	orderbookID string
-	client      *client.Client
-	ctx         context.Context
-	cancel      context.CancelFunc
-	events      chan OrderDepthEvent
-	errors      chan error
-	wg          sync.WaitGroup
+	orderbookID   string
+	client        *client.Client
+	ctx           context.Context
+	cancel        context.CancelFunc
+	events        chan OrderDepthEvent
+	errors        chan error
+	wg            sync.WaitGroup
+	lastEventID   string
+	retryInterval time.Duration
 }
 
 // Events returns a channel that receives order depth events.
@@ -62,7 +72,7 @@ func (s *OrderDepthSubscription) trySendEvent(event OrderDepthEvent) {
 	}
 }
 
-// start begins the SSE stream processing.
+// start begins the SSE stream processing with automatic reconnection.
 func (s *OrderDepthSubscription) start() {
 	s.wg.Add(1)
 	defer s.wg.Done()
@@ -73,12 +83,44 @@ func (s *OrderDepthSubscription) start() {
 		}
 	}()
 
+	s.retryInterval = defaultRetryInterval
+
+	for attempt := 0; ; attempt++ {
+		connected, err := s.connectAndStream()
+
+		if s.ctx.Err() != nil {
+			return
+		}
+		if err != nil && !isRecoverable(err) {
+			s.trySendError(err)
+			return
+		}
+		if connected {
+			attempt = 0
+		}
+
+		wait := s.retryInterval
+		if attempt > 0 {
+			wait = exponentialBackoff(s.retryInterval, attempt)
+		}
+
+		select {
+		case <-s.ctx.Done():
+			return
+		case <-time.After(wait):
+		}
+	}
+}
+
+// connectAndStream establishes an SSE connection and processes the stream.
+// It returns (true, err) if it connected and streamed before failing,
+// or (false, err) if it couldn't connect at all.
+func (s *OrderDepthSubscription) connectAndStream() (bool, error) {
 	endpoint := fmt.Sprintf("/_push/order-depth-web-push/%s", url.PathEscape(s.orderbookID))
 
 	req, err := http.NewRequestWithContext(s.ctx, "GET", s.client.BaseURL()+endpoint, nil)
 	if err != nil {
-		s.trySendError(fmt.Errorf("create request: %w", err))
-		return
+		return false, fmt.Errorf("create request: %w", err)
 	}
 
 	s.setSSEHeaders(req)
@@ -92,17 +134,16 @@ func (s *OrderDepthSubscription) start() {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		s.trySendError(fmt.Errorf("request failed: %w", err))
-		return
+		return false, fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		s.trySendError(client.NewHTTPError(resp))
-		return
+		return false, client.NewHTTPError(resp)
 	}
 
-	s.processSSEStream(resp)
+	err = s.processSSEStream(resp)
+	return true, err
 }
 
 // setSSEHeaders sets the appropriate headers for Server-Sent Events.
@@ -124,6 +165,10 @@ func (s *OrderDepthSubscription) setSSEHeaders(req *http.Request) {
 	req.Header.Set("Sec-Gpc", "1")
 	req.Header.Set("User-Agent", s.client.UserAgent())
 
+	if s.lastEventID != "" {
+		req.Header.Set("Last-Event-ID", s.lastEventID)
+	}
+
 	if token := s.client.SecurityToken(); token != "" {
 		req.Header.Set("X-Securitytoken", token)
 	}
@@ -142,7 +187,8 @@ func (s *OrderDepthSubscription) setSSEHeaders(req *http.Request) {
 }
 
 // processSSEStream processes the Server-Sent Events stream.
-func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
+// It returns an error if the stream ends unexpectedly, or nil if it ends cleanly.
+func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) error {
 	scanner := bufio.NewScanner(resp.Body)
 
 	var event OrderDepthEvent
@@ -150,7 +196,7 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 	for scanner.Scan() {
 		select {
 		case <-s.ctx.Done():
-			return
+			return nil
 		default:
 		}
 
@@ -187,14 +233,51 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 			}
 		case "id":
 			event.ID = value
+			s.lastEventID = value
 		case "retry":
 			if retry, err := json.Number(value).Int64(); err == nil {
 				event.Retry = int(retry)
+				s.retryInterval = time.Duration(retry) * time.Millisecond
 			}
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		s.trySendError(fmt.Errorf("stream error: %w", err))
+		return fmt.Errorf("stream error: %w", err)
 	}
+	return nil
+}
+
+// isRecoverable reports whether the error is transient and the connection should be retried.
+func isRecoverable(err error) bool {
+	if err == nil {
+		return true
+	}
+
+	var httpErr *client.HTTPError
+	if errors.As(err, &httpErr) {
+		switch {
+		case httpErr.StatusCode == http.StatusRequestTimeout,
+			httpErr.StatusCode == http.StatusTooManyRequests:
+			return true
+		case httpErr.StatusCode >= 400 && httpErr.StatusCode < 500:
+			return false
+		case httpErr.StatusCode >= 500:
+			return true
+		}
+	}
+
+	// Network/IO errors are recoverable
+	if errors.Is(err, io.ErrUnexpectedEOF) {
+		return true
+	}
+
+	return true
+}
+
+// exponentialBackoff returns a wait duration using exponential backoff.
+// The formula is base * 2^min(attempt, 5), capped at maxRetryInterval.
+func exponentialBackoff(base time.Duration, attempt int) time.Duration {
+	wait := base << uint(min(attempt, 5))
+	return min(wait, maxRetryInterval)
 }
