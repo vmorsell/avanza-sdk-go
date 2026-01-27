@@ -77,7 +77,7 @@ func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to get initial cookies: %w", err)
 	}
-	initResp.Body.Close()
+	_ = initResp.Body.Close()
 
 	reqBody := BankIDStartRequest{
 		Method:       "QR_START",
