@@ -278,6 +278,6 @@ func isRecoverable(err error) bool {
 // exponentialBackoff returns a wait duration using exponential backoff.
 // The formula is base * 2^min(attempt, 5), capped at maxRetryInterval.
 func exponentialBackoff(base time.Duration, attempt int) time.Duration {
-	wait := base << uint(min(attempt, 5))
+	wait := base << min(max(attempt, 0), 5)
 	return min(wait, maxRetryInterval)
 }
