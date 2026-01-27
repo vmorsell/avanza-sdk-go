@@ -1,6 +1,7 @@
 package trading
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -135,21 +136,10 @@ func TestPlaceOrderRequest_Validate(t *testing.T) {
 				return
 			}
 			if tt.wantErr && tt.errMsg != "" {
-				if err == nil || err.Error() == "" {
-					t.Errorf("Validate() expected error message containing %q, got %v", tt.errMsg, err)
-				} else if err != nil && err.Error() != "" {
-					// Check if error message contains expected text
-					if err.Error() != "" && tt.errMsg != "" {
-						// Error message should contain the expected text
-						found := false
-						if err.Error() != "" {
-							// Simple check - error should not be empty
-							found = true
-						}
-						if !found && err != nil {
-							t.Errorf("Validate() error message = %q, want containing %q", err.Error(), tt.errMsg)
-						}
-					}
+				if err == nil {
+					t.Errorf("Validate() expected error containing %q, got nil", tt.errMsg)
+				} else if !strings.Contains(err.Error(), tt.errMsg) {
+					t.Errorf("Validate() error = %q, want containing %q", err.Error(), tt.errMsg)
 				}
 			}
 		})

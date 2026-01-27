@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,9 +21,11 @@ const (
 )
 
 // Client manages sessions, cookies, and security tokens for Avanza API requests.
+// It is safe for concurrent use.
 type Client struct {
 	httpClient    *http.Client
 	baseURL       string
+	mu            sync.RWMutex
 	cookies       map[string]string
 	securityToken string
 	userAgent     string
@@ -41,12 +44,16 @@ func (c *Client) HTTPClient() *http.Client {
 
 // SecurityToken returns the current CSRF security token.
 func (c *Client) SecurityToken() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.securityToken
 }
 
 // Cookies returns a copy of the current session cookies.
 func (c *Client) Cookies() map[string]string {
-	cookies := make(map[string]string)
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	cookies := make(map[string]string, len(c.cookies))
 	for k, v := range c.cookies {
 		cookies[k] = v
 	}
@@ -60,7 +67,9 @@ func (c *Client) UserAgent() string {
 
 // SetMockCookies sets cookies for testing. AZACSRF is also set as the security token.
 func (c *Client) SetMockCookies(cookies map[string]string) {
-	c.cookies = make(map[string]string)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cookies = make(map[string]string, len(cookies))
 	for k, v := range cookies {
 		c.cookies[k] = v
 		if k == "AZACSRF" {
@@ -203,6 +212,9 @@ func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Referer", "https://www.avanza.se/logga-in.html")
 	req.Header.Set("User-Agent", c.userAgent)
 
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c.securityToken != "" {
 		req.Header.Set("X-SecurityToken", c.securityToken)
 	}
@@ -221,6 +233,8 @@ func (c *Client) setHeaders(req *http.Request) {
 }
 
 func (c *Client) extractCookies(resp *http.Response) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name != "" && cookie.Value != "" {
 			c.cookies[cookie.Name] = cookie.Value

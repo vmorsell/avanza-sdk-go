@@ -31,19 +31,21 @@ func (r *SimpleRateLimiter) Wait(ctx context.Context) error {
 	r.mu.Lock()
 	now := time.Now()
 	elapsed := now.Sub(r.lastCall)
-	r.mu.Unlock()
 
-	if elapsed < r.Interval {
-		waitTime := r.Interval - elapsed
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(waitTime):
-		}
+	if elapsed >= r.Interval {
+		r.lastCall = now
+		r.mu.Unlock()
+		return nil
 	}
 
-	r.mu.Lock()
-	r.lastCall = time.Now()
+	waitTime := r.Interval - elapsed
+	r.lastCall = now.Add(waitTime)
 	r.mu.Unlock()
-	return nil
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(waitTime):
+		return nil
+	}
 }

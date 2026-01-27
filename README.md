@@ -80,4 +80,35 @@ func main() {
 }
 ```
 
+## Configuration
+
+```go
+client := avanza.New(
+    avanza.WithBaseURL("http://localhost:8080"),
+    avanza.WithHTTPClient(&http.Client{Timeout: 60 * time.Second}),
+    avanza.WithUserAgent("MyApp/1.0"),
+    avanza.WithRateLimiter(&client.SimpleRateLimiter{Interval: 200 * time.Millisecond}),
+)
+```
+
+All options are composable and optional. Defaults: `https://www.avanza.se`, standard `http.Client`, 100ms rate limit.
+
+## Error Handling
+
+API errors are returned as `*client.HTTPError` with the status code and response body:
+
+```go
+import "github.com/vmorsell/avanza-sdk-go/client"
+
+overview, err := c.Accounts.GetOverview(ctx)
+if err != nil {
+    var httpErr *client.HTTPError
+    if errors.As(err, &httpErr) {
+        fmt.Printf("status=%d body=%s\n", httpErr.StatusCode, httpErr.Body)
+    }
+}
+```
+
+## Examples
+
 See the [examples](examples/) directory for complete working examples.

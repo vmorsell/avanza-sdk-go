@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
@@ -31,7 +32,7 @@ func (s *Service) GetOverview(ctx context.Context) (*AccountOverview, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("get account overview: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var overview AccountOverview
@@ -51,7 +52,7 @@ func (s *Service) GetTradingAccounts(ctx context.Context) ([]TradingAccount, err
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("get trading accounts: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var accounts []TradingAccount
@@ -64,7 +65,7 @@ func (s *Service) GetTradingAccounts(ctx context.Context) ([]TradingAccount, err
 
 // GetPositions returns positions for an account by its URL parameter ID.
 func (s *Service) GetPositions(ctx context.Context, urlParameterID string) (*AccountPositions, error) {
-	endpoint := fmt.Sprintf("/_api/position-data/positions/%s", urlParameterID)
+	endpoint := fmt.Sprintf("/_api/position-data/positions/%s", url.PathEscape(urlParameterID))
 
 	resp, err := s.client.Get(ctx, endpoint)
 	if err != nil {
@@ -73,7 +74,7 @@ func (s *Service) GetPositions(ctx context.Context, urlParameterID string) (*Acc
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("get account positions: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var positions AccountPositions

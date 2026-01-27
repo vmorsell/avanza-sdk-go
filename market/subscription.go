@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 
@@ -45,6 +46,22 @@ func (s *OrderDepthSubscription) Close() {
 	close(s.errors)
 }
 
+// trySendError sends an error without blocking if the context is cancelled.
+func (s *OrderDepthSubscription) trySendError(err error) {
+	select {
+	case s.errors <- err:
+	case <-s.ctx.Done():
+	}
+}
+
+// trySendEvent sends an event without blocking if the context is cancelled.
+func (s *OrderDepthSubscription) trySendEvent(event OrderDepthEvent) {
+	select {
+	case s.events <- event:
+	case <-s.ctx.Done():
+	}
+}
+
 // start begins the SSE stream processing.
 func (s *OrderDepthSubscription) start() {
 	s.wg.Add(1)
@@ -52,15 +69,15 @@ func (s *OrderDepthSubscription) start() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			s.errors <- fmt.Errorf("subscription panic: %v", r)
+			s.trySendError(fmt.Errorf("subscription panic: %v", r))
 		}
 	}()
 
-	endpoint := fmt.Sprintf("/_push/order-depth-web-push/%s", s.orderbookID)
+	endpoint := fmt.Sprintf("/_push/order-depth-web-push/%s", url.PathEscape(s.orderbookID))
 
 	req, err := http.NewRequestWithContext(s.ctx, "GET", s.client.BaseURL()+endpoint, nil)
 	if err != nil {
-		s.errors <- fmt.Errorf("create request: %w", err)
+		s.trySendError(fmt.Errorf("create request: %w", err))
 		return
 	}
 
@@ -75,13 +92,13 @@ func (s *OrderDepthSubscription) start() {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		s.errors <- fmt.Errorf("request failed: %w", err)
+		s.trySendError(fmt.Errorf("request failed: %w", err))
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		s.errors <- fmt.Errorf("subscription failed: %w", client.NewHTTPError(resp))
+		s.trySendError(client.NewHTTPError(resp))
 		return
 	}
 
@@ -97,7 +114,7 @@ func (s *OrderDepthSubscription) setSSEHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Pragma", "no-cache")
 	req.Header.Set("Priority", "u=1, i")
-	req.Header.Set("Referer", fmt.Sprintf("https://www.avanza.se/handla/order.html/kop/%s", s.orderbookID))
+	req.Header.Set("Referer", fmt.Sprintf("https://www.avanza.se/handla/order.html/kop/%s", url.PathEscape(s.orderbookID)))
 	req.Header.Set("Sec-Ch-Ua", `"Not)A;Brand";v="8", "Chromium";v="138", "Brave";v="138"`)
 	req.Header.Set("Sec-Ch-Ua-Mobile", "?0")
 	req.Header.Set("Sec-Ch-Ua-Platform", `"macOS"`)
@@ -142,7 +159,7 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 		if line == "" {
 			// SSE protocol: empty line marks end of event
 			if event.Event != "" {
-				s.events <- event
+				s.trySendEvent(event)
 				event = OrderDepthEvent{}
 			}
 			continue
@@ -163,7 +180,7 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 			if event.Event == "ORDER_DEPTH" {
 				var orderDepthData OrderDepthData
 				if err := json.Unmarshal([]byte(value), &orderDepthData); err != nil {
-					s.errors <- fmt.Errorf("parse order depth data: %w", err)
+					s.trySendError(fmt.Errorf("parse order depth data: %w", err))
 					continue
 				}
 				event.Data = orderDepthData
@@ -178,6 +195,6 @@ func (s *OrderDepthSubscription) processSSEStream(resp *http.Response) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		s.errors <- fmt.Errorf("stream error: %w", err)
+		s.trySendError(fmt.Errorf("stream error: %w", err))
 	}
 }

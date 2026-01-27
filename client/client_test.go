@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -504,4 +505,135 @@ func TestDefaultUserAgent(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	defer resp.Body.Close()
+}
+
+func TestGet_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			t.Errorf("expected GET method, got %s", r.Method)
+		}
+		if r.URL.Path != "/test" {
+			t.Errorf("expected path /test, got %s", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"status":"ok"}`))
+	}))
+	defer server.Close()
+
+	client := NewClient(WithBaseURL(server.URL))
+
+	ctx := context.Background()
+	resp, err := client.Get(ctx, "/test")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected status 200, got %d", resp.StatusCode)
+	}
+}
+
+func TestGet_ExtractsCookies(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{Name: "AZACSRF", Value: "token-from-get"})
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := NewClient(WithBaseURL(server.URL))
+
+	ctx := context.Background()
+	resp, err := client.Get(ctx, "/test")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if client.SecurityToken() != "token-from-get" {
+		t.Errorf("expected security token to be set from GET response, got %q", client.SecurityToken())
+	}
+}
+
+func TestGet_ContextCancellation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(200 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := NewClient(WithBaseURL(server.URL))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	_, err := client.Get(ctx, "/test")
+	if err == nil {
+		t.Error("expected timeout error, got nil")
+	}
+}
+
+func TestGet_SendsCookiesAndHeaders(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			t.Errorf("expected GET, got %s", r.Method)
+		}
+
+		// Verify standard headers are set
+		if got := r.Header.Get("Accept"); got != "application/json, text/plain, */*" {
+			t.Errorf("expected Accept header, got %q", got)
+		}
+
+		// Verify cookies are sent
+		cookie := r.Header.Get("Cookie")
+		if !strings.Contains(cookie, "session=test-session") {
+			t.Errorf("expected session cookie, got %q", cookie)
+		}
+
+		// Verify security token
+		if got := r.Header.Get("X-SecurityToken"); got != "test-token" {
+			t.Errorf("expected X-SecurityToken=test-token, got %q", got)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := NewClient(WithBaseURL(server.URL))
+	client.SetMockCookies(map[string]string{
+		"session": "test-session",
+		"AZACSRF": "test-token",
+	})
+
+	ctx := context.Background()
+	resp, err := client.Get(ctx, "/test")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer resp.Body.Close()
+}
+
+func TestConcurrentRequests(t *testing.T) {
+	// Verify the mutex protects concurrent access to cookies.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{Name: "AZACSRF", Value: "token"})
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := NewClient(WithBaseURL(server.URL), WithRateLimiter(nil))
+
+	var wg sync.WaitGroup
+	for i := 0; i < 20; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			resp, err := client.Get(context.Background(), "/test")
+			if err != nil {
+				return
+			}
+			resp.Body.Close()
+		}()
+	}
+	wg.Wait()
 }

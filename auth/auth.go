@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -72,10 +73,11 @@ type BankIDRestartRequest struct{}
 // For automatic QR refresh, use PollBankIDWithQRUpdates.
 func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, error) {
 	// Get initial cookies (AZAPERSISTENCE, etc.)
-	_, err := a.client.Get(ctx, "/")
+	initResp, err := a.client.Get(ctx, "/")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get initial cookies: %w", err)
 	}
+	initResp.Body.Close()
 
 	reqBody := BankIDStartRequest{
 		Method:       "QR_START",
@@ -89,7 +91,7 @@ func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, er
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		return nil, fmt.Errorf("start bankid: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var response BankIDStartResponse
@@ -109,7 +111,7 @@ func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		return nil, fmt.Errorf("start bankid: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var response BankIDStartResponse
@@ -129,7 +131,7 @@ func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		return nil, fmt.Errorf("start bankid: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var response BankIDCollectResponse
@@ -181,14 +183,11 @@ func (a *AuthService) PollBankIDWithQRUpdates(ctx context.Context) (*BankIDColle
 			case <-qrCtx.Done():
 				return
 			case <-ticker.C:
-				restartResp, err := a.RestartBankID(ctx)
+				restartResp, err := a.RestartBankID(qrCtx)
 				if err != nil {
-					fmt.Printf("restart: %v\n", err)
 					continue
 				}
-				if err := a.DisplayQRCode(restartResp.QRToken); err != nil {
-					fmt.Printf("display qr: %v\n", err)
-				}
+				_ = a.DisplayQRCode(restartResp.QRToken)
 			}
 		}
 	}()
@@ -221,7 +220,7 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 	}
 
 	login := collectResp.Logins[0]
-	userEndpoint := fmt.Sprintf("/_api/authentication/v2/sessions/bankid/collect/%s", login.CustomerID)
+	userEndpoint := fmt.Sprintf("/_api/authentication/v2/sessions/bankid/collect/%s", url.PathEscape(login.CustomerID))
 
 	resp, err := a.client.Get(ctx, userEndpoint)
 	if err != nil {
@@ -283,7 +282,7 @@ func (a *AuthService) GetSessionInfo(ctx context.Context) (*SessionInfo, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("get session info: %w", client.NewHTTPError(resp))
+		return nil, client.NewHTTPError(resp)
 	}
 
 	var sessionInfo SessionInfo

@@ -55,18 +55,19 @@ type Avanza struct {
 }
 
 // Option is a functional option for configuring the Avanza client.
-type Option func(*Avanza)
+type Option func(*config)
+
+// config collects all options before building the client.
+type config struct {
+	clientOpts []client.Option
+}
 
 // WithBaseURL sets a custom base URL. Useful for testing.
 //
 //	client := avanza.New(avanza.WithBaseURL("http://localhost:8080"))
 func WithBaseURL(url string) Option {
-	return func(a *Avanza) {
-		a.client = client.NewClient(client.WithBaseURL(url))
-		a.Auth = auth.NewAuthService(a.client)
-		a.Accounts = accounts.NewService(a.client)
-		a.Trading = trading.NewService(a.client)
-		a.Market = market.NewService(a.client)
+	return func(c *config) {
+		c.clientOpts = append(c.clientOpts, client.WithBaseURL(url))
 	}
 }
 
@@ -75,12 +76,8 @@ func WithBaseURL(url string) Option {
 //	httpClient := &http.Client{Timeout: 60 * time.Second}
 //	client := avanza.New(avanza.WithHTTPClient(httpClient))
 func WithHTTPClient(httpClient *http.Client) Option {
-	return func(a *Avanza) {
-		a.client = client.NewClient(client.WithHTTPClient(httpClient))
-		a.Auth = auth.NewAuthService(a.client)
-		a.Accounts = accounts.NewService(a.client)
-		a.Trading = trading.NewService(a.client)
-		a.Market = market.NewService(a.client)
+	return func(c *config) {
+		c.clientOpts = append(c.clientOpts, client.WithHTTPClient(httpClient))
 	}
 }
 
@@ -88,12 +85,8 @@ func WithHTTPClient(httpClient *http.Client) Option {
 //
 //	client := avanza.New(avanza.WithUserAgent("MyApp/1.0"))
 func WithUserAgent(userAgent string) Option {
-	return func(a *Avanza) {
-		a.client = client.NewClient(client.WithUserAgent(userAgent))
-		a.Auth = auth.NewAuthService(a.client)
-		a.Accounts = accounts.NewService(a.client)
-		a.Trading = trading.NewService(a.client)
-		a.Market = market.NewService(a.client)
+	return func(c *config) {
+		c.clientOpts = append(c.clientOpts, client.WithUserAgent(userAgent))
 	}
 }
 
@@ -103,12 +96,8 @@ func WithUserAgent(userAgent string) Option {
 //	limiter := &client.SimpleRateLimiter{Interval: 200 * time.Millisecond}
 //	client := avanza.New(avanza.WithRateLimiter(limiter))
 func WithRateLimiter(limiter client.RateLimiter) Option {
-	return func(a *Avanza) {
-		a.client = client.NewClient(client.WithRateLimiter(limiter))
-		a.Auth = auth.NewAuthService(a.client)
-		a.Accounts = accounts.NewService(a.client)
-		a.Trading = trading.NewService(a.client)
-		a.Market = market.NewService(a.client)
+	return func(c *config) {
+		c.clientOpts = append(c.clientOpts, client.WithRateLimiter(limiter))
 	}
 }
 
@@ -117,17 +106,18 @@ func WithRateLimiter(limiter client.RateLimiter) Option {
 //	client := avanza.New()
 //	client := avanza.New(avanza.WithBaseURL("http://localhost:8080"))
 func New(opts ...Option) *Avanza {
-	a := &Avanza{
-		client: client.NewClient(),
-	}
-	a.Auth = auth.NewAuthService(a.client)
-	a.Accounts = accounts.NewService(a.client)
-	a.Trading = trading.NewService(a.client)
-	a.Market = market.NewService(a.client)
-
+	cfg := &config{}
 	for _, opt := range opts {
-		opt(a)
+		opt(cfg)
 	}
 
-	return a
+	c := client.NewClient(cfg.clientOpts...)
+
+	return &Avanza{
+		client:   c,
+		Auth:     auth.NewAuthService(c),
+		Accounts: accounts.NewService(c),
+		Trading:  trading.NewService(c),
+		Market:   market.NewService(c),
+	}
 }

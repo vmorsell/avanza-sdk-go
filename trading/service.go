@@ -36,7 +36,7 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-ok status: %w", client.NewHTTPError(httpResp))
+		return nil, client.NewHTTPError(httpResp)
 	}
 
 	var resp PlaceOrderResponse
@@ -60,7 +60,7 @@ func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-ok status: %w", client.NewHTTPError(httpResp))
+		return nil, client.NewHTTPError(httpResp)
 	}
 
 	var resp GetOrdersResponse
@@ -84,7 +84,7 @@ func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) 
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-ok status: %w", client.NewHTTPError(httpResp))
+		return nil, client.NewHTTPError(httpResp)
 	}
 
 	var resp ValidateOrderResponse
@@ -108,7 +108,7 @@ func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequ
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-ok status: %w", client.NewHTTPError(httpResp))
+		return nil, client.NewHTTPError(httpResp)
 	}
 
 	var resp PreliminaryFeeResponse
@@ -132,7 +132,7 @@ func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) 
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-ok status: %w", client.NewHTTPError(httpResp))
+		return nil, client.NewHTTPError(httpResp)
 	}
 
 	var resp PlaceStopLossResponse
@@ -156,7 +156,7 @@ func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error
 	defer httpResp.Body.Close()
 
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-ok status: %w", client.NewHTTPError(httpResp))
+		return nil, client.NewHTTPError(httpResp)
 	}
 
 	var orders []StopLossOrder
