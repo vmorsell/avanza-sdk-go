@@ -171,28 +171,35 @@ func (a *AuthService) PollBankID(ctx context.Context) (*BankIDCollectResponse, e
 // PollBankIDWithQRUpdates polls authentication and refreshes the QR code every second.
 // Recommended for QR-based authentication.
 func (a *AuthService) PollBankIDWithQRUpdates(ctx context.Context) (*BankIDCollectResponse, error) {
-	qrCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
 
-	go func() {
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-qrCtx.Done():
-				return
-			case <-ticker.C:
-				restartResp, err := a.RestartBankID(qrCtx)
-				if err != nil {
-					continue
-				}
-				_ = a.DisplayQRCode(restartResp.QRToken)
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-ticker.C:
+			collectResp, err := a.CollectBankID(ctx)
+			if err != nil {
+				return nil, err
 			}
-		}
-	}()
 
-	return a.PollBankID(ctx)
+			if collectResp.State == "COMPLETE" {
+				return collectResp, nil
+			}
+
+			if collectResp.State == "FAILED" {
+				return nil, fmt.Errorf("bankid authentication failed: %s", collectResp.HintCode)
+			}
+
+			// Still pending — refresh QR code for next scan attempt.
+			restartResp, err := a.RestartBankID(ctx)
+			if err != nil {
+				continue
+			}
+			_ = a.DisplayQRCode(restartResp.QRToken)
+		}
+	}
 }
 
 // ClearScreen clears the terminal using ANSI escape codes.
