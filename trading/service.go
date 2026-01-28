@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
@@ -54,13 +55,28 @@ func NewService(client *client.Client) *Service {
 // PlaceOrder places a new order. Consider validating first with ValidateOrder
 // and checking fees with GetPreliminaryFee.
 func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*PlaceOrderResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.OrderbookID == "" {
+		return nil, fmt.Errorf("orderbookId is required")
+	}
+	if req.Price <= 0 {
+		return nil, fmt.Errorf("price must be greater than 0")
+	}
+	if req.Volume <= 0 {
+		return nil, fmt.Errorf("volume must be greater than 0")
+	}
+	if req.Side != OrderSideBuy && req.Side != OrderSideSell {
+		return nil, fmt.Errorf("side must be %s or %s", OrderSideBuy, OrderSideSell)
+	}
+	if req.Condition != OrderConditionNormal && req.Condition != OrderConditionFillOrKill {
+		return nil, fmt.Errorf("condition must be %s or %s", OrderConditionNormal, OrderConditionFillOrKill)
 	}
 
 	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/new", req)
 	if err != nil {
-		return nil, fmt.Errorf("post: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -82,13 +98,16 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 
 // DeleteOrder deletes an existing order.
 func (s *Service) DeleteOrder(ctx context.Context, req *DeleteOrderRequest) (*DeleteOrderResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.OrderID == "" {
+		return nil, fmt.Errorf("orderId is required")
 	}
 
 	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/delete", req)
 	if err != nil {
-		return nil, fmt.Errorf("post: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -110,13 +129,22 @@ func (s *Service) DeleteOrder(ctx context.Context, req *DeleteOrderRequest) (*De
 
 // ModifyOrder modifies an existing order.
 func (s *Service) ModifyOrder(ctx context.Context, req *ModifyOrderRequest) (*ModifyOrderResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+	if req.OrderID == "" {
+		return nil, fmt.Errorf("orderId is required")
+	}
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.Price <= 0 {
+		return nil, fmt.Errorf("price must be greater than 0")
+	}
+	if req.Volume <= 0 {
+		return nil, fmt.Errorf("volume must be greater than 0")
 	}
 
 	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/modify", req)
 	if err != nil {
-		return nil, fmt.Errorf("post: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -140,7 +168,7 @@ func (s *Service) ModifyOrder(ctx context.Context, req *ModifyOrderRequest) (*Mo
 func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 	httpResp, err := s.client.Get(ctx, "/_api/trading/rest/orders")
 	if err != nil {
-		return nil, fmt.Errorf("get: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -158,13 +186,37 @@ func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 
 // ValidateOrder validates an order before placing it.
 func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) (*ValidateOrderResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.OrderbookID == "" {
+		return nil, fmt.Errorf("orderbookId is required")
+	}
+	if req.Price <= 0 {
+		return nil, fmt.Errorf("price must be greater than 0")
+	}
+	if req.Volume <= 0 {
+		return nil, fmt.Errorf("volume must be greater than 0")
+	}
+	if req.Side != OrderSideBuy && req.Side != OrderSideSell {
+		return nil, fmt.Errorf("side must be %s or %s", OrderSideBuy, OrderSideSell)
+	}
+	if req.Condition != OrderConditionNormal && req.Condition != OrderConditionFillOrKill {
+		return nil, fmt.Errorf("condition must be %s or %s", OrderConditionNormal, OrderConditionFillOrKill)
+	}
+	if req.ISIN == "" {
+		return nil, fmt.Errorf("isin is required")
+	}
+	if req.Currency == "" {
+		return nil, fmt.Errorf("currency is required")
+	}
+	if req.MarketPlace == "" {
+		return nil, fmt.Errorf("marketPlace is required")
 	}
 
 	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/validation/validate", req)
 	if err != nil {
-		return nil, fmt.Errorf("post: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -182,13 +234,39 @@ func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) 
 
 // GetPreliminaryFee estimates fees for an order.
 func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequest) (*PreliminaryFeeResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.OrderbookID == "" {
+		return nil, fmt.Errorf("orderbookId is required")
+	}
+	if req.Price == "" {
+		return nil, fmt.Errorf("price is required")
+	}
+	price, err := strconv.ParseFloat(req.Price, 64)
+	if err != nil {
+		return nil, fmt.Errorf("price must be a valid number: %w", err)
+	}
+	if price <= 0 {
+		return nil, fmt.Errorf("price must be greater than 0")
+	}
+	if req.Volume == "" {
+		return nil, fmt.Errorf("volume is required")
+	}
+	volume, err := strconv.Atoi(req.Volume)
+	if err != nil {
+		return nil, fmt.Errorf("volume must be a valid integer: %w", err)
+	}
+	if volume <= 0 {
+		return nil, fmt.Errorf("volume must be greater than 0")
+	}
+	if req.Side != OrderSideBuy && req.Side != OrderSideSell {
+		return nil, fmt.Errorf("side must be %s or %s", OrderSideBuy, OrderSideSell)
 	}
 
 	httpResp, err := s.client.Post(ctx, "/_api/trading/preliminary-fee/preliminaryfee", req)
 	if err != nil {
-		return nil, fmt.Errorf("post: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -206,13 +284,42 @@ func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequ
 
 // PlaceStopLoss places a new stop loss order.
 func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) (*PlaceStopLossResponse, error) {
-	if err := req.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.OrderbookID == "" {
+		return nil, fmt.Errorf("orderbookId is required")
+	}
+	// Validate trigger
+	if req.StopLossTrigger.Type != StopLossTriggerLessOrEqual && req.StopLossTrigger.Type != StopLossTriggerGreaterOrEqual {
+		return nil, fmt.Errorf("stopLossTrigger.type must be %s or %s", StopLossTriggerLessOrEqual, StopLossTriggerGreaterOrEqual)
+	}
+	if req.StopLossTrigger.Value <= 0 {
+		return nil, fmt.Errorf("stopLossTrigger.value must be greater than 0")
+	}
+	if req.StopLossTrigger.ValueType != StopLossValueMonetary && req.StopLossTrigger.ValueType != StopLossValuePercentage {
+		return nil, fmt.Errorf("stopLossTrigger.valueType must be %s or %s", StopLossValueMonetary, StopLossValuePercentage)
+	}
+	// Validate order event
+	if req.StopLossOrderEvent.Type != StopLossOrderEventBuy && req.StopLossOrderEvent.Type != StopLossOrderEventSell {
+		return nil, fmt.Errorf("stopLossOrderEvent.type must be %s or %s", StopLossOrderEventBuy, StopLossOrderEventSell)
+	}
+	if req.StopLossOrderEvent.Price <= 0 {
+		return nil, fmt.Errorf("stopLossOrderEvent.price must be greater than 0")
+	}
+	if req.StopLossOrderEvent.Volume <= 0 {
+		return nil, fmt.Errorf("stopLossOrderEvent.volume must be greater than 0")
+	}
+	if req.StopLossOrderEvent.ValidDays <= 0 {
+		return nil, fmt.Errorf("stopLossOrderEvent.validDays must be greater than 0")
+	}
+	if req.StopLossOrderEvent.PriceType != StopLossPriceMonetary && req.StopLossOrderEvent.PriceType != StopLossPricePercentage {
+		return nil, fmt.Errorf("stopLossOrderEvent.priceType must be %s or %s", StopLossPriceMonetary, StopLossPricePercentage)
 	}
 
 	httpResp, err := s.client.Post(ctx, "/_api/trading/stoploss/new", req)
 	if err != nil {
-		return nil, fmt.Errorf("post: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 
@@ -236,7 +343,7 @@ func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) 
 func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error) {
 	httpResp, err := s.client.Get(ctx, "/_api/trading/stoploss/")
 	if err != nil {
-		return nil, fmt.Errorf("get: %w", err)
+		return nil, err
 	}
 	defer httpResp.Body.Close()
 

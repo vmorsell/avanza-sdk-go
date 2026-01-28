@@ -22,6 +22,10 @@ func NewService(client *client.Client) *Service {
 
 // SubscribeToOrderDepth subscribes to order depth updates. Call Close() when done.
 func (s *Service) SubscribeToOrderDepth(ctx context.Context, orderbookID string) (*OrderDepthSubscription, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
 	cookies := s.client.Cookies()
 	if len(cookies) == 0 {
 		return nil, fmt.Errorf("subscribe to order depth: no authentication cookies found - please authenticate first")

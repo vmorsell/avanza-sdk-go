@@ -65,6 +65,10 @@ func (s *Service) GetTradingAccounts(ctx context.Context) ([]TradingAccount, err
 
 // GetPositions returns positions for an account by its URL parameter ID.
 func (s *Service) GetPositions(ctx context.Context, urlParameterID string) (*AccountPositions, error) {
+	if urlParameterID == "" {
+		return nil, fmt.Errorf("urlParameterID is required")
+	}
+
 	endpoint := fmt.Sprintf("/_api/position-data/positions/%s", url.PathEscape(urlParameterID))
 
 	resp, err := s.client.Get(ctx, endpoint)
