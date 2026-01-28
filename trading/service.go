@@ -10,6 +10,35 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
+// SubscribeToOrders subscribes to real-time order updates. Call Close() when done.
+func (s *Service) SubscribeToOrders(ctx context.Context) (*OrdersSubscription, error) {
+	cookies := s.client.Cookies()
+	if len(cookies) == 0 {
+		return nil, fmt.Errorf("subscribe to orders: no authentication cookies found - please authenticate first")
+	}
+
+	essentialCookies := []string{"csid", "cstoken", "AZACSRF"}
+	for _, cookie := range essentialCookies {
+		if _, exists := cookies[cookie]; !exists {
+			return nil, fmt.Errorf("subscribe to orders: missing essential cookie: %s - please authenticate first", cookie)
+		}
+	}
+
+	subscriptionCtx, cancel := context.WithCancel(ctx)
+
+	subscription := &OrdersSubscription{
+		client: s.client,
+		ctx:    subscriptionCtx,
+		cancel: cancel,
+		events: make(chan OrderEvent, 100),
+		errors: make(chan error, 10),
+	}
+
+	go subscription.start()
+
+	return subscription, nil
+}
+
 // Service handles trading operations: orders, stop loss, validation, and fees.
 type Service struct {
 	client *client.Client

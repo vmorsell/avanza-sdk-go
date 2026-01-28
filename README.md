@@ -19,6 +19,7 @@ Reverse-engineered Go client for Avanza.
 - **Order Validation** - Validate orders before placing them
 - **Preliminary Fees** - Get fee estimates before placing orders
 - **Order Depth Subscription** - Real-time order book updates
+- **Orders Subscription** - Real-time updates on your own orders
 
 ## Installation
 

@@ -304,3 +304,73 @@ type StopLossOrder struct {
 	Editable  bool                    `json:"editable"`
 	Deletable bool                    `json:"deletable"`
 }
+
+// OrderAction indicates the type of order event.
+type OrderAction string
+
+const (
+	OrderActionNew     OrderAction = "NEW"     // New order created
+	OrderActionDeleted OrderAction = "DELETED" // Order deleted/cancelled
+)
+
+// OrderStateName indicates the current state of an order.
+type OrderStateName string
+
+const (
+	OrderStateActivePending OrderStateName = "ACTIVE_PENDING" // Order pending market open
+	OrderStateDeleted       OrderStateName = "DELETED"        // Order has been deleted
+)
+
+// OrderEventOrderbook contains instrument details in an order event.
+type OrderEventOrderbook struct {
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	TickerSymbol    string `json:"tickerSymbol"`
+	MarketplaceName string `json:"marketplaceName"`
+	CountryCode     string `json:"countryCode"`
+	InstrumentType  string `json:"instrumentType"`
+	Tradable        bool   `json:"tradable"`
+	VolumeFactor    int    `json:"volumeFactor"`
+	CurrencyCode    string `json:"currencyCode"`
+	FlagCode        string `json:"flagCode"`
+}
+
+// OrderEventState contains order state information.
+type OrderEventState struct {
+	Value       string         `json:"value"`
+	Description string         `json:"description"`
+	Name        OrderStateName `json:"name"`
+}
+
+// OrderEventData contains order data from an SSE event.
+type OrderEventData struct {
+	ID                   string               `json:"id"`
+	AccountID            string               `json:"accountId"`
+	Orderbook            OrderEventOrderbook  `json:"orderbook"`
+	CurrentVolume        float64              `json:"currentVolume"`
+	OriginalVolume       float64              `json:"originalVolume"`
+	OpenVolume           *float64             `json:"openVolume"`
+	Price                float64              `json:"price"`
+	ValidDate            *string              `json:"validDate"`
+	Type                 OrderSide            `json:"type"`
+	State                OrderEventState      `json:"state"`
+	Action               OrderAction          `json:"action"`
+	Modifiable           bool                 `json:"modifiable"`
+	Deletable            bool                 `json:"deletable"`
+	Sum                  float64              `json:"sum"`
+	VisibleDate          *string              `json:"visibleDate"`
+	OrderDateTime        int64                `json:"orderDateTime"`
+	EventTimeStamp       int64                `json:"eventTimeStamp"`
+	UniqueID             string               `json:"uniqueId"`
+	AdditionalParameters map[string]any       `json:"additionalParameters"`
+	DetailedCancelStatus *string              `json:"detailedCancelStatus"`
+	Condition            OrderCondition       `json:"condition"`
+}
+
+// OrderEvent is a single event from the orders subscription stream.
+type OrderEvent struct {
+	Event string         `json:"event"`
+	Data  OrderEventData `json:"data"`
+	ID    string         `json:"id"`
+	Retry int            `json:"retry"`
+}
