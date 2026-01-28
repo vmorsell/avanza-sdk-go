@@ -65,6 +65,39 @@ type PlaceOrderResponse struct {
 	OrderID            string             `json:"orderId"`
 }
 
+// DeleteOrderRequest contains parameters needed to delete an order.
+type DeleteOrderRequest struct {
+	AccountID string `json:"accountId"`
+	OrderID   string `json:"orderId"`
+}
+
+// DeleteOrderResponse contains the result of deleting an order.
+type DeleteOrderResponse struct {
+	OrderRequestStatus OrderRequestStatus `json:"orderRequestStatus"`
+	Message            string             `json:"message"`
+	Parameters         []string           `json:"parameters"`
+	OrderID            string             `json:"orderId"`
+}
+
+// ModifyOrderRequest contains parameters needed to modify an existing order.
+type ModifyOrderRequest struct {
+	OrderID    string      `json:"orderId"`
+	Price      float64     `json:"price"`
+	Volume     int         `json:"volume"`
+	OpenVolume interface{} `json:"openVolume"`
+	AccountID  string      `json:"accountId"`
+	ValidUntil interface{} `json:"validUntil"`
+	Metadata   interface{} `json:"metadata"`
+}
+
+// ModifyOrderResponse contains the result of modifying an order.
+type ModifyOrderResponse struct {
+	OrderRequestStatus OrderRequestStatus `json:"orderRequestStatus"`
+	Message            string             `json:"message"`
+	Parameters         []string           `json:"parameters"`
+	OrderID            string             `json:"orderId"`
+}
+
 // OrderAccount contains account details associated with an order.
 type OrderAccount struct {
 	AccountID string `json:"accountId"`

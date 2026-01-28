@@ -6,6 +6,34 @@ import (
 	"strconv"
 )
 
+// Validate validates a DeleteOrderRequest and returns an error if any required fields are missing or invalid.
+func (r *DeleteOrderRequest) Validate() error {
+	if r.AccountID == "" {
+		return fmt.Errorf("accountId is required")
+	}
+	if r.OrderID == "" {
+		return fmt.Errorf("orderId is required")
+	}
+	return nil
+}
+
+// Validate validates a ModifyOrderRequest and returns an error if any required fields are missing or invalid.
+func (r *ModifyOrderRequest) Validate() error {
+	if r.OrderID == "" {
+		return fmt.Errorf("orderId is required")
+	}
+	if r.AccountID == "" {
+		return fmt.Errorf("accountId is required")
+	}
+	if r.Price <= 0 {
+		return fmt.Errorf("price must be greater than 0")
+	}
+	if r.Volume <= 0 {
+		return fmt.Errorf("volume must be greater than 0")
+	}
+	return nil
+}
+
 // Validate validates a PlaceOrderRequest and returns an error if any required fields are missing or invalid.
 func (r *PlaceOrderRequest) Validate() error {
 	if r.AccountID == "" {

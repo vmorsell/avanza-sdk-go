@@ -5,6 +5,158 @@ import (
 	"testing"
 )
 
+func TestDeleteOrderRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		req     DeleteOrderRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			req: DeleteOrderRequest{
+				AccountID: "account123",
+				OrderID:   "order456",
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing accountId",
+			req: DeleteOrderRequest{
+				OrderID: "order456",
+			},
+			wantErr: true,
+			errMsg:  "accountId is required",
+		},
+		{
+			name: "missing orderId",
+			req: DeleteOrderRequest{
+				AccountID: "account123",
+			},
+			wantErr: true,
+			errMsg:  "orderId is required",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.req.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr && tt.errMsg != "" {
+				if err == nil {
+					t.Errorf("Validate() expected error containing %q, got nil", tt.errMsg)
+				} else if !strings.Contains(err.Error(), tt.errMsg) {
+					t.Errorf("Validate() error = %q, want containing %q", err.Error(), tt.errMsg)
+				}
+			}
+		})
+	}
+}
+
+func TestModifyOrderRequest_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		req     ModifyOrderRequest
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name: "valid request",
+			req: ModifyOrderRequest{
+				OrderID:   "order456",
+				AccountID: "account123",
+				Price:     100.0,
+				Volume:    10,
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing orderId",
+			req: ModifyOrderRequest{
+				AccountID: "account123",
+				Price:     100.0,
+				Volume:    10,
+			},
+			wantErr: true,
+			errMsg:  "orderId is required",
+		},
+		{
+			name: "missing accountId",
+			req: ModifyOrderRequest{
+				OrderID: "order456",
+				Price:   100.0,
+				Volume:  10,
+			},
+			wantErr: true,
+			errMsg:  "accountId is required",
+		},
+		{
+			name: "invalid price - zero",
+			req: ModifyOrderRequest{
+				OrderID:   "order456",
+				AccountID: "account123",
+				Price:     0.0,
+				Volume:    10,
+			},
+			wantErr: true,
+			errMsg:  "price must be greater than 0",
+		},
+		{
+			name: "invalid price - negative",
+			req: ModifyOrderRequest{
+				OrderID:   "order456",
+				AccountID: "account123",
+				Price:     -10.0,
+				Volume:    10,
+			},
+			wantErr: true,
+			errMsg:  "price must be greater than 0",
+		},
+		{
+			name: "invalid volume - zero",
+			req: ModifyOrderRequest{
+				OrderID:   "order456",
+				AccountID: "account123",
+				Price:     100.0,
+				Volume:    0,
+			},
+			wantErr: true,
+			errMsg:  "volume must be greater than 0",
+		},
+		{
+			name: "invalid volume - negative",
+			req: ModifyOrderRequest{
+				OrderID:   "order456",
+				AccountID: "account123",
+				Price:     100.0,
+				Volume:    -5,
+			},
+			wantErr: true,
+			errMsg:  "volume must be greater than 0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.req.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr && tt.errMsg != "" {
+				if err == nil {
+					t.Errorf("Validate() expected error containing %q, got nil", tt.errMsg)
+				} else if !strings.Contains(err.Error(), tt.errMsg) {
+					t.Errorf("Validate() error = %q, want containing %q", err.Error(), tt.errMsg)
+				}
+			}
+		})
+	}
+}
+
 func TestPlaceOrderRequest_Validate(t *testing.T) {
 	tests := []struct {
 		name    string

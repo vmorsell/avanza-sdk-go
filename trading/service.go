@@ -80,6 +80,62 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 	return &resp, nil
 }
 
+// DeleteOrder deletes an existing order.
+func (s *Service) DeleteOrder(ctx context.Context, req *DeleteOrderRequest) (*DeleteOrderResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, fmt.Errorf("validate: %w", err)
+	}
+
+	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/delete", req)
+	if err != nil {
+		return nil, fmt.Errorf("post: %w", err)
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp DeleteOrderResponse
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	if resp.OrderRequestStatus != OrderRequestStatusSuccess {
+		return &resp, fmt.Errorf("delete order request failed: %s", resp.Message)
+	}
+
+	return &resp, nil
+}
+
+// ModifyOrder modifies an existing order.
+func (s *Service) ModifyOrder(ctx context.Context, req *ModifyOrderRequest) (*ModifyOrderResponse, error) {
+	if err := req.Validate(); err != nil {
+		return nil, fmt.Errorf("validate: %w", err)
+	}
+
+	httpResp, err := s.client.Post(ctx, "/_api/trading-critical/rest/order/modify", req)
+	if err != nil {
+		return nil, fmt.Errorf("post: %w", err)
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp ModifyOrderResponse
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	if resp.OrderRequestStatus != OrderRequestStatusSuccess {
+		return &resp, fmt.Errorf("modify order request failed: %s", resp.Message)
+	}
+
+	return &resp, nil
+}
+
 // GetOrders returns all current orders.
 func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 	httpResp, err := s.client.Get(ctx, "/_api/trading/rest/orders")
