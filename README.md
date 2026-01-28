@@ -14,6 +14,8 @@ Reverse-engineered Go client for Avanza.
 - **Account Overview** - Get categorized accounts, balances, and performance data
 - **Trading Accounts** - List all trading accounts with detailed information
 - **Account Positions** - Get detailed positions, stocks, and cash for specific accounts
+- **Transactions** - Fetch transaction history with date filtering
+- **Aggregated Values** - Get total account values on specific dates
 - **Order Management** - Place, modify, and delete orders for stocks and funds
 - **Stop Loss Orders** - Place stop loss orders with trigger conditions
 - **Order Validation** - Validate orders before placing them

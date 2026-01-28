@@ -212,3 +212,83 @@ type AccountPositions struct {
 	CashPositions     []CashPosition    `json:"cashPositions"`
 	WithCreditAccount bool              `json:"withCreditAccount"`
 }
+
+// TransactionsRequest contains parameters for fetching transactions.
+type TransactionsRequest struct {
+	From string // Required: start date (YYYY-MM-DD)
+	To   string // Required: end date (YYYY-MM-DD)
+}
+
+// TransactionsResponse contains transactions and metadata.
+type TransactionsResponse struct {
+	Transactions               []Transaction `json:"transactions"`
+	TransactionsAfterFiltering int           `json:"transactionsAfterFiltering"`
+	FirstTransactionDate       string        `json:"firstTransactionDate"`
+}
+
+// Transaction represents a single transaction.
+type Transaction struct {
+	ID                         string                  `json:"id"`
+	Date                       string                  `json:"date"`
+	SettlementDate             string                  `json:"settlementDate"`
+	AvailabilityDate           string                  `json:"availabilityDate"`
+	TradeDate                  string                  `json:"tradeDate"`
+	Account                    TransactionAccount      `json:"account"`
+	Orderbook                  *TransactionOrderbook   `json:"orderbook"`
+	InstrumentName             *string                 `json:"instrumentName"`
+	Description                string                  `json:"description"`
+	Type                       string                  `json:"type"`
+	BackofficeType             string                  `json:"backofficeType"`
+	BackofficeTypeText         string                  `json:"backofficeTypeText"`
+	Volume                     *Money                  `json:"volume"`
+	PriceInTradedCurrency      *Money                  `json:"priceInTradedCurrency"`
+	Amount                     *Money                  `json:"amount"`
+	OnCreditAccount            bool                    `json:"onCreditAccount"`
+	Commission                 *Money                  `json:"commission"`
+	CurrencyRate               *float64                `json:"currencyRate"`
+	NoteID                     *string                 `json:"noteId"`
+	PriceInTransactionCurrency *Money                  `json:"priceInTransactionCurrency"`
+	Intraday                   bool                    `json:"intraday"`
+	ForeignTaxRate             *float64                `json:"foreignTaxRate"`
+	ISIN                       *string                 `json:"isin"`
+	Result                     *Money                  `json:"result"`
+	VolumeFactor               *float64                `json:"volumeFactor"`
+	Cancelled                  bool                    `json:"cancelled"`
+	CancelDate                 *string                 `json:"cancelDate"`
+	VerificationNumber         string                  `json:"verificationNumber"`
+}
+
+// TransactionAccount contains account details for a transaction.
+type TransactionAccount struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Type           string `json:"type"`
+	URLParameterID string `json:"urlParameterId"`
+}
+
+// TransactionOrderbook contains orderbook/instrument details for a transaction.
+type TransactionOrderbook struct {
+	ID           string   `json:"id"`
+	FlagCode     string   `json:"flagCode"`
+	Name         string   `json:"name"`
+	Marketplace  string   `json:"marketplace"`
+	Type         string   `json:"type"`
+	Currency     string   `json:"currency"`
+	ISIN         string   `json:"isin"`
+	VolumeFactor *float64 `json:"volumeFactor"`
+}
+
+// AggregatedValuesRequest contains parameters for fetching aggregated account values.
+type AggregatedValuesRequest struct {
+	EncryptedAccountIDs []string `json:"encryptedAccountIds"`
+	Dates               []string `json:"dates"` // format: YYYY-MM-DD
+}
+
+// AggregatedValuesResponse is a list of dated account values.
+type AggregatedValuesResponse []DatedValue
+
+// DatedValue represents the total value of accounts on a specific date.
+type DatedValue struct {
+	Date  string `json:"date"`
+	Value Money  `json:"value"`
+}
