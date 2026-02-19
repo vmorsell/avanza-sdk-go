@@ -1,6 +1,11 @@
 // Package trading provides trading functionality for the Avanza API.
 package trading
 
+import (
+	"encoding/json"
+	"strconv"
+)
+
 // OrderSide indicates whether to buy or sell.
 type OrderSide string
 
@@ -145,6 +150,19 @@ type Order struct {
 	Condition            OrderCondition         `json:"condition"`
 }
 
+// UnmarshalJSON divides Price and Amount by 10, converting them from SEK to USD.
+func (o *Order) UnmarshalJSON(data []byte) error {
+	type OrderAlias Order
+	var alias OrderAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*o = Order(alias)
+	o.Price /= 10
+	o.Amount /= 10
+	return nil
+}
+
 // GetOrdersResponse contains all orders for the authenticated user.
 type GetOrdersResponse struct {
 	Orders          []Order       `json:"orders"`
@@ -216,6 +234,49 @@ type PreliminaryFeeResponse struct {
 type CurrencyExchangeFee struct {
 	Rate string `json:"rate"`
 	Sum  string `json:"sum"`
+}
+
+// divideStringAmount parses s as a float64, divides it by 10, and returns the
+// result formatted as a decimal string. If s is empty or cannot be parsed, s
+// is returned unchanged.
+func divideStringAmount(s string) string {
+	if s == "" {
+		return s
+	}
+	val, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return s
+	}
+	return strconv.FormatFloat(val/10, 'f', -1, 64)
+}
+
+// divideStringAmountPtr applies divideStringAmount to a pointer string, returning
+// nil when the input is nil.
+func divideStringAmountPtr(s *string) *string {
+	if s == nil {
+		return nil
+	}
+	result := divideStringAmount(*s)
+	return &result
+}
+
+// UnmarshalJSON divides all monetary string fields by 10, converting them from
+// SEK to USD.
+func (p *PreliminaryFeeResponse) UnmarshalJSON(data []byte) error {
+	type PreliminaryFeeResponseAlias PreliminaryFeeResponse
+	var alias PreliminaryFeeResponseAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*p = PreliminaryFeeResponse(alias)
+	p.Commission = divideStringAmount(p.Commission)
+	p.MarketFees = divideStringAmount(p.MarketFees)
+	p.TotalFees = divideStringAmount(p.TotalFees)
+	p.TotalSum = divideStringAmount(p.TotalSum)
+	p.TotalSumWithoutFees = divideStringAmount(p.TotalSumWithoutFees)
+	p.TransactionTax = divideStringAmountPtr(p.TransactionTax)
+	p.CurrencyExchangeFee.Sum = divideStringAmount(p.CurrencyExchangeFee.Sum)
+	return nil
 }
 
 // StopLossTriggerType determines when the stop loss triggers.
@@ -325,6 +386,36 @@ type StopLossOrderDetails struct {
 	PriceDecimalPrecision int                    `json:"priceDecimalPrecision"`
 }
 
+// UnmarshalJSON divides Value by 10 when ValueType is MONETARY, converting the
+// trigger price from SEK to USD. Percentage-based triggers are left unchanged.
+func (s *StopLossTriggerResponse) UnmarshalJSON(data []byte) error {
+	type StopLossTriggerResponseAlias StopLossTriggerResponse
+	var alias StopLossTriggerResponseAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*s = StopLossTriggerResponse(alias)
+	if s.ValueType == StopLossValueMonetary {
+		s.Value /= 10
+	}
+	return nil
+}
+
+// UnmarshalJSON divides Price by 10 when PriceType is MONETARY, converting the
+// order price from SEK to USD. Percentage-based prices are left unchanged.
+func (s *StopLossOrderDetails) UnmarshalJSON(data []byte) error {
+	type StopLossOrderDetailsAlias StopLossOrderDetails
+	var alias StopLossOrderDetailsAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*s = StopLossOrderDetails(alias)
+	if s.PriceType == StopLossPriceMonetary {
+		s.Price /= 10
+	}
+	return nil
+}
+
 // StopLossOrder represents an active stop loss order.
 type StopLossOrder struct {
 	ID        string                  `json:"id"`
@@ -398,6 +489,19 @@ type OrderEventData struct {
 	AdditionalParameters map[string]any       `json:"additionalParameters"`
 	DetailedCancelStatus *string              `json:"detailedCancelStatus"`
 	Condition            OrderCondition       `json:"condition"`
+}
+
+// UnmarshalJSON divides Price and Sum by 10, converting them from SEK to USD.
+func (o *OrderEventData) UnmarshalJSON(data []byte) error {
+	type OrderEventDataAlias OrderEventData
+	var alias OrderEventDataAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*o = OrderEventData(alias)
+	o.Price /= 10
+	o.Sum /= 10
+	return nil
 }
 
 // OrderEvent is a single event from the orders subscription stream.

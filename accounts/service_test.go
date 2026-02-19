@@ -252,7 +252,7 @@ func TestGetPositions_Success(t *testing.T) {
 	if len(positions.CashPositions) != 1 {
 		t.Fatalf("expected 1 cash position, got %d", len(positions.CashPositions))
 	}
-	if got, want := positions.CashPositions[0].TotalBalance.Value, 10000.00; got != want {
+	if got, want := positions.CashPositions[0].TotalBalance.Value, 1000.00; got != want {
 		t.Errorf("cash balance = %v, want %v", got, want)
 	}
 }
@@ -395,7 +395,7 @@ func TestGetTransactions_Success(t *testing.T) {
 	if resp.Transactions[0].Amount == nil {
 		t.Fatal("expected amount to be set")
 	}
-	if got, want := resp.Transactions[0].Amount.Value, 1234.56; got != want {
+	if got, want := resp.Transactions[0].Amount.Value, 123.456; got != want {
 		t.Errorf("amount = %v, want %v", got, want)
 	}
 	if got, want := resp.FirstTransactionDate, "2020-01-01"; got != want {
@@ -723,7 +723,7 @@ func TestGetAggregatedValues_Success(t *testing.T) {
 	if got, want := resp[0].Date, "2026-01-25"; got != want {
 		t.Errorf("date = %q, want %q", got, want)
 	}
-	if got, want := resp[0].Value.Value, 2963043.66; got != want {
+	if got, want := resp[0].Value.Value, 296304.366; got != want {
 		t.Errorf("value = %v, want %v", got, want)
 	}
 	if got, want := resp[1].Date, "2026-01-28"; got != want {

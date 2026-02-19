@@ -78,8 +78,8 @@ func TestOrdersSubscription_ReceivesEvents(t *testing.T) {
 		if e.Data.Type != OrderSideBuy {
 			t.Errorf("type = %q, want BUY", e.Data.Type)
 		}
-		if e.Data.Price != 90 {
-			t.Errorf("price = %f, want 90", e.Data.Price)
+		if e.Data.Price != 9 {
+			t.Errorf("price = %f, want 9", e.Data.Price)
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("timed out waiting for event")

@@ -185,7 +185,7 @@ func TestGetStopLossOrders_Success(t *testing.T) {
 	if got, want := orders[0].ID, "sl-1"; got != want {
 		t.Errorf("orders[0].ID = %q, want %q", got, want)
 	}
-	if got, want := orders[0].Trigger.Value, 90.0; got != want {
+	if got, want := orders[0].Trigger.Value, 9.0; got != want {
 		t.Errorf("orders[0].Trigger.Value = %v, want %v", got, want)
 	}
 	if got, want := orders[0].Order.Type, trading.StopLossOrderEventSell; got != want {

@@ -1,6 +1,8 @@
 // Package accounts provides account management functionality for the Avanza API.
 package accounts
 
+import "encoding/json"
+
 // AccountOverview contains all accounts, categorized and with loans.
 type AccountOverview struct {
 	Categories []Category `json:"categories"`
@@ -66,6 +68,22 @@ type Money struct {
 	DecimalPrecision int     `json:"decimalPrecision"`
 }
 
+// UnmarshalJSON divides the Value by 10 and changes Unit to "USD" when the
+// incoming value is denominated in SEK, converting it to USD.
+func (m *Money) UnmarshalJSON(data []byte) error {
+	type MoneyAlias Money
+	var alias MoneyAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*m = Money(alias)
+	if m.Unit == "SEK" {
+		m.Value /= 10
+		m.Unit = "USD"
+	}
+	return nil
+}
+
 // Profit contains both absolute and relative profit values.
 type Profit struct {
 	Absolute Money `json:"absolute"`
@@ -120,6 +138,21 @@ type CurrencyBalance struct {
 	Balance     float64 `json:"balance"`
 }
 
+// UnmarshalJSON divides all monetary balance fields by 10, converting them from
+// SEK to USD.
+func (t *TradingAccount) UnmarshalJSON(data []byte) error {
+	type TradingAccountAlias TradingAccount
+	var alias TradingAccountAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*t = TradingAccount(alias)
+	t.AvailableForPurchase /= 10
+	t.AvailableForPurchaseWithoutCredit /= 10
+	t.AvailableCredit /= 10
+	return nil
+}
+
 // AccountPosition represents a holding (stock, fund, etc.) in an account.
 type AccountPosition struct {
 	Account                                AccountInfo         `json:"account"`
@@ -133,6 +166,22 @@ type AccountPosition struct {
 	AverageAcquiredPriceInstrumentCurrency Money               `json:"averageAcquiredPriceInstrumentCurrency"`
 	AcquiredValue                          Money               `json:"acquiredValue"`
 	CollateralFactor                       Money               `json:"collateralFactor"`
+}
+
+// UnmarshalJSON divides Balance by 10 and changes Currency to "USD" when the
+// incoming balance is in SEK, converting it to USD.
+func (c *CurrencyBalance) UnmarshalJSON(data []byte) error {
+	type CurrencyBalanceAlias CurrencyBalance
+	var alias CurrencyBalanceAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*c = CurrencyBalance(alias)
+	if c.Currency == "SEK" {
+		c.Balance /= 10
+		c.Currency = "USD"
+	}
+	return nil
 }
 
 // AccountInfo contains account details used in positions.

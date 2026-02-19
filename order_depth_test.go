@@ -114,8 +114,8 @@ func TestOrderDepthSubscription(t *testing.T) {
 			t.Error("Expected at least one price level")
 		} else {
 			level := orderDepthEvent.Data.Levels[0]
-			if level.BuyPrice != 10.00 {
-				t.Errorf("Expected buy price 10.00, got %f", level.BuyPrice)
+			if level.BuyPrice != 1.00 {
+				t.Errorf("Expected buy price 1.00, got %f", level.BuyPrice)
 			}
 			if level.BuyVolume != 500 {
 				t.Errorf("Expected buy volume 500, got %f", level.BuyVolume)
@@ -169,14 +169,14 @@ func TestOrderDepthDataUnmarshal(t *testing.T) {
 
 	// Check first level
 	level := data.Levels[0]
-	if level.BuyPrice != 10.00 {
-		t.Errorf("Expected buy price 10.00, got %f", level.BuyPrice)
+	if level.BuyPrice != 1.00 {
+		t.Errorf("Expected buy price 1.00, got %f", level.BuyPrice)
 	}
 	if level.BuyVolume != 500 {
 		t.Errorf("Expected buy volume 500, got %f", level.BuyVolume)
 	}
-	if level.SellPrice != 10.15 {
-		t.Errorf("Expected sell price 10.15, got %f", level.SellPrice)
+	if level.SellPrice != 1.015 {
+		t.Errorf("Expected sell price 1.015, got %f", level.SellPrice)
 	}
 	if level.SellVolume != 25000 {
 		t.Errorf("Expected sell volume 25000, got %f", level.SellVolume)

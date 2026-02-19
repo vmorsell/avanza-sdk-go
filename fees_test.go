@@ -93,15 +93,16 @@ func TestGetPreliminaryFee_Success(t *testing.T) {
 		t.Fatalf("GetPreliminaryFee failed: %v", err)
 	}
 
-	if got, want := resp.Commission, testCommission; got != want {
+	// Monetary values are divided by 10 (SEK → USD conversion)
+	if got, want := resp.Commission, "9.9"; got != want {
 		t.Errorf("resp.Commission = %v, want %v", got, want)
 	}
 
-	if got, want := resp.TotalFees, testTotalFees; got != want {
+	if got, want := resp.TotalFees, "9.9"; got != want {
 		t.Errorf("resp.TotalFees = %v, want %v", got, want)
 	}
 
-	if got, want := resp.TotalSum, testTotalSum; got != want {
+	if got, want := resp.TotalSum, "10.3"; got != want {
 		t.Errorf("resp.TotalSum = %v, want %v", got, want)
 	}
 
