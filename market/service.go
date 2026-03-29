@@ -3,8 +3,11 @@ package market
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
@@ -18,6 +21,50 @@ func NewService(client *client.Client) *Service {
 	return &Service{
 		client: client,
 	}
+}
+
+// Search searches for instruments by name, ticker, or other text.
+func (s *Service) Search(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {
+	if req.Query == "" {
+		return nil, fmt.Errorf("query is required")
+	}
+
+	size := req.Size
+	if size == 0 {
+		size = 30
+	}
+
+	types := req.Types
+	if types == nil {
+		types = []string{}
+	}
+
+	apiReq := searchAPIRequest{
+		Query:           req.Query,
+		SearchFilter:    searchFilter{Types: types},
+		ScreenSize:      "DESKTOP",
+		OriginPath:      "/hem/hem.html",
+		OriginPlatform:  "PWA",
+		SearchSessionID: uuid.New().String(),
+		Pagination:      searchAPIPagination{From: req.From, Size: size},
+	}
+
+	httpResp, err := s.client.Post(ctx, "/_api/search/filtered-search", apiReq)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp SearchResponse
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
 }
 
 // SubscribeToOrderDepth subscribes to order depth updates. Call Close() when done.
