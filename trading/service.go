@@ -286,8 +286,8 @@ func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) 
 		return nil, fmt.Errorf("orderbookId is required")
 	}
 	// Validate trigger
-	if req.StopLossTrigger.Type != StopLossTriggerLessOrEqual && req.StopLossTrigger.Type != StopLossTriggerGreaterOrEqual {
-		return nil, fmt.Errorf("stopLossTrigger.type must be %s or %s", StopLossTriggerLessOrEqual, StopLossTriggerGreaterOrEqual)
+	if req.StopLossTrigger.Type != StopLossTriggerLessOrEqual && req.StopLossTrigger.Type != StopLossTriggerMoreOrEqual {
+		return nil, fmt.Errorf("stopLossTrigger.type must be %s or %s", StopLossTriggerLessOrEqual, StopLossTriggerMoreOrEqual)
 	}
 	if req.StopLossTrigger.Value <= 0 {
 		return nil, fmt.Errorf("stopLossTrigger.value must be greater than 0")

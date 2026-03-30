@@ -219,8 +219,8 @@ type CurrencyExchangeFee struct {
 type StopLossTriggerType string
 
 const (
-	StopLossTriggerLessOrEqual    StopLossTriggerType = "LESS_OR_EQUAL"    // Trigger when price drops to or below value
-	StopLossTriggerGreaterOrEqual StopLossTriggerType = "GREATER_OR_EQUAL" // Trigger when price rises to or above value
+	StopLossTriggerLessOrEqual StopLossTriggerType = "LESS_OR_EQUAL"  // Trigger when price drops to or below value
+	StopLossTriggerMoreOrEqual StopLossTriggerType = "MORE_OR_EQUAL" // Trigger when price rises to or above value
 )
 
 // StopLossValueType specifies how the trigger value is interpreted.
@@ -270,7 +270,7 @@ type StopLossOrderEvent struct {
 type PlaceStopLossRequest struct {
 	ParentStopLossID   string             `json:"parentStopLossId"`
 	AccountID          string             `json:"accountId"`
-	OrderbookID        string             `json:"orderbookId"`
+	OrderbookID        string             `json:"orderBookId"` // NB: capital B — stop-loss endpoint differs from other trading endpoints
 	StopLossTrigger    StopLossTrigger    `json:"stopLossTrigger"`
 	StopLossOrderEvent StopLossOrderEvent `json:"stopLossOrderEvent"`
 }
