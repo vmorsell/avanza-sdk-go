@@ -12,9 +12,9 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
-// writeSSEEvent writes a single SSE event to the response writer and flushes.
-func writeSSEEvent(w http.ResponseWriter, id, event, data string) {
-	fmt.Fprintf(w, "id: %s\nevent: %s\ndata: %s\n\n", id, event, data)
+// writeSSEEvent writes a single SSE event with event type "TEST" to the response writer and flushes.
+func writeSSEEvent(w http.ResponseWriter, id, data string) {
+	fmt.Fprintf(w, "id: %s\nevent: TEST\ndata: %s\n\n", id, data)
 	w.(http.Flusher).Flush()
 }
 
@@ -28,7 +28,7 @@ func TestReceivesEvents(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.WriteHeader(http.StatusOK)
-		writeSSEEvent(w, "e1", "TEST", `{"foo":"bar"}`)
+		writeSSEEvent(w, "e1", `{"foo":"bar"}`)
 	}))
 	defer srv.Close()
 
@@ -67,7 +67,7 @@ func TestReconnectsAfterStreamDrop(t *testing.T) {
 		n := connCount.Add(1)
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.WriteHeader(http.StatusOK)
-		writeSSEEvent(w, fmt.Sprintf("evt-%d", n), "TEST", `{"n":`+fmt.Sprintf("%d", n)+`}`)
+		writeSSEEvent(w, fmt.Sprintf("evt-%d", n), `{"n":`+fmt.Sprintf("%d", n)+`}`)
 	}))
 	defer srv.Close()
 
@@ -125,7 +125,7 @@ func TestSendsLastEventIDOnReconnect(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.WriteHeader(http.StatusOK)
-		writeSSEEvent(w, "my-event-42", "TEST", `{}`)
+		writeSSEEvent(w, "my-event-42", `{}`)
 	}))
 	defer srv.Close()
 
@@ -183,7 +183,7 @@ func TestRespectsServerRetryField(t *testing.T) {
 			w.(http.Flusher).Flush()
 			return
 		}
-		writeSSEEvent(w, "e2", "TEST", `{}`)
+		writeSSEEvent(w, "e2", `{}`)
 	}))
 	defer srv.Close()
 
