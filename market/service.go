@@ -69,6 +69,84 @@ func (s *Service) Search(ctx context.Context, req *SearchRequest) (*SearchRespon
 	return &resp, nil
 }
 
+// GetStock returns detailed market data for a stock.
+func (s *Service) GetStock(ctx context.Context, orderbookID string) (*Stock, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/stock/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp Stock
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetCertificate returns detailed market data for a certificate.
+func (s *Service) GetCertificate(ctx context.Context, orderbookID string) (*Certificate, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/certificate/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp Certificate
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetWarrant returns detailed market data for a warrant.
+func (s *Service) GetWarrant(ctx context.Context, orderbookID string) (*Warrant, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/warrant/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp Warrant
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
 // SubscribeToOrderDepth subscribes to order depth updates. Call Close() when done.
 func (s *Service) SubscribeToOrderDepth(ctx context.Context, orderbookID string) (*OrderDepthSubscription, error) {
 	if orderbookID == "" {
