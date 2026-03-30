@@ -144,6 +144,30 @@ type Order struct {
 	Condition            OrderCondition         `json:"condition"`
 }
 
+// GetOrderRequest contains parameters needed to get a single order.
+type GetOrderRequest struct {
+	OrderID   string
+	AccountID string
+}
+
+// GetOrderResponse contains a single order returned by the find endpoint.
+type GetOrderResponse struct {
+	OrderID         string         `json:"orderId"`
+	OrderbookID     string         `json:"orderbookId"`
+	Side            OrderSide      `json:"side"`
+	State           string         `json:"state"`
+	MarketReference string         `json:"marketReference"`
+	Price           float64        `json:"price"`
+	Message         string         `json:"message"`
+	Volume          int            `json:"volume"`
+	OriginalVolume  int            `json:"originalVolume"`
+	AccountID       string         `json:"accountId"`
+	Condition       OrderCondition `json:"condition"`
+	ValidUntil      string         `json:"validUntil"`
+	Modifiable      bool           `json:"modifiable"`
+	Deletable       bool           `json:"deletable"`
+}
+
 // GetOrdersResponse contains all orders for the authenticated user.
 type GetOrdersResponse struct {
 	Orders          []Order       `json:"orders"`

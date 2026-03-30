@@ -183,6 +183,38 @@ func (s *Service) ModifyOrder(ctx context.Context, req *ModifyOrderRequest) (*Mo
 	return &resp, nil
 }
 
+// GetOrder returns a single order by ID.
+func (s *Service) GetOrder(ctx context.Context, req *GetOrderRequest) (*GetOrderResponse, error) {
+	if req.OrderID == "" {
+		return nil, fmt.Errorf("orderId is required")
+	}
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+
+	params := url.Values{}
+	params.Set("orderId", req.OrderID)
+	params.Set("cAccountId", req.AccountID)
+	endpoint := "/_api/trading-critical/rest/order/find?" + params.Encode()
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp GetOrderResponse
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
 // GetOrders returns all current orders.
 func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 	httpResp, err := s.client.Get(ctx, "/_api/trading/rest/orders")
