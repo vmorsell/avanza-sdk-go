@@ -65,6 +65,28 @@ func (c *Client) UserAgent() string {
 	return c.userAgent
 }
 
+// CookieHeader returns the session cookies formatted as an HTTP Cookie header value.
+// Returns empty string if no cookies are set.
+func (c *Client) CookieHeader() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.cookieHeaderLocked()
+}
+
+// cookieHeaderLocked formats cookies as a header value. Caller must hold c.mu.
+func (c *Client) cookieHeaderLocked() string {
+	pairs := make([]string, 0, len(c.cookies))
+	for name, value := range c.cookies {
+		if name != "" && value != "" {
+			pairs = append(pairs, fmt.Sprintf("%s=%s", name, value))
+		}
+	}
+	if len(pairs) == 0 {
+		return ""
+	}
+	return strings.Join(pairs, "; ")
+}
+
 // SetMockCookies sets cookies for testing. AZACSRF is also set as the security token.
 func (c *Client) SetMockCookies(cookies map[string]string) {
 	c.mu.Lock()
@@ -219,16 +241,8 @@ func (c *Client) setHeaders(req *http.Request) {
 		req.Header.Set("X-SecurityToken", c.securityToken)
 	}
 
-	if len(c.cookies) > 0 {
-		var cookiePairs []string
-		for name, value := range c.cookies {
-			if name != "" && value != "" {
-				cookiePairs = append(cookiePairs, fmt.Sprintf("%s=%s", name, value))
-			}
-		}
-		if len(cookiePairs) > 0 {
-			req.Header.Set("Cookie", strings.Join(cookiePairs, "; "))
-		}
+	if cookie := c.cookieHeaderLocked(); cookie != "" {
+		req.Header.Set("Cookie", cookie)
 	}
 }
 

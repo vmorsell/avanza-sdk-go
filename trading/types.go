@@ -40,7 +40,6 @@ type OrderMetadata struct {
 }
 
 // PlaceOrderRequest contains all parameters needed to place an order.
-// Use Validate() before sending to ensure all required fields are set.
 type PlaceOrderRequest struct {
 	IsDividendReinvestment bool           `json:"isDividendReinvestment"`
 	RequestID              string         `json:"requestId"`
@@ -153,7 +152,6 @@ type GetOrdersResponse struct {
 }
 
 // ValidateOrderRequest contains order parameters to validate before placing.
-// Use Validate() before sending to ensure all required fields are set.
 type ValidateOrderRequest struct {
 	IsDividendReinvestment bool           `json:"isDividendReinvestment"`
 	RequestID              *string        `json:"requestId"`
@@ -189,7 +187,6 @@ type ValidationResult struct {
 }
 
 // PreliminaryFeeRequest contains order parameters to calculate fees.
-// Use Validate() before sending to ensure all required fields are set.
 type PreliminaryFeeRequest struct {
 	AccountID   string    `json:"accountId"`
 	OrderbookID string    `json:"orderbookId"`
@@ -270,7 +267,6 @@ type StopLossOrderEvent struct {
 }
 
 // PlaceStopLossRequest contains all parameters needed to place a stop loss order.
-// Use Validate() before sending to ensure all required fields are set.
 type PlaceStopLossRequest struct {
 	ParentStopLossID   string             `json:"parentStopLossId"`
 	AccountID          string             `json:"accountId"`

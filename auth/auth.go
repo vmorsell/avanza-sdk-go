@@ -73,9 +73,6 @@ type Account struct {
 	AccountType string `json:"accountType"`
 }
 
-// BankIDRestartRequest refreshes an expiring QR code.
-type BankIDRestartRequest struct{}
-
 // StartBankID initiates a BankID authentication session. Returns a QR token.
 // For automatic QR refresh, use PollBankIDWithQRUpdates.
 func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, error) {
@@ -111,7 +108,7 @@ func (a *AuthService) StartBankID(ctx context.Context) (*BankIDStartResponse, er
 
 // RestartBankID refreshes the BankID session with a new QR code.
 func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, error) {
-	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/restart", BankIDRestartRequest{})
+	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/restart", struct{}{})
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +128,7 @@ func (a *AuthService) RestartBankID(ctx context.Context) (*BankIDStartResponse, 
 
 // CollectBankID checks the BankID authentication status.
 func (a *AuthService) CollectBankID(ctx context.Context) (*BankIDCollectResponse, error) {
-	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/collect", BankIDRestartRequest{})
+	resp, err := a.client.Post(ctx, "/_api/authentication/v2/sessions/bankid/collect", struct{}{})
 	if err != nil {
 		return nil, err
 	}

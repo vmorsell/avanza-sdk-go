@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/sse"
 )
 
 // SubscribeToOrders subscribes to real-time order updates. Call Close() when done.
@@ -25,19 +26,13 @@ func (s *Service) SubscribeToOrders(ctx context.Context) (*OrdersSubscription, e
 		}
 	}
 
-	subscriptionCtx, cancel := context.WithCancel(ctx)
+	sub := sse.New(ctx, sse.Config{
+		Client:   s.client,
+		Endpoint: "/_push/trading/orders/",
+		Referer:  "https://www.avanza.se/min-ekonomi/ordrar.html",
+	})
 
-	subscription := &OrdersSubscription{
-		client: s.client,
-		ctx:    subscriptionCtx,
-		cancel: cancel,
-		events: make(chan OrderEvent, 100),
-		errors: make(chan error, 10),
-	}
-
-	go subscription.start()
-
-	return subscription, nil
+	return newOrdersSubscription(sub), nil
 }
 
 // Service handles trading operations: orders, stop loss, validation, and fees.

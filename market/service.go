@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/google/uuid"
 	"github.com/vmorsell/avanza-sdk-go/client"
+	"github.com/vmorsell/avanza-sdk-go/internal/sse"
 )
 
 // Service handles market data and real-time subscriptions.
@@ -85,18 +87,12 @@ func (s *Service) SubscribeToOrderDepth(ctx context.Context, orderbookID string)
 		}
 	}
 
-	subscriptionCtx, cancel := context.WithCancel(ctx)
+	escapedID := url.PathEscape(orderbookID)
+	sub := sse.New(ctx, sse.Config{
+		Client:   s.client,
+		Endpoint: fmt.Sprintf("/_push/order-depth-web-push/%s", escapedID),
+		Referer:  fmt.Sprintf("https://www.avanza.se/handla/order.html/kop/%s", escapedID),
+	})
 
-	subscription := &OrderDepthSubscription{
-		orderbookID: orderbookID,
-		client:      s.client,
-		ctx:         subscriptionCtx,
-		cancel:      cancel,
-		events:      make(chan OrderDepthEvent, 100),
-		errors:      make(chan error, 10),
-	}
-
-	go subscription.start()
-
-	return subscription, nil
+	return newOrderDepthSubscription(sub), nil
 }
