@@ -14,6 +14,8 @@ import (
 	"github.com/vmorsell/avanza-sdk-go/client"
 )
 
+const testLoginPath = "/_api/authentication/v2/sessions/bankid/tx-abc/customer-123"
+
 // newTestClient creates a client configured to use the test server URL.
 func newTestClient(baseURL string) *client.Client {
 	return client.NewClient(client.WithBaseURL(baseURL))
@@ -657,7 +659,7 @@ func TestBankIDCollectResponse_CompleteStructure(t *testing.T) {
 		"name": "FOO BAR",
 		"transactionId": "FOO",
 		"state": "COMPLETE",
-		"hintCode": "",
+		"hintCode": "COMPLETE",
 		"identificationNumber": "42",
 		"logins": [
 			{
@@ -673,7 +675,7 @@ func TestBankIDCollectResponse_CompleteStructure(t *testing.T) {
 			}
 		],
 		"recommendedTargetCustomers": [],
-		"poa": []
+		"poa": {"letters": []}
 	}`
 
 	var resp BankIDCollectResponse
@@ -746,7 +748,7 @@ func TestEstablishSession_Success(t *testing.T) {
 		mu.Unlock()
 
 		switch r.URL.Path {
-		case "/_api/authentication/v2/sessions/bankid/collect/customer-123":
+		case testLoginPath:
 			if r.Method != http.MethodGet {
 				t.Errorf("expected GET for select user, got %s", r.Method)
 			}
@@ -777,6 +779,7 @@ func TestEstablishSession_Success(t *testing.T) {
 			{
 				CustomerID: "customer-123",
 				Username:   "testuser",
+				LoginPath:  testLoginPath,
 			},
 		},
 	}
@@ -792,8 +795,8 @@ func TestEstablishSession_Success(t *testing.T) {
 	if len(requestPaths) != 3 {
 		t.Fatalf("expected 3 requests, got %d: %v", len(requestPaths), requestPaths)
 	}
-	if requestPaths[0] != "/_api/authentication/v2/sessions/bankid/collect/customer-123" {
-		t.Errorf("first request path = %q, want select user endpoint", requestPaths[0])
+	if requestPaths[0] != testLoginPath {
+		t.Errorf("first request path = %q, want login path", requestPaths[0])
 	}
 	if requestPaths[1] != "/handla/order.html" {
 		t.Errorf("second request path = %q, want trading page", requestPaths[1])
@@ -828,6 +831,20 @@ func TestEstablishSession_NoLogins(t *testing.T) {
 	}
 }
 
+func TestEstablishSession_EmptyLoginPath(t *testing.T) {
+	c := client.NewClient()
+	service := NewAuthService(c)
+
+	collectResp := &BankIDCollectResponse{
+		Logins: []Login{{CustomerID: "customer-123", LoginPath: ""}},
+	}
+
+	err := service.EstablishSession(context.Background(), collectResp)
+	if err == nil {
+		t.Fatal("expected error for empty login path, got nil")
+	}
+}
+
 func TestEstablishSession_SelectUserHTTPError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
@@ -839,7 +856,7 @@ func TestEstablishSession_SelectUserHTTPError(t *testing.T) {
 	service := NewAuthService(c)
 
 	collectResp := &BankIDCollectResponse{
-		Logins: []Login{{CustomerID: "customer-123"}},
+		Logins: []Login{{CustomerID: "customer-123", LoginPath: testLoginPath}},
 	}
 
 	err := service.EstablishSession(context.Background(), collectResp)
@@ -851,7 +868,7 @@ func TestEstablishSession_SelectUserHTTPError(t *testing.T) {
 func TestEstablishSession_SessionVerifyHTTPError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/_api/authentication/v2/sessions/bankid/collect/customer-123":
+		case testLoginPath:
 			w.WriteHeader(http.StatusOK)
 		case "/handla/order.html":
 			w.WriteHeader(http.StatusOK)
@@ -868,7 +885,7 @@ func TestEstablishSession_SessionVerifyHTTPError(t *testing.T) {
 	service := NewAuthService(c)
 
 	collectResp := &BankIDCollectResponse{
-		Logins: []Login{{CustomerID: "customer-123"}},
+		Logins: []Login{{CustomerID: "customer-123", LoginPath: testLoginPath}},
 	}
 
 	err := service.EstablishSession(context.Background(), collectResp)
@@ -890,7 +907,7 @@ func TestEstablishSession_ContextCancellation(t *testing.T) {
 	cancel()
 
 	collectResp := &BankIDCollectResponse{
-		Logins: []Login{{CustomerID: "customer-123"}},
+		Logins: []Login{{CustomerID: "customer-123", LoginPath: testLoginPath}},
 	}
 
 	err := service.EstablishSession(ctx, collectResp)

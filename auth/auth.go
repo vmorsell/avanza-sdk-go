@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"time"
 
@@ -40,16 +39,24 @@ type BankIDStartResponse struct {
 }
 
 // BankIDCollectResponse contains authentication status.
-// State is "PENDING", "COMPLETE", or "FAILED". Logins is populated when State is "COMPLETE".
+// State is "OUTSTANDING_TRANSACTION" while pending, "COMPLETE" on success, or "FAILED" on error.
+// Logins is populated when State is "COMPLETE".
 type BankIDCollectResponse struct {
 	Name                       string        `json:"name"`
 	TransactionID              string        `json:"transactionId"`
 	State                      string        `json:"state"`
 	HintCode                   string        `json:"hintCode"`
+	Hint                       string        `json:"hint"`
+	RFA                        string        `json:"rfa"`
 	IdentificationNumber       string        `json:"identificationNumber"`
 	Logins                     []Login       `json:"logins"`
 	RecommendedTargetCustomers []interface{} `json:"recommendedTargetCustomers"`
-	Poa                        []interface{} `json:"poa"`
+	Poa                        Poa           `json:"poa"`
+}
+
+// Poa contains power of attorney information.
+type Poa struct {
+	Letters []interface{} `json:"letters"`
 }
 
 // Login represents a user account available after authentication completes.
@@ -227,9 +234,11 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 	}
 
 	login := collectResp.Logins[0]
-	userEndpoint := fmt.Sprintf("/_api/authentication/v2/sessions/bankid/collect/%s", url.PathEscape(login.CustomerID))
+	if login.LoginPath == "" {
+		return fmt.Errorf("login path is empty")
+	}
 
-	resp, err := a.client.Get(ctx, userEndpoint)
+	resp, err := a.client.Get(ctx, login.LoginPath)
 	if err != nil {
 		return fmt.Errorf("failed to select user: %w", err)
 	}
