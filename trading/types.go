@@ -334,6 +334,68 @@ type StopLossOrder struct {
 	Deletable bool                    `json:"deletable"`
 }
 
+// StopLossPushAction indicates what happened to a stop loss order in an SSE event.
+type StopLossPushAction string
+
+const (
+	StopLossPushActionUpdated StopLossPushAction = "UPDATED" // Stop loss order created or modified
+	StopLossPushActionDeleted StopLossPushAction = "DELETED" // Stop loss order deleted
+)
+
+// StopLossEventStatus indicates the state of a stop loss order in an SSE event.
+type StopLossEventStatus string
+
+const (
+	StopLossEventStatusActive  StopLossEventStatus = "ACTIVE"  // Stop loss is active
+	StopLossEventStatusDeleted StopLossEventStatus = "DELETED" // Stop loss has been deleted
+)
+
+// StopLossEventTrigger contains trigger configuration from an SSE event.
+// Differs from StopLossTriggerResponse: has ValidDays/ExtremePrice, lacks TriggerOnMarketMakerQuote.
+type StopLossEventTrigger struct {
+	Value        float64             `json:"value"`
+	Type         StopLossTriggerType `json:"type"`
+	ValidUntil   string              `json:"validUntil"`
+	ValidDays    *int                `json:"validDays"`
+	ValueType    StopLossValueType   `json:"valueType"`
+	ExtremePrice *float64            `json:"extremePrice"`
+}
+
+// StopLossEventOrder contains order details from an SSE event.
+// Differs from StopLossOrderDetails: Volume is float64 (SSE sends "10.000000").
+type StopLossEventOrder struct {
+	Type                  StopLossOrderEventType `json:"type"`
+	Price                 float64                `json:"price"`
+	Volume                float64                `json:"volume"`
+	ShortSellingAllowed   bool                   `json:"shortSellingAllowed"`
+	ValidDays             int                    `json:"validDays"`
+	PriceType             StopLossPriceType      `json:"priceType"`
+	PriceDecimalPrecision int                    `json:"priceDecimalPrecision"`
+}
+
+// StopLossEventData contains stop loss data from an SSE event.
+type StopLossEventData struct {
+	ID         string                `json:"id"`
+	UniqueID   string                `json:"uniqueId"`
+	Status     StopLossEventStatus   `json:"status"`
+	AccountID  string                `json:"accountId"`
+	Orderbook  StopLossOrderbook     `json:"orderbook"`
+	Order      *StopLossEventOrder   `json:"order"`   // null when deleted
+	Trigger    *StopLossEventTrigger `json:"trigger"` // null when deleted
+	Editable   bool                  `json:"editable"`
+	Deletable  bool                  `json:"deletable"`
+	Message    *string               `json:"message"`
+	PushAction StopLossPushAction    `json:"pushAction"`
+}
+
+// StopLossEvent is a single event from the stop loss subscription stream.
+type StopLossEvent struct {
+	Event string            `json:"event"`
+	Data  StopLossEventData `json:"data"`
+	ID    string            `json:"id"`
+	Retry int               `json:"retry"`
+}
+
 // OrderAction indicates the type of order event.
 type OrderAction string
 

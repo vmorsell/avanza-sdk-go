@@ -35,6 +35,29 @@ func (s *Service) SubscribeToOrders(ctx context.Context) (*OrdersSubscription, e
 	return newOrdersSubscription(sub), nil
 }
 
+// SubscribeToStopLoss subscribes to real-time stop loss order updates. Call Close() when done.
+func (s *Service) SubscribeToStopLoss(ctx context.Context) (*StopLossSubscription, error) {
+	cookies := s.client.Cookies()
+	if len(cookies) == 0 {
+		return nil, fmt.Errorf("subscribe to stop loss: no authentication cookies found - please authenticate first")
+	}
+
+	essentialCookies := []string{"csid", "cstoken", "AZACSRF"}
+	for _, cookie := range essentialCookies {
+		if _, exists := cookies[cookie]; !exists {
+			return nil, fmt.Errorf("subscribe to stop loss: missing essential cookie: %s - please authenticate first", cookie)
+		}
+	}
+
+	sub := sse.New(ctx, sse.Config{
+		Client:   s.client,
+		Endpoint: "/_push/trading/stoploss/",
+		Referer:  "https://www.avanza.se/min-ekonomi/ordrar.html",
+	})
+
+	return newStopLossSubscription(sub), nil
+}
+
 // Service handles trading operations: orders, stop loss, validation, and fees.
 type Service struct {
 	client *client.Client

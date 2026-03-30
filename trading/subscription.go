@@ -96,3 +96,91 @@ func (s *OrdersSubscription) forwardEvent(raw sse.RawEvent) {
 		Retry: raw.Retry,
 	}
 }
+
+// StopLossSubscription represents an active stop loss subscription.
+type StopLossSubscription struct {
+	sub    *sse.Subscription
+	events chan StopLossEvent
+	errors chan error
+	wg     sync.WaitGroup
+}
+
+// Events returns a channel that receives stop loss events.
+func (s *StopLossSubscription) Events() <-chan StopLossEvent {
+	return s.events
+}
+
+// Errors returns a channel that receives any errors from the subscription.
+func (s *StopLossSubscription) Errors() <-chan error {
+	return s.errors
+}
+
+// Close stops the subscription and cleans up resources.
+// Always call Close() when done with the subscription to prevent resource leaks.
+func (s *StopLossSubscription) Close() {
+	s.sub.Close()
+	s.wg.Wait()
+	close(s.events)
+	close(s.errors)
+}
+
+func newStopLossSubscription(sub *sse.Subscription) *StopLossSubscription {
+	s := &StopLossSubscription{
+		sub:    sub,
+		events: make(chan StopLossEvent, 100),
+		errors: make(chan error, 10),
+	}
+	s.wg.Add(1)
+	go s.run()
+	return s
+}
+
+func (s *StopLossSubscription) run() {
+	defer s.wg.Done()
+
+	rawEvents := s.sub.Events()
+	rawErrors := s.sub.Errors()
+
+	for rawEvents != nil || rawErrors != nil {
+		select {
+		case raw, ok := <-rawEvents:
+			if !ok {
+				rawEvents = nil
+				continue
+			}
+			s.forwardEvent(raw)
+		case err, ok := <-rawErrors:
+			if !ok {
+				rawErrors = nil
+				continue
+			}
+			select {
+			case s.errors <- err:
+			default:
+			}
+		}
+	}
+}
+
+func (s *StopLossSubscription) forwardEvent(raw sse.RawEvent) {
+	if raw.Event != "STOPLOSS" {
+		s.events <- StopLossEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry}
+		return
+	}
+
+	var data StopLossEventData
+	if err := json.Unmarshal(raw.Data, &data); err != nil {
+		select {
+		case s.errors <- fmt.Errorf("parse stop loss data: %w", err):
+		default:
+		}
+		return
+	}
+
+	s.events <- StopLossEvent{
+		Event: raw.Event,
+		Data:  data,
+		ID:    raw.ID,
+		Retry: raw.Retry,
+	}
+}
