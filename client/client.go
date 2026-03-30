@@ -224,6 +224,32 @@ func (c *Client) Get(ctx context.Context, endpoint string) (*http.Response, erro
 	return resp, nil
 }
 
+// Delete sends a DELETE request. Cookies, security tokens, and rate limiting are handled automatically.
+func (c *Client) Delete(ctx context.Context, endpoint string) (*http.Response, error) {
+	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
+
+	req, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("new request: %w", err)
+	}
+
+	c.setHeaders(req)
+
+	if c.rateLimiter != nil {
+		if err := c.rateLimiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("rate limiter: %w", err)
+		}
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("do: %w", err)
+	}
+
+	c.extractCookies(resp)
+	return resp, nil
+}
+
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Accept", "application/json, text/plain, */*")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.8")

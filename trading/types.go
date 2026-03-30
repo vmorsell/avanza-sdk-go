@@ -282,6 +282,31 @@ type PlaceStopLossResponse struct {
 	StopLossOrderID string         `json:"stoplossOrderId"`
 }
 
+// ModifyStopLossRequest contains all parameters needed to modify a stop loss order.
+type ModifyStopLossRequest struct {
+	ParentStopLossID   string             `json:"parentStopLossId"`
+	TriggerAllChildren bool               `json:"triggerAllChildren"`
+	StopLossOrderID    string             `json:"stoplossOrderId"`
+	AccountID          string             `json:"accountId"`
+	OrderbookID        string             `json:"orderBookId"` // NB: capital B — stop-loss endpoint differs from other trading endpoints
+	StopLossTrigger    StopLossTrigger    `json:"stopLossTrigger"`
+	StopLossOrderEvent StopLossOrderEvent `json:"stopLossOrderEvent"`
+}
+
+// DeleteStopLossRequest contains parameters needed to delete a stop loss order.
+// AccountID and StopLossOrderID are used as URL path segments.
+type DeleteStopLossRequest struct {
+	AccountID       string
+	StopLossOrderID string
+}
+
+// GetStopLossRequest contains parameters needed to get a single stop loss order.
+// AccountURLParameterID and StopLossOrderID are used as URL path segments.
+type GetStopLossRequest struct {
+	AccountURLParameterID string
+	StopLossOrderID       string
+}
+
 // StopLossAccount contains account details for a stop loss order.
 type StopLossAccount struct {
 	ID             string `json:"id"`

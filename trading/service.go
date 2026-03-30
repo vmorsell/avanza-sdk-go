@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
@@ -375,4 +376,119 @@ func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error
 	}
 
 	return orders, nil
+}
+
+// GetStopLoss returns a single stop loss order by account URL parameter ID and order ID.
+func (s *Service) GetStopLoss(ctx context.Context, req *GetStopLossRequest) (*StopLossOrder, error) {
+	if req.AccountURLParameterID == "" {
+		return nil, fmt.Errorf("accountURLParameterID is required")
+	}
+	if req.StopLossOrderID == "" {
+		return nil, fmt.Errorf("stoplossOrderId is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/trading/stoploss/%s/%s",
+		url.PathEscape(req.AccountURLParameterID),
+		url.PathEscape(req.StopLossOrderID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var order StopLossOrder
+	if err := json.NewDecoder(httpResp.Body).Decode(&order); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &order, nil
+}
+
+// ModifyStopLoss modifies an existing stop loss order.
+func (s *Service) ModifyStopLoss(ctx context.Context, req *ModifyStopLossRequest) (*PlaceStopLossResponse, error) {
+	if req.StopLossOrderID == "" {
+		return nil, fmt.Errorf("stoplossOrderId is required")
+	}
+	if req.AccountID == "" {
+		return nil, fmt.Errorf("accountId is required")
+	}
+	if req.OrderbookID == "" {
+		return nil, fmt.Errorf("orderbookId is required")
+	}
+	if req.StopLossTrigger.Type != StopLossTriggerLessOrEqual && req.StopLossTrigger.Type != StopLossTriggerMoreOrEqual {
+		return nil, fmt.Errorf("stopLossTrigger.type must be %s or %s", StopLossTriggerLessOrEqual, StopLossTriggerMoreOrEqual)
+	}
+	if req.StopLossTrigger.Value <= 0 {
+		return nil, fmt.Errorf("stopLossTrigger.value must be greater than 0")
+	}
+	if req.StopLossTrigger.ValueType != StopLossValueMonetary && req.StopLossTrigger.ValueType != StopLossValuePercentage {
+		return nil, fmt.Errorf("stopLossTrigger.valueType must be %s or %s", StopLossValueMonetary, StopLossValuePercentage)
+	}
+	if req.StopLossOrderEvent.Type != StopLossOrderEventBuy && req.StopLossOrderEvent.Type != StopLossOrderEventSell {
+		return nil, fmt.Errorf("stopLossOrderEvent.type must be %s or %s", StopLossOrderEventBuy, StopLossOrderEventSell)
+	}
+	if req.StopLossOrderEvent.Price <= 0 {
+		return nil, fmt.Errorf("stopLossOrderEvent.price must be greater than 0")
+	}
+	if req.StopLossOrderEvent.Volume <= 0 {
+		return nil, fmt.Errorf("stopLossOrderEvent.volume must be greater than 0")
+	}
+	if req.StopLossOrderEvent.ValidDays <= 0 {
+		return nil, fmt.Errorf("stopLossOrderEvent.validDays must be greater than 0")
+	}
+	if req.StopLossOrderEvent.PriceType != StopLossPriceMonetary && req.StopLossOrderEvent.PriceType != StopLossPricePercentage {
+		return nil, fmt.Errorf("stopLossOrderEvent.priceType must be %s or %s", StopLossPriceMonetary, StopLossPricePercentage)
+	}
+
+	httpResp, err := s.client.Post(ctx, "/_api/trading/stoploss/modify", req)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp PlaceStopLossResponse
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	if resp.Status != StopLossStatusSuccess {
+		return &resp, fmt.Errorf("modify stop loss order request failed: %s", resp.Status)
+	}
+
+	return &resp, nil
+}
+
+// DeleteStopLoss deletes an existing stop loss order.
+func (s *Service) DeleteStopLoss(ctx context.Context, req *DeleteStopLossRequest) error {
+	if req.AccountID == "" {
+		return fmt.Errorf("accountId is required")
+	}
+	if req.StopLossOrderID == "" {
+		return fmt.Errorf("stoplossOrderId is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/trading/stoploss/%s/%s",
+		url.PathEscape(req.AccountID),
+		url.PathEscape(req.StopLossOrderID))
+
+	httpResp, err := s.client.Delete(ctx, endpoint)
+	if err != nil {
+		return err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return client.NewHTTPError(httpResp)
+	}
+
+	return nil
 }
