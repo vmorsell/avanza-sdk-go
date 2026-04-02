@@ -215,24 +215,43 @@ type AccountPositions struct {
 
 // TransactionsRequest contains parameters for fetching transactions.
 type TransactionsRequest struct {
-	From string // Required: start date (YYYY-MM-DD)
-	To   string // Required: end date (YYYY-MM-DD)
+	From        string   // Required: start date (YYYY-MM-DD)
+	To          string   // Required: end date (YYYY-MM-DD)
+	AccountIDs  []string // Optional: filter by account URL parameter IDs
+	MaxElements *int     // Optional: max number of transactions to return
 }
 
 // TransactionsResponse contains transactions and metadata.
 type TransactionsResponse struct {
-	Transactions               []Transaction `json:"transactions"`
-	TransactionsAfterFiltering int           `json:"transactionsAfterFiltering"`
-	FirstTransactionDate       string        `json:"firstTransactionDate"`
+	Transactions               []Transaction      `json:"transactions"`
+	TransactionsAfterFiltering int                 `json:"transactionsAfterFiltering"`
+	TransactionsFilter         *TransactionsFilter `json:"transactionsFilter"`
+	FirstTransactionDate       string              `json:"firstTransactionDate"`
+}
+
+// TransactionsFilter contains the filter criteria applied to the transaction query.
+type TransactionsFilter struct {
+	AccountIDs            []string                    `json:"accountIds"`
+	TransactionTypes      []string                    `json:"transactionTypes"`
+	ISIN                  *string                     `json:"isin"`
+	DateRange             TransactionsFilterDateRange `json:"dateRange"`
+	IncludeCancelled      bool                        `json:"includeCancelled"`
+	IncludeClosedAccounts bool                        `json:"includeClosedAccounts"`
+}
+
+// TransactionsFilterDateRange contains the date range applied to a transaction query.
+type TransactionsFilterDateRange struct {
+	From string `json:"from"`
+	To   string `json:"to"`
 }
 
 // Transaction represents a single transaction.
 type Transaction struct {
 	ID                         string                  `json:"id"`
 	Date                       string                  `json:"date"`
-	SettlementDate             string                  `json:"settlementDate"`
-	AvailabilityDate           string                  `json:"availabilityDate"`
-	TradeDate                  string                  `json:"tradeDate"`
+	SettlementDate             *string                 `json:"settlementDate"`
+	AvailabilityDate           *string                 `json:"availabilityDate"`
+	TradeDate                  *string                 `json:"tradeDate"`
 	Account                    TransactionAccount      `json:"account"`
 	Orderbook                  *TransactionOrderbook   `json:"orderbook"`
 	InstrumentName             *string                 `json:"instrumentName"`

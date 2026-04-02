@@ -330,14 +330,18 @@ func TestGetTransactions_Success(t *testing.T) {
 		}
 
 		instrumentName := "Test Instrument AB"
+		settlementDate := "2025-10-30"
+		availabilityDate := "2025-10-30"
+		tradeDate := "2025-10-28"
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(TransactionsResponse{
 			Transactions: []Transaction{
 				{
-					ID:             "TXN-12345-001",
-					Date:           "2025-10-28T00:00:00",
-					SettlementDate: "2025-10-30",
-					TradeDate:      "2025-10-28",
+					ID:               "TXN-12345-001",
+					Date:             "2025-10-28T00:00:00",
+					SettlementDate:   &settlementDate,
+					AvailabilityDate: &availabilityDate,
+					TradeDate:        &tradeDate,
 					Account: TransactionAccount{
 						ID:             "12345",
 						Name:           "Test Account",
@@ -400,6 +404,66 @@ func TestGetTransactions_Success(t *testing.T) {
 	}
 	if got, want := resp.FirstTransactionDate, "2020-01-01"; got != want {
 		t.Errorf("firstTransactionDate = %q, want %q", got, want)
+	}
+}
+
+func TestGetTransactions_WithAccountIDsAndMaxElements(t *testing.T) {
+	maxElements := 500
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if got := q.Get("from"); got != "2025-08-01" {
+			t.Errorf("expected from=2025-08-01, got %s", got)
+		}
+		if got := q.Get("to"); got != "2025-10-31" {
+			t.Errorf("expected to=2025-10-31, got %s", got)
+		}
+		if got := q["accountIds"]; len(got) != 2 || got[0] != "abc123" || got[1] != "def456" {
+			t.Errorf("expected accountIds=[abc123 def456], got %v", got)
+		}
+		if got := q.Get("maxElements"); got != "500" {
+			t.Errorf("expected maxElements=500, got %s", got)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"transactions": [],
+			"transactionsAfterFiltering": 0,
+			"transactionsFilter": {
+				"accountIds": ["111", "222"],
+				"transactionTypes": null,
+				"isin": null,
+				"dateRange": {"from": "2025-08-01", "to": "2025-10-31"},
+				"includeCancelled": false,
+				"includeClosedAccounts": false
+			},
+			"firstTransactionDate": "2020-01-01"
+		}`))
+	}))
+	defer server.Close()
+
+	c := newTestClient(server.URL)
+	svc := NewService(c)
+
+	resp, err := svc.GetTransactions(context.Background(), &TransactionsRequest{
+		From:        "2025-08-01",
+		To:          "2025-10-31",
+		AccountIDs:  []string{"abc123", "def456"},
+		MaxElements: &maxElements,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.TransactionsFilter == nil {
+		t.Fatal("expected transactionsFilter to be set")
+	}
+	if got, want := resp.TransactionsFilter.DateRange.From, "2025-08-01"; got != want {
+		t.Errorf("filter dateRange.from = %q, want %q", got, want)
+	}
+	if got, want := resp.TransactionsFilter.DateRange.To, "2025-10-31"; got != want {
+		t.Errorf("filter dateRange.to = %q, want %q", got, want)
+	}
+	if got, want := len(resp.TransactionsFilter.AccountIDs), 2; got != want {
+		t.Errorf("filter accountIds length = %d, want %d", got, want)
 	}
 }
 

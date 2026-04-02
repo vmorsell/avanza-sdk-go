@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/vmorsell/avanza-sdk-go/client"
@@ -122,6 +123,12 @@ func (s *Service) GetTransactions(ctx context.Context, req *TransactionsRequest)
 	params.Set("from", req.From)
 	params.Set("to", req.To)
 	params.Set("includeResult", "false")
+	for _, id := range req.AccountIDs {
+		params.Add("accountIds", id)
+	}
+	if req.MaxElements != nil {
+		params.Set("maxElements", strconv.Itoa(*req.MaxElements))
+	}
 
 	endpoint := "/_api/transactions/list?" + params.Encode()
 
