@@ -215,10 +215,11 @@ type AccountPositions struct {
 
 // TransactionsRequest contains parameters for fetching transactions.
 type TransactionsRequest struct {
-	From        string   // Required: start date (YYYY-MM-DD)
-	To          string   // Required: end date (YYYY-MM-DD)
-	AccountIDs  []string // Optional: filter by account URL parameter IDs
-	MaxElements *int     // Optional: max number of transactions to return
+	From          string   // Required: start date (YYYY-MM-DD)
+	To            string   // Required: end date (YYYY-MM-DD)
+	AccountIDs    []string // Optional: filter by account URL parameter IDs
+	MaxElements   *int     // Optional: max number of transactions to return
+	IncludeResult bool     // Optional: include P&L result on settled transactions
 }
 
 // TransactionsResponse contains transactions and metadata.

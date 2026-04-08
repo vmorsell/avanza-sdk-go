@@ -467,6 +467,33 @@ func TestGetTransactions_WithAccountIDsAndMaxElements(t *testing.T) {
 	}
 }
 
+func TestGetTransactions_IncludeResult(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("includeResult"); got != "true" {
+			t.Errorf("expected includeResult=true, got %s", got)
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"transactions": [],
+			"transactionsAfterFiltering": 0,
+			"firstTransactionDate": "2020-01-01"
+		}`))
+	}))
+	defer server.Close()
+
+	c := newTestClient(server.URL)
+	svc := NewService(c)
+
+	_, err := svc.GetTransactions(context.Background(), &TransactionsRequest{
+		From:          "2025-08-01",
+		To:            "2025-10-31",
+		IncludeResult: true,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestGetTransactions_MissingFromDate(t *testing.T) {
 	c := newTestClient("http://unused")
 	svc := NewService(c)

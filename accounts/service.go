@@ -122,7 +122,7 @@ func (s *Service) GetTransactions(ctx context.Context, req *TransactionsRequest)
 	params := url.Values{}
 	params.Set("from", req.From)
 	params.Set("to", req.To)
-	params.Set("includeResult", "false")
+	params.Set("includeResult", strconv.FormatBool(req.IncludeResult))
 	for _, id := range req.AccountIDs {
 		params.Add("accountIds", id)
 	}
