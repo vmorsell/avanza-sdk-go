@@ -338,6 +338,57 @@ type WarrantKeyIndicators struct {
 	SubType        string  `json:"subType"`
 }
 
+// --- Orderbook (trading-critical) ---
+
+// Orderbook contains trading parameters for an instrument (tick sizes, feature support, validity dates).
+type Orderbook struct {
+	ID                    string         `json:"id"`
+	Name                  string         `json:"name"`
+	ISIN                  string         `json:"isin"`
+	InstrumentID          string         `json:"instrumentId"`
+	MarketPlace           string         `json:"marketPlace"`
+	CountryCode           string         `json:"countryCode"`
+	TickSizeList          TickSizeList   `json:"tickSizeList"`
+	CollateralValue       float64        `json:"collateralValue"`
+	Currency              string         `json:"currency"`
+	OrderbookStatus       string         `json:"orderbookStatus"`
+	MinValidUntil         string         `json:"minValidUntil"`
+	MaxValidUntil         string         `json:"maxValidUntil"`
+	InstrumentType        string         `json:"instrumentType"`
+	VolumeFactor          int            `json:"volumeFactor"`
+	FeatureSupport        FeatureSupport `json:"featureSupport"`
+	PriceType             string         `json:"priceType"`
+	TradingUnit           int            `json:"tradingUnit"`
+	TickerSymbol          string         `json:"tickerSymbol"`
+	UnderlyingOrderbook   string         `json:"underlyingOrderbook,omitempty"`
+	UnderlyingCountryCode string         `json:"underlyingCountryCode,omitempty"`
+}
+
+// TickSizeList contains the tick size table for an instrument.
+type TickSizeList struct {
+	TickSizeEntries []TickSizeEntry `json:"tickSizeEntries"`
+}
+
+// TickSizeEntry defines the tick size for a price range.
+type TickSizeEntry struct {
+	Min  float64 `json:"min"`
+	Max  float64 `json:"max"`
+	Tick float64 `json:"tick"`
+}
+
+// FeatureSupport describes which trading features are available for an instrument.
+type FeatureSupport struct {
+	StopLoss                 bool `json:"stopLoss"`
+	FillAndOrKill            bool `json:"fillAndOrKill"`
+	OpenVolume               bool `json:"openVolume"`
+	MarketTrades             bool `json:"marketTrades"`
+	MarketTradesSummary      bool `json:"marketTradesSummary"`
+	NordicAtMid              bool `json:"nordicAtMid"`
+	StopLossMarketMakerQuote bool `json:"stopLossMarketMakerQuote"`
+	RoutingStrategies        bool `json:"routingStrategies"`
+	LimitOnClose             bool `json:"limitOnClose"`
+}
+
 // --- Market data (trading-critical) ---
 
 // MarketData contains real-time quote, order depth, and trades for an instrument.

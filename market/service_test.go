@@ -823,6 +823,137 @@ func TestGetMarketData_HTTPError(t *testing.T) {
 	}
 }
 
+// --- GetOrderbook tests ---
+
+func TestGetOrderbook_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/trading-critical/rest/orderbook/5246" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/trading-critical/rest/orderbook/5246")
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", r.Method, http.MethodGet)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"id": "5246",
+			"name": "Investor A",
+			"isin": "SE0015811955",
+			"instrumentId": "5406",
+			"marketPlace": "XSTO",
+			"countryCode": "SE",
+			"tickSizeList": {
+				"tickSizeEntries": [
+					{"min": 0.0, "max": 0.4999, "tick": 0.0001},
+					{"min": 0.5, "max": 0.9998, "tick": 0.0002}
+				]
+			},
+			"collateralValue": 80.00,
+			"currency": "SEK",
+			"orderbookStatus": "CLOSED",
+			"minValidUntil": "2026-04-09",
+			"maxValidUntil": "2026-07-07",
+			"instrumentType": "STOCK",
+			"volumeFactor": 1,
+			"featureSupport": {
+				"stopLoss": true,
+				"fillAndOrKill": true,
+				"openVolume": true,
+				"marketTrades": true,
+				"marketTradesSummary": true,
+				"nordicAtMid": true,
+				"stopLossMarketMakerQuote": false,
+				"routingStrategies": true,
+				"limitOnClose": true
+			},
+			"priceType": "MONETARY",
+			"tradingUnit": 1,
+			"tickerSymbol": "INVE A"
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetOrderbook(context.Background(), "5246")
+	if err != nil {
+		t.Fatalf("GetOrderbook failed: %v", err)
+	}
+
+	if resp.ID != "5246" {
+		t.Errorf("ID = %q, want %q", resp.ID, "5246")
+	}
+	if resp.Name != "Investor A" {
+		t.Errorf("Name = %q, want %q", resp.Name, "Investor A")
+	}
+	if resp.ISIN != "SE0015811955" {
+		t.Errorf("ISIN = %q, want %q", resp.ISIN, "SE0015811955")
+	}
+	if resp.InstrumentType != "STOCK" {
+		t.Errorf("InstrumentType = %q, want %q", resp.InstrumentType, "STOCK")
+	}
+	if resp.CollateralValue != 80.00 {
+		t.Errorf("CollateralValue = %f, want 80.00", resp.CollateralValue)
+	}
+	if resp.OrderbookStatus != "CLOSED" {
+		t.Errorf("OrderbookStatus = %q, want %q", resp.OrderbookStatus, "CLOSED")
+	}
+	if len(resp.TickSizeList.TickSizeEntries) != 2 {
+		t.Fatalf("len(TickSizeEntries) = %d, want 2", len(resp.TickSizeList.TickSizeEntries))
+	}
+	entry := resp.TickSizeList.TickSizeEntries[0]
+	if entry.Min != 0.0 || entry.Max != 0.4999 || entry.Tick != 0.0001 {
+		t.Errorf("TickSizeEntries[0] = {%f, %f, %f}, want {0, 0.4999, 0.0001}", entry.Min, entry.Max, entry.Tick)
+	}
+	if !resp.FeatureSupport.StopLoss {
+		t.Error("FeatureSupport.StopLoss = false, want true")
+	}
+	if !resp.FeatureSupport.FillAndOrKill {
+		t.Error("FeatureSupport.FillAndOrKill = false, want true")
+	}
+	if !resp.FeatureSupport.NordicAtMid {
+		t.Error("FeatureSupport.NordicAtMid = false, want true")
+	}
+	if resp.FeatureSupport.StopLossMarketMakerQuote {
+		t.Error("FeatureSupport.StopLossMarketMakerQuote = true, want false")
+	}
+	if resp.TickerSymbol != "INVE A" {
+		t.Errorf("TickerSymbol = %q, want %q", resp.TickerSymbol, "INVE A")
+	}
+	if resp.UnderlyingOrderbook != "" {
+		t.Errorf("UnderlyingOrderbook = %q, want empty", resp.UnderlyingOrderbook)
+	}
+}
+
+func TestGetOrderbook_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	_, err := svc.GetOrderbook(context.Background(), "")
+	if err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetOrderbook_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("not found"))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetOrderbook(context.Background(), "999")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+	if httpErr.StatusCode != http.StatusNotFound {
+		t.Errorf("StatusCode = %d, want %d", httpErr.StatusCode, http.StatusNotFound)
+	}
+}
+
 func TestSearch_NilTypesBecomesEmptyArray(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req searchAPIRequest
