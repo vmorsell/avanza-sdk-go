@@ -86,6 +86,98 @@ func TestOrdersSubscription_ReceivesEvents(t *testing.T) {
 	sub.Close()
 }
 
+func TestOrdersChannelsCloseOnSSEDeath(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprint(w, "forbidden")
+	}))
+	defer srv.Close()
+
+	c := client.NewClient(client.WithBaseURL(srv.URL))
+	c.SetMockCookies(map[string]string{"csid": "a", "cstoken": "b", "AZACSRF": "c"})
+	svc := NewService(c)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub, err := svc.SubscribeToOrders(ctx)
+	if err != nil {
+		t.Fatalf("subscribe failed: %v", err)
+	}
+
+	// Drain the error forwarded from the SSE layer.
+	select {
+	case <-sub.Errors():
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for error")
+	}
+
+	// Both trading-level channels should close once the SSE sub dies.
+	select {
+	case _, ok := <-sub.Events():
+		if ok {
+			t.Fatal("events channel should be closed")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("events channel not closed")
+	}
+
+	select {
+	case _, ok := <-sub.Errors():
+		if ok {
+			t.Fatal("errors channel should be closed")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("errors channel not closed")
+	}
+}
+
+func TestStopLossChannelsCloseOnSSEDeath(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprint(w, "forbidden")
+	}))
+	defer srv.Close()
+
+	c := client.NewClient(client.WithBaseURL(srv.URL))
+	c.SetMockCookies(map[string]string{"csid": "a", "cstoken": "b", "AZACSRF": "c"})
+	svc := NewService(c)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub, err := svc.SubscribeToStopLoss(ctx)
+	if err != nil {
+		t.Fatalf("subscribe failed: %v", err)
+	}
+
+	// Drain the error forwarded from the SSE layer.
+	select {
+	case <-sub.Errors():
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for error")
+	}
+
+	// Both trading-level channels should close once the SSE sub dies.
+	select {
+	case _, ok := <-sub.Events():
+		if ok {
+			t.Fatal("events channel should be closed")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("events channel not closed")
+	}
+
+	select {
+	case _, ok := <-sub.Errors():
+		if ok {
+			t.Fatal("errors channel should be closed")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("errors channel not closed")
+	}
+}
+
 func TestSubscribeToStopLoss_RequiresAuth(t *testing.T) {
 	c := client.NewClient()
 	svc := NewService(c)

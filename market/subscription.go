@@ -32,8 +32,6 @@ func (s *OrderDepthSubscription) Errors() <-chan error {
 func (s *OrderDepthSubscription) Close() {
 	s.sub.Close()
 	s.wg.Wait()
-	close(s.events)
-	close(s.errors)
 }
 
 func newOrderDepthSubscription(sub *sse.Subscription) *OrderDepthSubscription {
@@ -49,6 +47,8 @@ func newOrderDepthSubscription(sub *sse.Subscription) *OrderDepthSubscription {
 
 func (s *OrderDepthSubscription) run() {
 	defer s.wg.Done()
+	defer close(s.events)
+	defer close(s.errors)
 
 	rawEvents := s.sub.Events()
 	rawErrors := s.sub.Errors()

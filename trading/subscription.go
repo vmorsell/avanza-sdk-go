@@ -32,8 +32,6 @@ func (s *OrdersSubscription) Errors() <-chan error {
 func (s *OrdersSubscription) Close() {
 	s.sub.Close()
 	s.wg.Wait()
-	close(s.events)
-	close(s.errors)
 }
 
 func newOrdersSubscription(sub *sse.Subscription) *OrdersSubscription {
@@ -49,6 +47,8 @@ func newOrdersSubscription(sub *sse.Subscription) *OrdersSubscription {
 
 func (s *OrdersSubscription) run() {
 	defer s.wg.Done()
+	defer close(s.events)
+	defer close(s.errors)
 
 	rawEvents := s.sub.Events()
 	rawErrors := s.sub.Errors()
@@ -120,8 +120,6 @@ func (s *StopLossSubscription) Errors() <-chan error {
 func (s *StopLossSubscription) Close() {
 	s.sub.Close()
 	s.wg.Wait()
-	close(s.events)
-	close(s.errors)
 }
 
 func newStopLossSubscription(sub *sse.Subscription) *StopLossSubscription {
@@ -137,6 +135,8 @@ func newStopLossSubscription(sub *sse.Subscription) *StopLossSubscription {
 
 func (s *StopLossSubscription) run() {
 	defer s.wg.Done()
+	defer close(s.events)
+	defer close(s.errors)
 
 	rawEvents := s.sub.Events()
 	rawErrors := s.sub.Errors()

@@ -321,6 +321,50 @@ func TestCloseDuringReconnectWait(t *testing.T) {
 	}
 }
 
+func TestChannelsCloseOnNonRecoverableError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprint(w, "forbidden")
+	}))
+	defer srv.Close()
+
+	c := newTestClient(srv.URL)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub := New(ctx, Config{
+		Client:   c,
+		Endpoint: "/events",
+		Referer:  "https://example.com",
+	})
+
+	// Drain the error that gets sent before channels close.
+	select {
+	case <-sub.Errors():
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for error")
+	}
+
+	// Both channels should now be closed.
+	select {
+	case _, ok := <-sub.Events():
+		if ok {
+			t.Fatal("events channel should be closed")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("events channel not closed")
+	}
+
+	select {
+	case _, ok := <-sub.Errors():
+		if ok {
+			t.Fatal("errors channel should be closed")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("errors channel not closed")
+	}
+}
+
 func TestExponentialBackoff(t *testing.T) {
 	base := 3 * time.Second
 

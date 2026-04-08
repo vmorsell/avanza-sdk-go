@@ -76,8 +76,6 @@ func (s *Subscription) Errors() <-chan error {
 func (s *Subscription) Close() {
 	s.cancel()
 	s.wg.Wait()
-	close(s.events)
-	close(s.errors)
 }
 
 func (s *Subscription) trySendError(err error) {
@@ -98,6 +96,8 @@ func (s *Subscription) trySendEvent(event RawEvent) {
 func (s *Subscription) start() {
 	s.wg.Add(1)
 	defer s.wg.Done()
+	defer close(s.events)
+	defer close(s.errors)
 
 	defer func() {
 		if r := recover(); r != nil {
