@@ -700,6 +700,129 @@ func TestGetWarrant_HTTPError(t *testing.T) {
 	}
 }
 
+// --- GetMarketData tests ---
+
+func TestGetMarketData_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/trading-critical/rest/marketdata/123" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/trading-critical/rest/marketdata/123")
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", r.Method, http.MethodGet)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"quote": {
+				"buy": 99.50,
+				"sell": 100.00,
+				"last": 99.75,
+				"highest": 101.00,
+				"lowest": 98.00,
+				"change": 1.25,
+				"changePercent": 1.27,
+				"timeOfLast": "2025-01-15T14:30:00",
+				"totalValueTraded": 5000000.50,
+				"totalVolumeTraded": 50000,
+				"updated": "2025-01-15T14:30:05.123",
+				"volumeWeightedAveragePrice": 99.80
+			},
+			"orderDepth": {
+				"receivedTime": 1700000000000,
+				"levels": [
+					{
+						"buySide": {"price": 99.50, "volume": 200, "priceString": "99.50"},
+						"sellSide": {"price": 100.00, "volume": 150, "priceString": "100.00"}
+					}
+				],
+				"marketMakerExpected": true
+			},
+			"trades": []
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetMarketData(context.Background(), "123")
+	if err != nil {
+		t.Fatalf("GetMarketData failed: %v", err)
+	}
+
+	if resp.Quote.Buy != 99.50 {
+		t.Errorf("Quote.Buy = %f, want 99.50", resp.Quote.Buy)
+	}
+	if resp.Quote.Last != 99.75 {
+		t.Errorf("Quote.Last = %f, want 99.75", resp.Quote.Last)
+	}
+	if resp.Quote.ChangePercent != 1.27 {
+		t.Errorf("Quote.ChangePercent = %f, want 1.27", resp.Quote.ChangePercent)
+	}
+	if resp.Quote.TimeOfLast != "2025-01-15T14:30:00" {
+		t.Errorf("Quote.TimeOfLast = %q, want %q", resp.Quote.TimeOfLast, "2025-01-15T14:30:00")
+	}
+	if resp.Quote.TotalVolumeTraded != 50000 {
+		t.Errorf("Quote.TotalVolumeTraded = %d, want 50000", resp.Quote.TotalVolumeTraded)
+	}
+	if resp.Quote.VolumeWeightedAveragePrice != 99.80 {
+		t.Errorf("Quote.VolumeWeightedAveragePrice = %f, want 99.80", resp.Quote.VolumeWeightedAveragePrice)
+	}
+	if len(resp.OrderDepth.Levels) != 1 {
+		t.Fatalf("len(OrderDepth.Levels) = %d, want 1", len(resp.OrderDepth.Levels))
+	}
+	level := resp.OrderDepth.Levels[0]
+	if level.BuySide.Price != 99.50 {
+		t.Errorf("BuySide.Price = %f, want 99.50", level.BuySide.Price)
+	}
+	if level.BuySide.Volume != 200 {
+		t.Errorf("BuySide.Volume = %d, want 200", level.BuySide.Volume)
+	}
+	if level.SellSide.Price != 100.00 {
+		t.Errorf("SellSide.Price = %f, want 100.00", level.SellSide.Price)
+	}
+	if level.SellSide.PriceString != "100.00" {
+		t.Errorf("SellSide.PriceString = %q, want %q", level.SellSide.PriceString, "100.00")
+	}
+	if !resp.OrderDepth.MarketMakerExpected {
+		t.Error("OrderDepth.MarketMakerExpected = false, want true")
+	}
+	if resp.OrderDepth.ReceivedTime != 1700000000000 {
+		t.Errorf("OrderDepth.ReceivedTime = %d, want 1700000000000", resp.OrderDepth.ReceivedTime)
+	}
+	if len(resp.Trades) != 0 {
+		t.Errorf("len(Trades) = %d, want 0", len(resp.Trades))
+	}
+}
+
+func TestGetMarketData_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	_, err := svc.GetMarketData(context.Background(), "")
+	if err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetMarketData_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("not found"))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetMarketData(context.Background(), "999")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+	if httpErr.StatusCode != http.StatusNotFound {
+		t.Errorf("StatusCode = %d, want %d", httpErr.StatusCode, http.StatusNotFound)
+	}
+}
+
 func TestSearch_NilTypesBecomesEmptyArray(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req searchAPIRequest

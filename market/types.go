@@ -1,6 +1,8 @@
 // Package market provides market data functionality for the Avanza API.
 package market
 
+import "encoding/json"
+
 // OrderDepthLevel contains bid/ask prices and volumes at a single price level.
 type OrderDepthLevel struct {
 	BuyPrice   float64 `json:"buyPrice"`
@@ -334,4 +336,49 @@ type WarrantKeyIndicators struct {
 	IsAza          bool    `json:"isAza"`
 	NumberOfOwners int     `json:"numberOfOwners"`
 	SubType        string  `json:"subType"`
+}
+
+// --- Market data (trading-critical) ---
+
+// MarketData contains real-time quote, order depth, and trades for an instrument.
+type MarketData struct {
+	Quote      MarketDataQuote      `json:"quote"`
+	OrderDepth MarketDataOrderDepth `json:"orderDepth"`
+	Trades     []json.RawMessage    `json:"trades"`
+}
+
+// MarketDataQuote contains real-time price data from the trading-critical endpoint.
+type MarketDataQuote struct {
+	Buy                        float64 `json:"buy"`
+	Sell                       float64 `json:"sell"`
+	Last                       float64 `json:"last"`
+	Highest                    float64 `json:"highest"`
+	Lowest                     float64 `json:"lowest"`
+	Change                     float64 `json:"change"`
+	ChangePercent              float64 `json:"changePercent"`
+	TimeOfLast                 string  `json:"timeOfLast"`
+	TotalValueTraded           float64 `json:"totalValueTraded"`
+	TotalVolumeTraded          int     `json:"totalVolumeTraded"`
+	Updated                    string  `json:"updated"`
+	VolumeWeightedAveragePrice float64 `json:"volumeWeightedAveragePrice"`
+}
+
+// MarketDataOrderDepth contains the order book from the trading-critical endpoint.
+type MarketDataOrderDepth struct {
+	ReceivedTime        int64                       `json:"receivedTime"`
+	Levels              []MarketDataOrderDepthLevel `json:"levels"`
+	MarketMakerExpected bool                        `json:"marketMakerExpected"`
+}
+
+// MarketDataOrderDepthLevel contains bid and ask at a single price level.
+type MarketDataOrderDepthLevel struct {
+	BuySide  MarketDataOrderSide `json:"buySide"`
+	SellSide MarketDataOrderSide `json:"sellSide"`
+}
+
+// MarketDataOrderSide contains the price and volume for one side of the order book.
+type MarketDataOrderSide struct {
+	Price       float64 `json:"price"`
+	Volume      int     `json:"volume"`
+	PriceString string  `json:"priceString"`
 }

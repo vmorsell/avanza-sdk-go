@@ -147,6 +147,32 @@ func (s *Service) GetWarrant(ctx context.Context, orderbookID string) (*Warrant,
 	return &resp, nil
 }
 
+// GetMarketData returns real-time quote, order depth, and trades for an instrument.
+func (s *Service) GetMarketData(ctx context.Context, orderbookID string) (*MarketData, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/trading-critical/rest/marketdata/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp MarketData
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
 // SubscribeToOrderDepth subscribes to order depth updates. Call Close() when done.
 func (s *Service) SubscribeToOrderDepth(ctx context.Context, orderbookID string) (*OrderDepthSubscription, error) {
 	if orderbookID == "" {
