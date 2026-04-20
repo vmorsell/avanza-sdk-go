@@ -1,6 +1,26 @@
 #!/bin/bash
 set -e
 
+# Refuse to tag a dirty tree or a stale main.
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Working tree is dirty. Commit or stash first." >&2
+  exit 1
+fi
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" != "main" ]; then
+  echo "Not on main (current: $BRANCH). Release tags must be cut from main." >&2
+  exit 1
+fi
+
+git fetch origin main --quiet
+LOCAL=$(git rev-parse main)
+REMOTE=$(git rev-parse origin/main)
+if [ "$LOCAL" != "$REMOTE" ]; then
+  echo "Local main is not in sync with origin/main. Pull or push first." >&2
+  exit 1
+fi
+
 # Get current version
 CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 
