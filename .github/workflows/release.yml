@@ -38,8 +38,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          FLAGS=""
-          if [[ "$TAG" =~ ^v0\. ]]; then
+          # Prerelease only if the tag has a semver suffix (e.g. v0.9.2-rc.1).
+          # 0.x stable releases are not GitHub prereleases — see semver.org.
+          FLAGS="--latest"
+          if [[ "$TAG" == *-* ]]; then
             FLAGS="--prerelease"
           fi
           gh release create "$TAG" \
