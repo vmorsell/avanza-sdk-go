@@ -3,26 +3,15 @@
 [![CI](https://github.com/vmorsell/avanza-sdk-go/actions/workflows/ci.yml/badge.svg)](https://github.com/vmorsell/avanza-sdk-go/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/vmorsell/avanza-sdk-go.svg)](https://pkg.go.dev/github.com/vmorsell/avanza-sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vmorsell/avanza-sdk-go)](https://goreportcard.com/report/github.com/vmorsell/avanza-sdk-go)
-[![Latest Release](https://img.shields.io/github/v/release/vmorsell/avanza-sdk-go?include_prereleases&sort=semver)](https://github.com/vmorsell/avanza-sdk-go/releases)
+[![Latest Release](https://img.shields.io/github/v/release/vmorsell/avanza-sdk-go?sort=semver)](https://github.com/vmorsell/avanza-sdk-go/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/vmorsell/avanza-sdk-go)](go.mod)
 [![License](https://img.shields.io/github/license/vmorsell/avanza-sdk-go)](LICENSE)
 
-Unofficial Go SDK for [Avanza Bank](https://www.avanza.se), Sweden's largest online stockbroker. Covers BankID authentication, account and position data, order placement and management (including stop-loss), transaction history, and real-time streaming of order-book depth and own-order updates over Server-Sent Events. Reverse-engineered from the Avanza web client — there is no official public API.
+Go SDK for [Avanza Bank](https://www.avanza.se), the Swedish online broker. Unofficial, reverse-engineered from the web client, so the API surface here tracks whatever Avanza's own frontend uses. No public API exists.
 
-## Status
+Covers BankID login, account and position data, order placement (stocks, funds, stop-loss), instrument search, and real-time streams (order-book depth, own-order updates, stop-loss events) over SSE.
 
-**`v0.x` — API surface may change between minor versions.** The SDK is in active use but the Avanza endpoints themselves are undocumented and can change without notice. Pin exact versions in production.
-
-## Features
-
-- **BankID authentication** — QR-code flow with automatic QR refresh and session establishment.
-- **Accounts** — overview, account lists, positions, cash, transactions, aggregated values.
-- **Trading** — place, modify, delete orders for stocks and funds. Order validation and preliminary fee quotes before submission.
-- **Stop-loss orders** — full lifecycle (place, list, modify, delete) with trigger and order-event configuration.
-- **Market data** — instrument search, quotes, order depth, orderbook trading parameters.
-- **Streaming (SSE)** — subscribe to real-time order-book depth, stop-loss order updates, and your own order updates. Automatic reconnect with exponential backoff.
-- **Thread-safe** — a single client can be shared across goroutines. Cookies and security tokens are protected under RWMutex.
-- **Rate limiting** — pluggable `RateLimiter` interface with a 100ms-interval default, TOCTOU-safe under concurrency.
+> 0.x software. The Avanza endpoints are undocumented and can change without notice. Pin exact versions, and expect minor bumps to occasionally break things.
 
 ## Install
 
@@ -30,9 +19,11 @@ Unofficial Go SDK for [Avanza Bank](https://www.avanza.se), Sweden's largest onl
 go get github.com/vmorsell/avanza-sdk-go
 ```
 
-Go 1.21+.
+Requires Go 1.23 or newer.
 
 ## Quick start
+
+Authentication is BankID only. The flow starts a session, renders a QR in your terminal, polls until you scan it, then exchanges the result for session cookies.
 
 ```go
 package main
@@ -52,24 +43,20 @@ func main() {
 
     c := avanza.New()
 
-    // 1. Start BankID — returns a QR token.
     startResp, err := c.Auth.StartBankID(ctx)
     if err != nil {
         log.Fatal(err)
     }
 
-    // 2. Render the QR in the terminal.
     if err := c.Auth.DisplayQRCode(startResp.QRToken); err != nil {
         log.Fatal(err)
     }
 
-    // 3. Poll until the user scans it, auto-refreshing the QR as it expires.
     collectResp, err := c.Auth.PollBankIDWithQRUpdates(ctx)
     if err != nil {
         log.Fatal(err)
     }
 
-    // 4. Exchange the auth result for session cookies.
     if err := c.Auth.EstablishSession(ctx, collectResp); err != nil {
         log.Fatal(err)
     }
@@ -78,22 +65,19 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Printf("Logged in as %s — %d accounts\n", collectResp.Name, len(overview.Accounts))
+    fmt.Printf("logged in as %s, %d accounts\n", collectResp.Name, len(overview.Accounts))
 }
 ```
+
+Hold on to the `Avanza` struct after that. Every service (`Auth`, `Accounts`, `Trading`, `Market`) hangs off it and they share one HTTP client, cookie jar, and rate limiter. Safe to share across goroutines.
 
 ## Placing an order
 
 ```go
-import (
-    "github.com/google/uuid"
-    "github.com/vmorsell/avanza-sdk-go/trading"
-)
-
 resp, err := c.Trading.PlaceOrder(ctx, &trading.PlaceOrderRequest{
     RequestID:   uuid.New().String(),
     AccountID:   accountID,
-    OrderbookID: "5247", // Investor B
+    OrderbookID: "5247", // Investor B on Stockholmsbörsen
     Side:        trading.OrderSideBuy,
     Condition:   trading.OrderConditionNormal,
     Price:       245.50,
@@ -105,9 +89,11 @@ if err != nil {
 fmt.Printf("order %s: %s\n", resp.OrderID, resp.OrderRequestStatus)
 ```
 
-For safer flows, call `Trading.ValidateOrder` and `Trading.GetPreliminaryFee` before `PlaceOrder`.
+For anything real, run `Trading.ValidateOrder` and `Trading.GetPreliminaryFee` first. Validation flags commission thresholds, price ramping, large-in-scale, etc. The fee call gives you the commission in the order's currency before you commit.
 
-## Streaming order-book depth
+## Streaming
+
+Order-book depth, own-order updates, and stop-loss events come over Server-Sent Events. Subscriptions reconnect automatically on transient failures with exponential backoff from 3s up to 30s.
 
 ```go
 sub, err := c.Market.SubscribeToOrderDepth(ctx, "738784")
@@ -134,39 +120,28 @@ for {
 }
 ```
 
-The subscription reconnects automatically with exponential backoff (3s → 30s) on transient failures. `sub.Close()` cancels the underlying context and drains goroutines cleanly.
+`sub.Close()` cancels the underlying context and waits for goroutines to drain before returning.
 
 ## Configuration
 
+Functional options on `avanza.New`:
+
 ```go
-import (
-    "net/http"
-    "time"
-
-    "github.com/vmorsell/avanza-sdk-go"
-    "github.com/vmorsell/avanza-sdk-go/client"
-)
-
 c := avanza.New(
     avanza.WithBaseURL("http://localhost:8080"),
     avanza.WithHTTPClient(&http.Client{Timeout: 60 * time.Second}),
-    avanza.WithUserAgent("MyApp/1.0"),
+    avanza.WithUserAgent("my-trading-bot/1.0"),
     avanza.WithRateLimiter(&client.SimpleRateLimiter{Interval: 200 * time.Millisecond}),
 )
 ```
 
-All options are optional and composable. Defaults: `https://www.avanza.se`, standard `http.Client`, 100ms minimum interval between requests.
+Defaults: `https://www.avanza.se`, stdlib `http.Client`, minimum 100ms between requests. The rate limiter is an interface, so swap it for something smarter if you need token bucket or adaptive behavior.
 
-## Error handling
+## Errors
 
-Non-2xx responses return `*client.HTTPError` with the status code and raw body:
+Non-2xx responses come back as `*client.HTTPError`:
 
 ```go
-import (
-    "errors"
-    "github.com/vmorsell/avanza-sdk-go/client"
-)
-
 _, err := c.Accounts.GetOverview(ctx)
 if err != nil {
     var httpErr *client.HTTPError
@@ -176,27 +151,16 @@ if err != nil {
 }
 ```
 
+Bodies are left raw because Avanza's error shapes aren't consistent enough to model generically.
+
 ## Examples
 
-Runnable end-to-end examples (authenticate, list accounts, place/validate orders, subscribe to streams) live under [`examples/`](examples/).
-
-## Related projects
-
-Unofficial Avanza SDKs also exist in other languages — search GitHub for "avanza" if you need Python, JavaScript, or other runtimes.
-
-## Contributing
-
-Issues and PRs welcome. Run `make ci` (tests with `-race`, `govulncheck`, `golangci-lint`) before submitting.
+Runnable end-to-end examples live under [`examples/`](examples/), grouped by feature. Each is a `main.go` you can run directly once you have a test account.
 
 ## License
 
 [MIT](LICENSE).
 
----
+## Disclaimer
 
-<details>
-<summary><strong>Disclaimer</strong></summary>
-
-This is an unofficial, reverse-engineered SDK. It is **not affiliated with, endorsed by, or supported by Avanza Bank AB**. The underlying endpoints are undocumented and may change or break without notice. Trading involves financial risk; bugs in this library could cause unintended orders. You are solely responsible for any use of this SDK and any resulting trades. Test thoroughly against small positions before automating anything meaningful.
-
-</details>
+Not affiliated with Avanza Bank AB. The endpoints are undocumented and may change or break at any point. Trading involves real money; bugs here could cause unintended orders. Test against small positions before letting anything loose.
