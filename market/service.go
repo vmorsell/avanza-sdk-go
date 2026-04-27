@@ -199,6 +199,38 @@ func (s *Service) GetMarketData(ctx context.Context, orderbookID string) (*Marke
 	return &resp, nil
 }
 
+// GetMarketMakerPriceChart returns OHLC bars and market-maker quotes for an instrument
+// over the given time period. The server selects an appropriate bar resolution; available
+// alternatives are reported in the response metadata.
+func (s *Service) GetMarketMakerPriceChart(ctx context.Context, orderbookID string, timePeriod TimePeriod) (*MarketMakerPriceChart, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+	if timePeriod == "" {
+		return nil, fmt.Errorf("timePeriod is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/price-chart/marketmaker/%s?timePeriod=%s",
+		url.PathEscape(orderbookID), url.QueryEscape(string(timePeriod)))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp MarketMakerPriceChart
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
 // SubscribeToOrderDepth subscribes to order depth updates. Call Close() when done.
 func (s *Service) SubscribeToOrderDepth(ctx context.Context, orderbookID string) (*OrderDepthSubscription, error) {
 	if orderbookID == "" {

@@ -47,7 +47,7 @@ func TestSearch_Success(t *testing.T) {
 					Type:        "STOCK",
 					Title:       "Investor B (INVE B)",
 					OrderbookID: "5247",
-					Tradable:   true,
+					Tradable:    true,
 					Buyable:     true,
 					Sellable:    true,
 					Price: SearchHitPrice{
@@ -64,7 +64,7 @@ func TestSearch_Success(t *testing.T) {
 					Type:            "FUND",
 					Title:           "Spiltan Aktiefond Investmentbolag",
 					OrderbookID:     "325406",
-					Tradable:       true,
+					Tradable:        true,
 					MarketPlaceName: "Fondmarknaden",
 					FundTags: []FundTag{
 						{Title: "Aktiefond", Category: "fund-type", TagCategory: "TYPE"},
@@ -941,6 +941,157 @@ func TestGetOrderbook_HTTPError(t *testing.T) {
 
 	svc := NewService(newTestClient(server.URL))
 	_, err := svc.GetOrderbook(context.Background(), "999")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+	if httpErr.StatusCode != http.StatusNotFound {
+		t.Errorf("StatusCode = %d, want %d", httpErr.StatusCode, http.StatusNotFound)
+	}
+}
+
+// --- GetMarketMakerPriceChart tests ---
+
+func TestGetMarketMakerPriceChart_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/price-chart/marketmaker/2037852" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/price-chart/marketmaker/2037852")
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", r.Method, http.MethodGet)
+		}
+		if got := r.URL.Query().Get("timePeriod"); got != "today" {
+			t.Errorf("timePeriod = %q, want %q", got, "today")
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"ohlc": [
+				{"timestamp": 1777318680000, "open": 80.73, "close": 80.73, "low": 80.73, "high": 80.73, "totalVolumeTraded": 3000},
+				{"timestamp": 1777319280000, "open": 81.0, "close": 81.0, "low": 81.0, "high": 81.0, "totalVolumeTraded": 3000}
+			],
+			"marketMaker": [
+				{"buy": 78.13, "sell": 78.43, "timestamp": 1777270500000},
+				{"buy": null, "sell": null, "timestamp": 1777270560000}
+			],
+			"from": "2026-04-27",
+			"to": "2026-04-27",
+			"metadata": {
+				"resolution": {
+					"chartResolution": "minute",
+					"availableResolutions": ["minute", "two_minutes", "hour", "day"]
+				}
+			}
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetMarketMakerPriceChart(context.Background(), "2037852", TimePeriodToday)
+	if err != nil {
+		t.Fatalf("GetMarketMakerPriceChart failed: %v", err)
+	}
+
+	if len(resp.OHLC) != 2 {
+		t.Fatalf("len(OHLC) = %d, want 2", len(resp.OHLC))
+	}
+	if resp.OHLC[0].Timestamp != 1777318680000 {
+		t.Errorf("OHLC[0].Timestamp = %d, want 1777318680000", resp.OHLC[0].Timestamp)
+	}
+	if resp.OHLC[0].Open != 80.73 || resp.OHLC[0].Close != 80.73 {
+		t.Errorf("OHLC[0] = {open=%v, close=%v}, want {80.73, 80.73}", resp.OHLC[0].Open, resp.OHLC[0].Close)
+	}
+	if resp.OHLC[0].TotalVolumeTraded != 3000 {
+		t.Errorf("OHLC[0].TotalVolumeTraded = %d, want 3000", resp.OHLC[0].TotalVolumeTraded)
+	}
+
+	if len(resp.MarketMaker) != 2 {
+		t.Fatalf("len(MarketMaker) = %d, want 2", len(resp.MarketMaker))
+	}
+	if resp.MarketMaker[0].Buy == nil || *resp.MarketMaker[0].Buy != 78.13 {
+		t.Errorf("MarketMaker[0].Buy = %v, want 78.13", resp.MarketMaker[0].Buy)
+	}
+	if resp.MarketMaker[0].Sell == nil || *resp.MarketMaker[0].Sell != 78.43 {
+		t.Errorf("MarketMaker[0].Sell = %v, want 78.43", resp.MarketMaker[0].Sell)
+	}
+	if resp.MarketMaker[1].Buy != nil {
+		t.Errorf("MarketMaker[1].Buy = %v, want nil", resp.MarketMaker[1].Buy)
+	}
+	if resp.MarketMaker[1].Sell != nil {
+		t.Errorf("MarketMaker[1].Sell = %v, want nil", resp.MarketMaker[1].Sell)
+	}
+
+	if resp.From != "2026-04-27" || resp.To != "2026-04-27" {
+		t.Errorf("From/To = %q/%q, want 2026-04-27/2026-04-27", resp.From, resp.To)
+	}
+	if resp.Metadata.Resolution.ChartResolution != "minute" {
+		t.Errorf("ChartResolution = %q, want %q", resp.Metadata.Resolution.ChartResolution, "minute")
+	}
+	if len(resp.Metadata.Resolution.AvailableResolutions) != 4 {
+		t.Errorf("len(AvailableResolutions) = %d, want 4", len(resp.Metadata.Resolution.AvailableResolutions))
+	}
+}
+
+func TestGetMarketMakerPriceChart_TimePeriodPropagated(t *testing.T) {
+	cases := []TimePeriod{
+		TimePeriodToday,
+		TimePeriodOneWeek,
+		TimePeriodOneMonth,
+		TimePeriodThreeMonths,
+		TimePeriodSixMonths,
+		TimePeriodThisYear,
+		TimePeriodOneYear,
+		TimePeriodInfinity,
+	}
+
+	for _, tp := range cases {
+		t.Run(string(tp), func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if got := r.URL.Query().Get("timePeriod"); got != string(tp) {
+					t.Errorf("timePeriod = %q, want %q", got, string(tp))
+				}
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{"ohlc": [], "marketMaker": [], "from": "", "to": "", "metadata": {"resolution": {"chartResolution": "day", "availableResolutions": ["day"]}}}`))
+			}))
+			defer server.Close()
+
+			svc := NewService(newTestClient(server.URL))
+			if _, err := svc.GetMarketMakerPriceChart(context.Background(), "1", tp); err != nil {
+				t.Fatalf("GetMarketMakerPriceChart failed: %v", err)
+			}
+		})
+	}
+}
+
+func TestGetMarketMakerPriceChart_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	_, err := svc.GetMarketMakerPriceChart(context.Background(), "", TimePeriodToday)
+	if err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetMarketMakerPriceChart_EmptyTimePeriod(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	_, err := svc.GetMarketMakerPriceChart(context.Background(), "2037852", "")
+	if err == nil {
+		t.Fatal("expected error for empty timePeriod, got nil")
+	}
+}
+
+func TestGetMarketMakerPriceChart_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("not found"))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetMarketMakerPriceChart(context.Background(), "999", TimePeriodOneWeek)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
