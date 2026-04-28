@@ -74,32 +74,32 @@ type SearchResponse struct {
 
 // SearchHit is a single search result.
 type SearchHit struct {
-	Type             string         `json:"type"`
-	Title            string         `json:"title"`
-	Description      string         `json:"description"`
-	FlagCode         string         `json:"flagCode"`
-	OrderbookID      string         `json:"orderBookId"`
-	URLSlugName      string         `json:"urlSlugName"`
-	Tradable         bool           `json:"tradeable"`
-	Sellable         bool           `json:"sellable"`
-	Buyable          bool           `json:"buyable"`
-	Price            SearchHitPrice `json:"price"`
-	StockSectors     []StockSector  `json:"stockSectors"`
-	FundTags         []FundTag      `json:"fundTags"`
-	MarketPlaceName  string         `json:"marketPlaceName"`
-	SubType          *string        `json:"subType"`
+	Type            string         `json:"type"`
+	Title           string         `json:"title"`
+	Description     string         `json:"description"`
+	FlagCode        string         `json:"flagCode"`
+	OrderbookID     string         `json:"orderBookId"`
+	URLSlugName     string         `json:"urlSlugName"`
+	Tradable        bool           `json:"tradeable"`
+	Sellable        bool           `json:"sellable"`
+	Buyable         bool           `json:"buyable"`
+	Price           SearchHitPrice `json:"price"`
+	StockSectors    []StockSector  `json:"stockSectors"`
+	FundTags        []FundTag      `json:"fundTags"`
+	MarketPlaceName string         `json:"marketPlaceName"`
+	SubType         *string        `json:"subType"`
 }
 
 // SearchHitPrice contains price and change data for a search hit.
 type SearchHitPrice struct {
-	Last                           string  `json:"last"`
-	Currency                       string  `json:"currency"`
-	TodayChangePercent             string  `json:"todayChangePercent"`
-	TodayChangeValue               string  `json:"todayChangeValue"`
-	TodayChangeDirection           int     `json:"todayChangeDirection"`
-	ThreeMonthsAgoChangePercent    *string `json:"threeMonthsAgoChangePercent"`
-	ThreeMonthsAgoChangeDirection  int     `json:"threeMonthsAgoChangeDirection"`
-	Spread                         *string `json:"spread"`
+	Last                          string  `json:"last"`
+	Currency                      string  `json:"currency"`
+	TodayChangePercent            string  `json:"todayChangePercent"`
+	TodayChangeValue              string  `json:"todayChangeValue"`
+	TodayChangeDirection          int     `json:"todayChangeDirection"`
+	ThreeMonthsAgoChangePercent   *string `json:"threeMonthsAgoChangePercent"`
+	ThreeMonthsAgoChangeDirection int     `json:"threeMonthsAgoChangeDirection"`
+	Spread                        *string `json:"spread"`
 }
 
 // StockSector categorizes a stock by industry sector.
@@ -186,14 +186,14 @@ type HistoricalClosingPrices struct {
 
 // Underlying describes the underlying instrument for derivatives.
 type Underlying struct {
-	OrderbookID        string  `json:"orderbookId"`
-	Name               string  `json:"name"`
-	InstrumentType     string  `json:"instrumentType"`
-	InstrumentSubType  string  `json:"instrumentSubType"`
-	Quote              Quote   `json:"quote"`
-	Listing            Listing `json:"listing"`
+	OrderbookID          string  `json:"orderbookId"`
+	Name                 string  `json:"name"`
+	InstrumentType       string  `json:"instrumentType"`
+	InstrumentSubType    string  `json:"instrumentSubType"`
+	Quote                Quote   `json:"quote"`
+	Listing              Listing `json:"listing"`
 	PreviousClosingPrice float64 `json:"previousClosingPrice"`
-	Reference          bool    `json:"reference"`
+	Reference            bool    `json:"reference"`
 }
 
 // --- Stock ---
@@ -432,4 +432,62 @@ type MarketDataOrderSide struct {
 	Price       float64 `json:"price"`
 	Volume      int     `json:"volume"`
 	PriceString string  `json:"priceString"`
+}
+
+// --- Price chart ---
+
+// TimePeriod is the time window for a price chart request.
+type TimePeriod string
+
+// Time periods accepted by the price chart endpoint.
+const (
+	TimePeriodToday       TimePeriod = "today"
+	TimePeriodOneWeek     TimePeriod = "one_week"
+	TimePeriodOneMonth    TimePeriod = "one_month"
+	TimePeriodThreeMonths TimePeriod = "three_months"
+	TimePeriodSixMonths   TimePeriod = "six_months"
+	TimePeriodThisYear    TimePeriod = "this_year"
+	TimePeriodOneYear     TimePeriod = "one_year"
+	TimePeriodInfinity    TimePeriod = "infinity"
+)
+
+// MarketMakerPriceChart contains OHLC bars and market-maker quotes for a single instrument.
+type MarketMakerPriceChart struct {
+	OHLC        []OHLCBar          `json:"ohlc"`
+	MarketMaker []MarketMakerQuote `json:"marketMaker"`
+	From        string             `json:"from"`
+	To          string             `json:"to"`
+	Metadata    PriceChartMetadata `json:"metadata"`
+}
+
+// OHLCBar is a single open/high/low/close bar with traded volume.
+// Timestamp is Unix epoch milliseconds.
+type OHLCBar struct {
+	Timestamp         int64   `json:"timestamp"`
+	Open              float64 `json:"open"`
+	Close             float64 `json:"close"`
+	Low               float64 `json:"low"`
+	High              float64 `json:"high"`
+	TotalVolumeTraded int64   `json:"totalVolumeTraded"`
+}
+
+// MarketMakerQuote is a single market-maker bid/ask sample.
+// Buy and Sell are nil when the market maker did not publish a quote at that timestamp.
+// Timestamp is Unix epoch milliseconds.
+type MarketMakerQuote struct {
+	Buy       *float64 `json:"buy"`
+	Sell      *float64 `json:"sell"`
+	Timestamp int64    `json:"timestamp"`
+}
+
+// PriceChartMetadata describes the resolution of the returned series.
+type PriceChartMetadata struct {
+	Resolution PriceChartResolution `json:"resolution"`
+}
+
+// PriceChartResolution reports the resolution used for this response and the
+// other resolutions the server is willing to return for this time period.
+type PriceChartResolution struct {
+	ChartResolution      string   `json:"chartResolution"`
+	AvailableResolutions []string `json:"availableResolutions"`
 }
