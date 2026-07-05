@@ -1,0 +1,14 @@
+{
+    "quote": {
+        "buy": 194.35,
+        "sell": 194.51,
+        "last": 194.4,
+        "highest": 208.14,
+        "lowest": 181.39,
+        "change": -0.43,
+        "changePercent": -0.22,
+        "updated": "2026-07-02T23:59:58.838Z",
+        "timeOfLast": "2026-07-02T23:59:58.838Z"
+    },
+    "status": "POST_MARKET"
+}

@@ -1,0 +1,157 @@
+{
+    "orderbookId": "4478",
+    "name": "NVIDIA",
+    "isin": "US67066G1040",
+    "instrumentId": "4658",
+    "sectors": [
+        {
+            "sectorId": "55",
+            "sectorName": "Hårdvaruutrustning"
+        },
+        {
+            "sectorId": "19",
+            "sectorName": "Hårdvara"
+        },
+        {
+            "sectorId": "38",
+            "sectorName": "Teknologi"
+        }
+    ],
+    "tradable": "BUYABLE_AND_SELLABLE",
+    "listing": {
+        "shortName": "NVDA",
+        "tickerSymbol": "NVDA",
+        "countryCode": "US",
+        "currency": "USD",
+        "marketPlaceCode": "XNAS",
+        "marketPlaceName": "NASDAQ",
+        "tickSizeListId": "4878",
+        "marketTradesAvailable": false
+    },
+    "marketPlace": {
+        "marketOpen": false,
+        "timeLeftMs": 88653330,
+        "openingTime": "15:30:00",
+        "todayClosingTime": "22:00:00",
+        "normalClosingTime": "22:00:00",
+        "currentStatus": "CLOSED",
+        "marketStateSchedule": [
+            {
+                "status": "PRE_MARKET_QUOTES",
+                "start": "10:00:00",
+                "end": "11:00:00"
+            },
+            {
+                "status": "PRE_MARKET_TRADING",
+                "start": "11:00:00",
+                "end": "15:30:00"
+            },
+            {
+                "status": "OPEN",
+                "start": "15:30:00",
+                "end": "22:00:00"
+            },
+            {
+                "status": "POST_MARKET_TRADING",
+                "start": "22:00:00",
+                "end": "22:30:00"
+            },
+            {
+                "status": "POST_MARKET_QUOTES",
+                "start": "22:30:00",
+                "end": "02:00:00"
+            },
+            {
+                "status": "CLOSED",
+                "start": "02:00:00",
+                "end": "10:00:00"
+            }
+        ]
+    },
+    "historicalClosingPrices": {
+        "oneDay": 197.58,
+        "oneWeek": 195.74,
+        "oneMonth": 218.66,
+        "threeMonths": 177.39,
+        "sixMonths": 188.85,
+        "startOfYear": 186.50,
+        "oneYear": 159.34,
+        "threeYears": 42.41,
+        "fiveYears": 20.49,
+        "tenYears": 1.17,
+        "start": 0.04,
+        "startDate": "1999-01-22"
+    },
+    "keyIndicators": {
+        "numberOfOwners": 105956,
+        "reportDate": "2026-05-20",
+        "directYield": 0.0014,
+        "ordinaryDirectYield": 0.0014,
+        "totalDirectYield": 0.0014,
+        "volatility": 0.4055,
+        "beta": 2.11,
+        "priceEarningsRatio": 29.54,
+        "priceSalesRatio": 18.60,
+        "priceBookRatio": 24.12,
+        "evEbitRatio": 29.02,
+        "returnOnEquity": 0.8165,
+        "returnOnTotalAssets": 0.6151,
+        "returnOnCapitalEmployed": 0.7527,
+        "equityRatio": 0.7533,
+        "capitalTurnover": 0.9769,
+        "operatingProfitMargin": 0.6402,
+        "grossMargin": 0.7415,
+        "netMargin": 0.7473,
+        "marketCapital": {
+            "value": 4714886000000.00,
+            "currency": "USD"
+        },
+        "equityPerShare": {
+            "value": 8.08,
+            "currency": "USD"
+        },
+        "turnoverPerShare": {
+            "value": 10.47,
+            "currency": "USD"
+        },
+        "earningsPerShare": {
+            "value": 6.56,
+            "currency": "USD"
+        },
+        "dividend": {
+            "exDate": "2026-06-04",
+            "paymentDate": "2026-06-26",
+            "amount": 0.25,
+            "currencyCode": "USD",
+            "exDateStatus": "HISTORICAL"
+        },
+        "dividendsPerYear": 4,
+        "nextReport": {
+            "date": "2026-08-25",
+            "reportType": "INTERIM",
+            "isConfirmed": false
+        },
+        "previousReport": {
+            "date": "2026-05-20",
+            "reportType": "INTERIM",
+            "isConfirmed": true
+        }
+    },
+    "quote": {
+        "buy": 194.49,
+        "sell": 194.55,
+        "last": 194.83,
+        "highest": 200.06,
+        "lowest": 192.35,
+        "change": -2.75,
+        "changePercent": -1.39,
+        "spread": 0.03,
+        "timeOfLast": 1783026000429,
+        "totalValueTraded": 27778871838.73279600,
+        "totalVolumeTraded": 142385548.00000000,
+        "updated": 1783043345495,
+        "volumeWeightedAveragePrice": 195.11,
+        "isRealTime": false
+    },
+    "type": "STOCK"
+}

@@ -1,0 +1,86 @@
+{
+    "orderbookId": "1612107",
+    "name": "BULL NVIDIA X3 AVA 1",
+    "isin": "GB00BQRK2L90",
+    "tradable": "BUYABLE_AND_SELLABLE",
+    "listing": {
+        "shortName": "BULL NVIDIA X3 AVA 1",
+        "tickerSymbol": "BULL NVIDIA X3 AVA 1",
+        "countryCode": "SE",
+        "currency": "SEK",
+        "marketPlaceCode": "FNSE",
+        "marketPlaceName": "First North Stockholm",
+        "tickSizeListId": "1851",
+        "marketTradesAvailable": true
+    },
+    "historicalClosingPrices": {
+        "oneDay": 663.27,
+        "oneWeek": 667,
+        "oneMonth": 1000.98,
+        "threeMonths": 563.25,
+        "sixMonths": 770.25,
+        "startOfYear": 747.75,
+        "oneYear": 565.33,
+        "start": 93.140000,
+        "startDate": "2023-07-25"
+    },
+    "keyIndicators": {
+        "leverage": 3,
+        "isAza": true,
+        "productLink": "https://etp.morganstanley.com/SE/SV/product-details/",
+        "numberOfOwners": 24
+    },
+    "quote": {
+        "buy": 693.72,
+        "sell": 695.47,
+        "last": 692.07,
+        "highest": 692.07,
+        "lowest": 690.38,
+        "change": 28.80,
+        "changePercent": 4.34,
+        "spread": 0.25,
+        "timeOfLast": 1783077052000,
+        "totalValueTraded": 4145.66000000,
+        "totalVolumeTraded": 6.00000000,
+        "updated": 1783110333609,
+        "volumeWeightedAveragePrice": 690.94,
+        "isRealTime": false
+    },
+    "type": "CERTIFICATE",
+    "underlying": {
+        "orderbookId": "4478",
+        "name": "NVIDIA",
+        "instrumentType": "STOCK",
+        "quote": {
+            "buy": 194.49,
+            "sell": 194.55,
+            "last": 194.83,
+            "highest": 200.06,
+            "lowest": 192.35,
+            "change": -2.75,
+            "changePercent": -1.39,
+            "spread": 0.03,
+            "timeOfLast": 1783026000429,
+            "totalValueTraded": 27778871838.73279600,
+            "totalVolumeTraded": 142385548.00000000,
+            "updated": 1783043345495,
+            "volumeWeightedAveragePrice": 195.11,
+            "isRealTime": false
+        },
+        "listing": {
+            "shortName": "NVDA",
+            "tickerSymbol": "NVDA",
+            "countryCode": "US",
+            "currency": "USD",
+            "marketPlaceCode": "XNAS",
+            "marketPlaceName": "NASDAQ",
+            "tickSizeListId": "4878",
+            "marketTradesAvailable": false
+        },
+        "previousClosingPrice": 197.58,
+        "reference": false
+    },
+    "assetCategory": "Aktier",
+    "category": "Enskild aktie",
+    "subCategory": "NVIDIA"
+}

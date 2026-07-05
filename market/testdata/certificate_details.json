@@ -1,0 +1,17 @@
+{
+    "issuer": "Morgan Stanley & Co. International plc",
+    "direction": "L\u00e5ng",
+    "leverage": 3,
+    "documents": {
+        "kid": "https://api.priiphub.com/hub/kid-portal/kid/identifier/GB00BQRK2L90?documentType=pdf&jurisdiction=SE&language=SV",
+        "prospectus": "https://etp.morganstanley.com/se/UnitedDocumentSection/GeneralDocument/447c97bc-3eae-44af-9300-1e7f1de50e37/Slutgiltiga-villkor-GB00BQRK2L90.pdf"
+    },
+    "trades": [],
+    "orderDepth": {
+        "receivedTime": 1783108500065,
+        "levels": []
+    },
+    "brokerTradeSummaries": [],
+    "collateralValue": 0.0,
+    "superInterestApproved": false
+}

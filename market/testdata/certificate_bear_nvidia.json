@@ -1,0 +1,80 @@
+{
+    "orderbookId": "1834856",
+    "name": "BEAR NVIDIA X5 SG",
+    "isin": "DE000SY7CGE9",
+    "tradable": "BUYABLE_AND_SELLABLE",
+    "listing": {
+        "shortName": "BEAR NVIDIA X5 SG",
+        "tickerSymbol": "BEAR NVIDIA X5 SG",
+        "countryCode": "SE",
+        "currency": "SEK",
+        "marketPlaceCode": "NMTF",
+        "marketPlaceName": "Nordic MTF",
+        "tickSizeListId": "2437",
+        "marketTradesAvailable": true
+    },
+    "historicalClosingPrices": {
+        "oneDay": 0.026,
+        "oneWeek": 0.02,
+        "oneMonth": 0.02,
+        "threeMonths": 0.1110,
+        "sixMonths": 0.0840,
+        "startOfYear": 0.0850,
+        "oneYear": 0.4310,
+        "start": 72.580000,
+        "startDate": "2024-08-23"
+    },
+    "keyIndicators": {
+        "leverage": 5,
+        "isAza": false,
+        "productLink": "https://etp.morganstanley.com/SE/SV/product-details/",
+        "numberOfOwners": 5
+    },
+    "quote": {
+        "last": 0.026,
+        "change": 0.000,
+        "changePercent": 0.00,
+        "timeOfLast": 1783057507309,
+        "totalValueTraded": 0E-8,
+        "totalVolumeTraded": 0E-8,
+        "updated": 1783108804405,
+        "isRealTime": false
+    },
+    "type": "CERTIFICATE",
+    "underlying": {
+        "orderbookId": "4478",
+        "name": "NVIDIA",
+        "instrumentType": "STOCK",
+        "quote": {
+            "buy": 194.49,
+            "sell": 194.55,
+            "last": 194.83,
+            "highest": 200.06,
+            "lowest": 192.35,
+            "change": -2.75,
+            "changePercent": -1.39,
+            "spread": 0.03,
+            "timeOfLast": 1783026000429,
+            "totalValueTraded": 27778871838.73279600,
+            "totalVolumeTraded": 142385548.00000000,
+            "updated": 1783043345495,
+            "volumeWeightedAveragePrice": 195.11,
+            "isRealTime": false
+        },
+        "listing": {
+            "shortName": "NVDA",
+            "tickerSymbol": "NVDA",
+            "countryCode": "US",
+            "currency": "USD",
+            "marketPlaceCode": "XNAS",
+            "marketPlaceName": "NASDAQ",
+            "tickSizeListId": "4878",
+            "marketTradesAvailable": false
+        },
+        "previousClosingPrice": 197.58,
+        "reference": false
+    },
+    "assetCategory": "Aktier",
+    "category": "Enskild aktie",
+    "subCategory": "NVIDIA"
+}

@@ -1,0 +1,88 @@
+{
+    "orderbookId": "1586984",
+    "name": "TURBO L NVIDIA AVA 94",
+    "isin": "GB00BQRHT191",
+    "tradable": "BUYABLE_AND_SELLABLE",
+    "listing": {
+        "shortName": "TURBO L NVIDIA AVA 94",
+        "tickerSymbol": "TURBO L NVIDIA AVA 94",
+        "countryCode": "SE",
+        "currency": "SEK",
+        "marketPlaceCode": "FNSE",
+        "marketPlaceName": "First North Stockholm",
+        "tickSizeListId": "1851",
+        "marketTradesAvailable": true
+    },
+    "historicalClosingPrices": {
+        "oneDay": 1477.56,
+        "oneWeek": 1515.87,
+        "oneMonth": 1728.97,
+        "threeMonths": 1365.06,
+        "sixMonths": 1344.91,
+        "startOfYear": 1344.91,
+        "oneYear": 911.06,
+        "threeYears": 100.590000,
+        "start": 72.760000,
+        "startDate": "2023-05-29"
+    },
+    "keyIndicators": {
+        "parity": 1,
+        "barrierLevel": 41.848686,
+        "financingLevel": 41.848686,
+        "direction": "Lång",
+        "leverage": 1.27,
+        "isAza": true,
+        "numberOfOwners": 3,
+        "subType": "KNOCK_OUT"
+    },
+    "quote": {
+        "buy": 1493.63,
+        "sell": 1496.17,
+        "last": 1477.56,
+        "change": 0.00,
+        "changePercent": 0.00,
+        "spread": 0.17,
+        "timeOfLast": 1783059300730,
+        "totalValueTraded": 0E-8,
+        "totalVolumeTraded": 0E-8,
+        "updated": 1783108497710,
+        "isRealTime": false
+    },
+    "type": "WARRANT",
+    "underlying": {
+        "orderbookId": "4478",
+        "name": "NVIDIA",
+        "instrumentType": "STOCK",
+        "quote": {
+            "buy": 194.49,
+            "sell": 194.55,
+            "last": 194.83,
+            "highest": 200.06,
+            "lowest": 192.35,
+            "change": -2.75,
+            "changePercent": -1.39,
+            "spread": 0.03,
+            "timeOfLast": 1783026000429,
+            "totalValueTraded": 27778871838.73279600,
+            "totalVolumeTraded": 142385548.00000000,
+            "updated": 1783043345495,
+            "volumeWeightedAveragePrice": 195.11,
+            "isRealTime": false
+        },
+        "listing": {
+            "shortName": "NVDA",
+            "tickerSymbol": "NVDA",
+            "countryCode": "US",
+            "currency": "USD",
+            "marketPlaceCode": "XNAS",
+            "marketPlaceName": "NASDAQ",
+            "tickSizeListId": "4878",
+            "marketTradesAvailable": false
+        },
+        "previousClosingPrice": 197.58,
+        "reference": false
+    },
+    "assetCategory": "Aktier",
+    "category": "Enskilda aktier",
+    "subCategory": "NVIDIA"
+}

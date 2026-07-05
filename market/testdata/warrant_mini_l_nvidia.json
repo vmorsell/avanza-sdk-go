@@ -1,0 +1,84 @@
+{
+    "orderbookId": "2044027",
+    "name": "MINI L NVIDIA LS SG",
+    "isin": "DE000SX8F897",
+    "tradable": "BUYABLE_AND_SELLABLE",
+    "listing": {
+        "shortName": "MINI L NVIDIA LS SG",
+        "tickerSymbol": "MINI L NVIDIA LS SG",
+        "countryCode": "SE",
+        "currency": "SEK",
+        "marketPlaceCode": "NMTF",
+        "marketPlaceName": "Nordic MTF",
+        "tickSizeListId": "2437",
+        "marketTradesAvailable": true
+    },
+    "historicalClosingPrices": {
+        "oneDay": 89.85,
+        "oneWeek": 88.13,
+        "oneMonth": 110.47,
+        "threeMonths": 62.63,
+        "sixMonths": 71.13,
+        "startOfYear": 71.13,
+        "oneYear": 60.63,
+        "start": 24.39,
+        "startDate": "2025-05-08"
+    },
+    "keyIndicators": {
+        "parity": 10,
+        "barrierLevel": 107.02,
+        "financingLevel": 101.765356,
+        "direction": "Lång",
+        "isAza": false,
+        "numberOfOwners": 6,
+        "subType": "MINI_FUTURE"
+    },
+    "quote": {
+        "sell": 94.60,
+        "last": 89.85,
+        "change": 0.00,
+        "changePercent": 0.00,
+        "timeOfLast": 1783057507518,
+        "totalValueTraded": 0E-8,
+        "totalVolumeTraded": 0E-8,
+        "updated": 1783108806416,
+        "isRealTime": false
+    },
+    "type": "WARRANT",
+    "underlying": {
+        "orderbookId": "4478",
+        "name": "NVIDIA",
+        "instrumentType": "STOCK",
+        "quote": {
+            "buy": 194.49,
+            "sell": 194.55,
+            "last": 194.83,
+            "highest": 200.06,
+            "lowest": 192.35,
+            "change": -2.75,
+            "changePercent": -1.39,
+            "spread": 0.03,
+            "timeOfLast": 1783026000429,
+            "totalValueTraded": 27778871838.73279600,
+            "totalVolumeTraded": 142385548.00000000,
+            "updated": 1783043345495,
+            "volumeWeightedAveragePrice": 195.11,
+            "isRealTime": false
+        },
+        "listing": {
+            "shortName": "NVDA",
+            "tickerSymbol": "NVDA",
+            "countryCode": "US",
+            "currency": "USD",
+            "marketPlaceCode": "XNAS",
+            "marketPlaceName": "NASDAQ",
+            "tickSizeListId": "4878",
+            "marketTradesAvailable": false
+        },
+        "previousClosingPrice": 197.58,
+        "reference": false
+    },
+    "assetCategory": "Aktier",
+    "category": "Enskild aktie",
+    "subCategory": "NVIDIA"
+}

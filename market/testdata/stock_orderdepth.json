@@ -1,0 +1,17 @@
+{
+    "receivedTime": 1783043345495,
+    "levels": [
+        {
+            "buySide": {
+                "price": 194.49,
+                "volume": 65,
+                "priceString": "194.49"
+            },
+            "sellSide": {
+                "price": 194.55,
+                "volume": 1,
+                "priceString": "194.55"
+            }
+        }
+    ]
+}

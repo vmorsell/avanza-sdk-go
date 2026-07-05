@@ -1,0 +1,889 @@
+{
+    "stock": {
+        "preferred": false,
+        "depositoryReceipt": false,
+        "numberOfShares": 24200000000.0
+    },
+    "company": {
+        "companyId": "103076",
+        "description": "Nvidia \u00e4r ett teknikbolag specialiserat p\u00e5 visuell datorteknik. Bolaget erbjuder produkter inom artificiell intelligens (AI), grafikkort, och grafikbehandlingsenheter (GPU). Produkterna anv\u00e4nds huvudsakligen inom marknaderna f\u00f6r professionell visualisering, datacenter, spel och fordon. Nvidia grundades \u00e5r 1993 och har huvudkontor i Santa Clara, Kalifornien.",
+        "ceo": "Jensen Huang",
+        "chairman": "Jensen Huang",
+        "totalNumberOfShares": 24200000000,
+        "homepage": "https://investor.nvidia.com/home/default.aspx"
+    },
+    "companyEvents": {
+        "events": [
+            {
+                "date": "2027-02-23",
+                "type": "ANNUAL_REPORT",
+                "isConfirmed": false
+            },
+            {
+                "date": "2025-08-27",
+                "type": "INTERIM_REPORT",
+                "isConfirmed": true
+            },
+            {
+                "date": "2026-05-20",
+                "type": "INTERIM_REPORT",
+                "isConfirmed": true
+            },
+            {
+                "date": "2026-11-19",
+                "type": "INTERIM_REPORT",
+                "isConfirmed": false
+            },
+            {
+                "date": "2026-02-25",
+                "type": "ANNUAL_REPORT",
+                "isConfirmed": true
+            },
+            {
+                "date": "2026-08-25",
+                "type": "INTERIM_REPORT",
+                "isConfirmed": false
+            },
+            {
+                "date": "2027-05-21",
+                "type": "INTERIM_REPORT",
+                "isConfirmed": false
+            },
+            {
+                "date": "2025-11-19",
+                "type": "INTERIM_REPORT",
+                "isConfirmed": true
+            },
+            {
+                "date": "2026-06-24",
+                "type": "GENERAL_MEETING",
+                "isConfirmed": true
+            }
+        ]
+    },
+    "companyOwners": {
+        "owners": []
+    },
+    "brokerTradeSummaries": [],
+    "dividends": {
+        "events": [],
+        "pastEvents": [
+            {
+                "exDate": "2026-06-04",
+                "paymentDate": "2026-06-26",
+                "amount": 0.25,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2026-03-11",
+                "paymentDate": "2026-04-01",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2025-12-04",
+                "paymentDate": "2025-12-26",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2025-09-11",
+                "paymentDate": "2025-10-02",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2025-06-11",
+                "paymentDate": "2025-07-03",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2025-03-12",
+                "paymentDate": "2025-04-02",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2024-12-05",
+                "paymentDate": "2024-12-27",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2024-09-12",
+                "paymentDate": "2024-10-03",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2024-06-11",
+                "paymentDate": "2024-06-28",
+                "amount": 0.01,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2024-03-05",
+                "paymentDate": "2024-03-27",
+                "amount": 0.004,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2023-12-05",
+                "paymentDate": "2023-12-28",
+                "amount": 0.004,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2023-09-06",
+                "paymentDate": "2023-09-28",
+                "amount": 0.004,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2023-06-07",
+                "paymentDate": "2023-06-30",
+                "amount": 0.004,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2023-03-07",
+                "paymentDate": "2023-03-29",
+                "amount": 0.004,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            },
+            {
+                "exDate": "2022-11-30",
+                "paymentDate": "2022-12-22",
+                "amount": 0.004,
+                "currencyCode": "USD",
+                "dividendType": "ORDINARY"
+            }
+        ]
+    },
+    "tradingTerms": {
+        "collateralValue": 0.7,
+        "marginRequirement": 1.4,
+        "shortSellable": false,
+        "superInterestApproved": true
+    },
+    "fundExposures": [
+        {
+            "orderbookId": "1673933",
+            "name": "Amundi S&P 500 Screened INDEX AE Acc",
+            "exposure": 0.1219,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "644315",
+            "name": "GAM Star Disruptive Gr A USD Acc",
+            "exposure": 0.0989,
+            "instrumentType": "FUND",
+            "countryCode": "IE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1334999",
+            "name": "FF - Technology Opps A Acc USD",
+            "exposure": 0.0934,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "289895",
+            "name": "CT (Lux) American AU",
+            "exposure": 0.0929,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1225079",
+            "name": "Franklin Innovation A(acc)USD",
+            "exposure": 0.0928,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1607",
+            "name": "FF - US Equity Fund A-Dis-USD",
+            "exposure": 0.0928,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "20988",
+            "name": "JPM US Growth A acc USD",
+            "exposure": 0.0913,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "263951",
+            "name": "Franklin US Opportunities A(acc)SEK-H1",
+            "exposure": 0.0902,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1512",
+            "name": "Franklin US Opportunities A(acc)USD",
+            "exposure": 0.0902,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1445334",
+            "name": "MS INVF Calvert Sstnb US Eq Slct A USD",
+            "exposure": 0.0895,
+            "instrumentType": "FUND",
+            "countryCode": "LU",
+            "hasPosition": false
+        }
+    ],
+    "etfExposures": [
+        {
+            "orderbookId": "1792960",
+            "name": "Amundi MSCI Semiconductors UCITS ETF Acc",
+            "exposure": 0.2489899,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1064005",
+            "name": "Xtrackers MSCI USA Information Technology UCITS ETF 1D",
+            "exposure": 0.2075754,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1063650",
+            "name": "SPDR S&P U.S. Technology Select Sector UCITS ETF (Acc)",
+            "exposure": 0.2046912,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1064172",
+            "name": "iShares S&P 500 Information Technology Sector UCITS ETF USD (Acc)",
+            "exposure": 0.1985863,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1792917",
+            "name": "Amundi S&P World Information technology Screened UCITS ETF Acc",
+            "exposure": 0.1917726,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1639934",
+            "name": "Amundi S&P World Information technology Screened UCITS ETF Dist",
+            "exposure": 0.1917726,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1063920",
+            "name": "Xtrackers MSCI World Information Technology UCITS ETF 1C",
+            "exposure": 0.1838928,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1064213",
+            "name": "iShares MSCI World Information Technology Sector Advanced UCITS ETF USD (Dist)",
+            "exposure": 0.1650618,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1889895",
+            "name": "iShares S&P 500 Top 20 UCITS ETF USD (Acc)",
+            "exposure": 0.1545777,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        },
+        {
+            "orderbookId": "1807491",
+            "name": "Amundi Russell 1000 Growth UCITS ETF Acc",
+            "exposure": 0.1385799,
+            "instrumentType": "EXCHANGE_TRADED_FUND",
+            "countryCode": "DE",
+            "hasPosition": false
+        }
+    ],
+    "esgView": {
+        "companyEqualityView": {
+            "womenOnBoard": 38.4615,
+            "womenInSeniorManagment": 40,
+            "womenInWorkforce": 21.2,
+            "womenOnBoardYear": 2025,
+            "womenInSeniorManagmentYear": 2025,
+            "womenInWorkforceYear": 2025
+        },
+        "sustainabilityDevelopmentGoals": [
+            {
+                "year": 2025,
+                "value": 11.32,
+                "name": "AFFORDABLE_AND_CLEAN_ENERGY",
+                "title": "H\u00e5llbar energi f\u00f6r alla"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "ZERO_HUNGER",
+                "title": "Ingen hunger"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "GOOD_HEALTH_AND_WELLBEING",
+                "title": "H\u00e4lsa och v\u00e4lbefinnande"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "QUALITY_EDUCATION",
+                "title": "God utbildning f\u00f6r alla"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "CLEAN_WATER_AND_SANITATION",
+                "title": "Rent vatten och sanitet f\u00f6r alla"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "INDUSTRY_INNOVATION_AND_INFRASTRUCTURE",
+                "title": "H\u00e5llbar industri, innovationer och infrastruktur"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "REDUCED_INEQUALITY",
+                "title": "Minskad oj\u00e4mlikhet"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "SUSTAINABLE_CITIES_AND_COMMUNITIES",
+                "title": "H\u00e5llbara st\u00e4der och samh\u00e4llen"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "RESPONSIBLE_CONSUMPTION_AND_PRODUCTION",
+                "title": "H\u00e5llbar konsumtion och produktion"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "CLIMATE_ACTION",
+                "title": "Bek\u00e4mpa klimatf\u00f6r\u00e4ndringarna"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "LIFE_BELOW_WATER",
+                "title": "Hav och marina resurser"
+            },
+            {
+                "year": 2025,
+                "value": 0,
+                "name": "LIFE_ON_LAND",
+                "title": "Ekosystem och biologisk m\u00e5ngfald"
+            }
+        ],
+        "productInvolvements": [
+            {
+                "year": 2024,
+                "value": 1,
+                "name": "GAMBLING",
+                "title": "Spel och kasino"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "SMALL_ARMS",
+                "title": "Handeldvapen"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "ADULT_ENTERTAINMENT",
+                "title": "Pornografi"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "ALCOHOL",
+                "title": "Alkohol"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "FUR_AND_SPECIALTY_LEATHER",
+                "title": "P\u00e4ls- och l\u00e4derindustri"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "GMO",
+                "title": "Genmodifierade organismer"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "MILITARY_CONTRACTING",
+                "title": "Milit\u00e4rindustri"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "NUCLEAR",
+                "title": "K\u00e4rnkraft"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "PESTICIDES",
+                "title": "Bek\u00e4mpningsmedel"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "PALM_OIL",
+                "title": "Palmolja"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "THERMAL_COAL",
+                "title": "Kolkraft"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "TOBACCO",
+                "title": "Tobak"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "OIL_SANDS_EXTRACTION_INVOLVEMENT",
+                "title": "Utvinning av oljesand"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "ARTIC_OIL_AND_GAS_EXPLORATION_INVOLVEMET",
+                "title": "Arktisk olja och gasproduktion"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "SHALE_ENERGY",
+                "title": "Skifferenergi"
+            },
+            {
+                "year": 2024,
+                "value": 0,
+                "name": "OIL_AND_GAS",
+                "title": "Olja och gas"
+            }
+        ]
+    },
+    "trades": [],
+    "orderDepth": {
+        "receivedTime": 1783043345495,
+        "levels": [
+            {
+                "buySide": {
+                    "price": 194.49,
+                    "volume": 65,
+                    "priceString": "194.49"
+                },
+                "sellSide": {
+                    "price": 194.55,
+                    "volume": 1,
+                    "priceString": "194.55"
+                }
+            }
+        ]
+    },
+    "insiderTransactionsView": {
+        "transactions": []
+    },
+    "companyReports": [
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q1",
+                "financialYear": 2027
+            },
+            "earningsCallEvent": {
+                "eventId": "568907",
+                "eventTitle": "Q1 2027",
+                "eventDate": "2026-05-20T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/04ec8ad6621d73a32739cedec3bdf35b-2026-05-20-20-24-03.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/8f7a0d6ecfd611a4ff8ebf5a0ee5a285-2026-05-20-22-04-35.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q1",
+                "fiscalYear": "2027",
+                "reportUrl": "https://files.quartr.com/reports/cdc881ae0ce2636cb6d9b359b441aa20-2026-05-20-20-22-08.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1270,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q1",
+                    "financialYear": 2027
+                },
+                "eventType": "Q1",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q1-2027-8c02c4cade13ce68/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q4",
+                "financialYear": 2026
+            },
+            "earningsCallEvent": {
+                "eventId": "409967",
+                "eventTitle": "Q4 2026",
+                "eventDate": "2026-02-25T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/4a34e-2026-02-25.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/a4a40-2026-02-25-11-42-21.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q4",
+                "fiscalYear": "2026",
+                "reportUrl": "https://files.quartr.com/reports/73c0d-2026-02-25-09-17-32.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1392,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q4",
+                    "financialYear": 2026
+                },
+                "eventType": "Q4",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q4-2026-371fc4c111657da1/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q3",
+                "financialYear": 2026
+            },
+            "earningsCallEvent": {
+                "eventId": "379484",
+                "eventTitle": "Q3 2026",
+                "eventDate": "2025-11-19T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/280b4-2025-11-19-10-14-25.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/d446c-2025-11-19-11-11-19.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q3",
+                "fiscalYear": "2026",
+                "reportUrl": "https://files.quartr.com/reports/0d93d-2025-11-19-09-26-22.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1769,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q3",
+                    "financialYear": 2026
+                },
+                "eventType": "Q3",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q3-2026-96ab9b8537155ca6/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q2",
+                "financialYear": 2026
+            },
+            "earningsCallEvent": {
+                "eventId": "351238",
+                "eventTitle": "Q2 2026",
+                "eventDate": "2025-08-27T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/2184a-2025-09-03-05-47-44.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/82dcf-2025-11-16-11-03-15.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q2",
+                "fiscalYear": "2026",
+                "reportUrl": "https://files.quartr.com/reports/750e4-2025-08-27-08-59-23.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1528,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q2",
+                    "financialYear": 2026
+                },
+                "eventType": "Q2",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q2-2026-f66600d98c6e7c1b/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q1",
+                "financialYear": 2026
+            },
+            "earningsCallEvent": {
+                "eventId": "319901",
+                "eventTitle": "Q1 2026",
+                "eventDate": "2025-05-28T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/8dc7d-2025-06-13-09-53-44.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/a3811-2025-11-22-01-19-34.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q1",
+                "fiscalYear": "2026",
+                "reportUrl": "https://files.quartr.com/reports/4a07c-2025-05-28-08-11-24.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1981,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q1",
+                    "financialYear": 2026
+                },
+                "eventType": "Q1",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q1-2026-f7eb8f6021068e97/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q4",
+                "financialYear": 2025
+            },
+            "earningsCallEvent": {
+                "eventId": "251681",
+                "eventTitle": "Q4 2025",
+                "eventDate": "2025-02-26T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/88081-2025-03-04-12-20-26.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/61579-2025-02-26-11-57-06.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q4",
+                "fiscalYear": "2025",
+                "reportUrl": "https://files.quartr.com/reports/c00ca-2025-02-26-09-19-23.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1367,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q4",
+                    "financialYear": 2025
+                },
+                "eventType": "Q4",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q4-2025-d2139e2816ceda05/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q3",
+                "financialYear": 2025
+            },
+            "earningsCallEvent": {
+                "eventId": "225518",
+                "eventTitle": "Q3 2025",
+                "eventDate": "2024-11-20T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/67245-2025-02-26-02-58-23.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/b8b0c-2024-11-20-11-16-10.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q3",
+                "fiscalYear": "2025",
+                "reportUrl": "https://files.quartr.com/reports/63ee5-2024-11-20-09-35-23.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1324,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q3",
+                    "financialYear": 2025
+                },
+                "eventType": "Q3",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q3-2025-012afa87154e5dcc/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q2",
+                "financialYear": 2025
+            },
+            "earningsCallEvent": {
+                "eventId": "197211",
+                "eventTitle": "Q2 2025",
+                "eventDate": "2024-08-28T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/a4f52-2024-09-09-09-06-20.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/92e1d-2024-08-28-10-04-10.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q2",
+                "fiscalYear": "2025",
+                "reportUrl": "https://files.quartr.com/reports/4a0d6-2024-08-28-08-24-23.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1293,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q2",
+                    "financialYear": 2025
+                },
+                "eventType": "Q2",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q2-2025-2558fe6bad890b85/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q1",
+                "financialYear": 2025
+            },
+            "earningsCallEvent": {
+                "eventId": "169207",
+                "eventTitle": "Q1 2025",
+                "eventDate": "2024-05-22T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/e9976-2024-08-07-02-54-48.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/b7b83-2024-05-22-10-13-12.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q1",
+                "fiscalYear": "2025",
+                "reportUrl": "https://files.quartr.com/reports/57947-2024-05-22-08-58-29.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1731,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q1",
+                    "financialYear": 2025
+                },
+                "eventType": "Q1",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q1-2025-924a13f5042f0ea0/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q4",
+                "financialYear": 2024
+            },
+            "earningsCallEvent": {
+                "eventId": "128392",
+                "eventTitle": "Q4 2024",
+                "eventDate": "2024-02-21T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/8975c-2024-02-27-09-12-13.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/33fd9-2024-02-21-11-34-13.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q4",
+                "fiscalYear": "2024",
+                "reportUrl": "https://files.quartr.com/reports/6e106-2024-02-21-09-06-32.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1476,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q4",
+                    "financialYear": 2024
+                },
+                "eventType": "Q4",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q4-2024-f9e0d5940aab3c99/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q3",
+                "financialYear": 2024
+            },
+            "earningsCallEvent": {
+                "eventId": "90789",
+                "eventTitle": "Q3 2024",
+                "eventDate": "2023-11-21T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/40e66-2023-11-28-03-23-37.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/571b3-2023-11-21-11-59-15.mpeg?ref=QXZhbnph",
+                "fiscalPeriod": "Q3",
+                "fiscalYear": "2024",
+                "reportUrl": "https://files.quartr.com/reports/358b7-2023-11-21-09-30-28.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1490,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q3",
+                    "financialYear": 2024
+                },
+                "eventType": "Q3",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q3-2024-ec69acb59701b3a1/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q2",
+                "financialYear": 2024
+            },
+            "earningsCallEvent": {
+                "eventId": "71056",
+                "eventTitle": "Q2 2024",
+                "eventDate": "2023-08-23T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/92b66-2023-08-30-02-22-21.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/live_f_2023_08_23T21_00_00_00_00_NVIDIA_Corporation_Q2_2024.806EEH89U5WW_normalized.mp3?ref=QXZhbnph",
+                "fiscalPeriod": "Q2",
+                "fiscalYear": "2024",
+                "reportUrl": "https://files.quartr.com/reports/5e79d-2023-08-23-08-41-22.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1456,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q2",
+                    "financialYear": 2024
+                },
+                "eventType": "Q2",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/conference-calls/nvidia-corporation-q2-2024-12a801a21fa2ce77/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q1",
+                "financialYear": 2024
+            },
+            "earningsCallEvent": {
+                "eventId": "53913",
+                "eventTitle": "Q1 2024",
+                "eventDate": "2023-05-24T21:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/ad26d-2023-05-31-08-42-13.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/audio-files/live_f_2023_05_24T21_00_00_00_00_NVIDIA_Corporation_Q1_2024.CTIR79JBFQ9O_normalized.mp3?ref=QXZhbnph",
+                "fiscalPeriod": "Q1",
+                "fiscalYear": "2024",
+                "reportUrl": "https://files.quartr.com/reports/e966c-2023-08-23-08-20-26.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1344,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q1",
+                    "financialYear": 2024
+                },
+                "eventType": "Q1",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/reports/ad26d-2023-05-31-08-42-13.pdf/1.png?ref=QXZhbnph"
+            }
+        },
+        {
+            "reportPeriodAndYear": {
+                "reportPeriod": "Q4",
+                "financialYear": 2023
+            },
+            "earningsCallEvent": {
+                "eventId": "45330",
+                "eventTitle": "Q4 2023",
+                "eventDate": "2023-02-22T22:00:00Z",
+                "pdfUrl": "https://files.quartr.com/conference-calls/eb5a9-2023-03-01-09-54-22.pdf?ref=QXZhbnph",
+                "audioUrl": "https://files.quartr.com/recordings/live_f_2023_02_22T22_00_00_00_00_NVIDIA_Corp_Earnings_Call_Q4_2023.Q1XHZXKKIU06_normalized.mp3?ref=QXZhbnph",
+                "fiscalPeriod": "Q4",
+                "fiscalYear": "2023",
+                "reportUrl": "https://files.quartr.com/reports/8f66c-2023-02-22-09-35-55.pdf?ref=QXZhbnph",
+                "qnaTimestamp": 1305,
+                "reportPeriodAndYear": {
+                    "reportPeriod": "Q4",
+                    "financialYear": 2023
+                },
+                "eventType": "Q4",
+                "secondaryEventType": "Earnings call",
+                "slidesPreviewUrl": "https://cdn.quartr.com/images/reports/eb5a9-2023-03-01-09-54-22.pdf/1.png?ref=QXZhbnph"
+            }
+        }
+    ]
+}

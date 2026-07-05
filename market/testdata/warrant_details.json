@@ -1,0 +1,28 @@
+{
+    "issuer": "Societe Generale Effekten GmbH",
+    "documents": {
+        "kid": "https://kid.sgmarkets.com/public/api/kid/isin/DE000SX8F897?lang=swe",
+        "prospectus": "https://warrants.societegenerale.com/EmcWebApi/api/Downloads/document/mostrecent/FT_SINGLE/DE000SX8F897"
+    },
+    "orderDepth": {
+        "receivedTime": 1783108806416,
+        "levels": [
+            {
+                "buySide": {
+                    "price": 0.0,
+                    "volume": 0.0,
+                    "priceString": "0.00"
+                },
+                "sellSide": {
+                    "price": 94.6,
+                    "volume": 1205,
+                    "priceString": "94.60"
+                }
+            }
+        ]
+    },
+    "brokerTradeSummaries": [],
+    "trades": [],
+    "tradingUnit": 1,
+    "collateralValue": 0.0
+}
