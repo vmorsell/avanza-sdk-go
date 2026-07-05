@@ -81,13 +81,17 @@ c := avanza.New()
 hits, err := c.Market.Search(ctx, &market.SearchRequest{Query: "investor"})
 stock, err := c.Market.GetStock(ctx, "5247")                                  // quote + key indicators
 details, err := c.Market.GetStockDetails(ctx, "5247")                          // owners, holdings, dividends, exposure
+quote, err := c.Market.GetStockQuote(ctx, "5247")                              // latest quote on its own (cheap polling)
+depth, err := c.Market.GetStockOrderDepth(ctx, "5247")                         // order book snapshot
 chart, err := c.Market.GetStockPriceChart(ctx, "5247", market.TimePeriodToday) // intraday OHLC
 cmp, err := c.Market.GetStockPriceChartComparison(ctx, "5247", "1002994", market.TimePeriodOneYear)
+offhrs, err := c.Market.GetOffHoursPrice(ctx, "5247")                          // pre/post-market price (nil off-session)
+certDet, err := c.Market.GetCertificateDetails(ctx, "1612107")                 // issuer, leverage, documents
 news, err := c.Market.GetNews(ctx, "5247")                                     // press releases and media coverage
 forum, err := c.Market.GetForum(ctx, "5247")                                   // community posts
 ```
 
-Methods that read public data (`Search`, `GetStock`, `GetCertificate`, `GetWarrant`, `GetStockDetails`, `GetStockPriceChart`, `GetStockPriceChartComparison`, `GetMarketMakerPriceChart`, `GetNews`, `GetForum`) say so in their godoc. Everything else — accounts, order placement, and the SSE subscriptions — requires an established session. See `examples/public-data`.
+Methods that read public data (`Search`, `GetStock`, `GetCertificate`, `GetWarrant`, `GetStockDetails`, `GetStockQuote`, `GetStockOrderDepth`, `GetStockMarketPlace`, `GetCertificateDetails`, `GetWarrantDetails`, `GetOffHoursPrice`, `GetStockPriceChart`, `GetStockPriceChartComparison`, `GetMarketMakerPriceChart`, `GetNews`, `GetForum`) say so in their godoc. Everything else — accounts, order placement, and the SSE subscriptions — requires an established session. See `examples/public-data`.
 
 ## Placing an order
 

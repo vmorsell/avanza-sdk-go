@@ -222,11 +222,21 @@ type StockSectorInfo struct {
 
 // MarketPlace describes the trading venue and hours.
 type MarketPlace struct {
-	MarketOpen        bool   `json:"marketOpen"`
-	TimeLeftMs        int64  `json:"timeLeftMs"`
-	OpeningTime       string `json:"openingTime"`
-	TodayClosingTime  string `json:"todayClosingTime"`
-	NormalClosingTime string `json:"normalClosingTime"`
+	MarketOpen          bool                       `json:"marketOpen"`
+	TimeLeftMs          int64                      `json:"timeLeftMs"`
+	OpeningTime         string                     `json:"openingTime"`
+	TodayClosingTime    string                     `json:"todayClosingTime"`
+	NormalClosingTime   string                     `json:"normalClosingTime"`
+	CurrentStatus       string                     `json:"currentStatus,omitempty"`
+	MarketStateSchedule []MarketStateScheduleEntry `json:"marketStateSchedule,omitempty"`
+}
+
+// MarketStateScheduleEntry is a single phase of the trading day (e.g. pre-market,
+// open, post-market). Start and End are local venue times in "HH:MM:SS" format.
+type MarketStateScheduleEntry struct {
+	Status string `json:"status"`
+	Start  string `json:"start"`
+	End    string `json:"end"`
 }
 
 // StockKeyIndicators contains financial metrics for a stock.
@@ -240,6 +250,7 @@ type StockKeyIndicators struct {
 	Volatility              float64       `json:"volatility"`
 	Beta                    float64       `json:"beta"`
 	PriceEarningsRatio      float64       `json:"priceEarningsRatio"`
+	PriceSalesRatio         float64       `json:"priceSalesRatio"`
 	PriceBookRatio          float64       `json:"priceBookRatio"`
 	EVEBITRatio             float64       `json:"evEbitRatio"`
 	InterestCoverageRatio   float64       `json:"interestCoverageRatio"`
@@ -248,6 +259,9 @@ type StockKeyIndicators struct {
 	ReturnOnCapitalEmployed float64       `json:"returnOnCapitalEmployed"`
 	EquityRatio             float64       `json:"equityRatio"`
 	CapitalTurnover         float64       `json:"capitalTurnover"`
+	OperatingProfitMargin   float64       `json:"operatingProfitMargin"`
+	GrossMargin             float64       `json:"grossMargin"`
+	NetMargin               float64       `json:"netMargin"`
 	MarketCapital           MonetaryValue `json:"marketCapital"`
 	EquityPerShare          MonetaryValue `json:"equityPerShare"`
 	TurnoverPerShare        MonetaryValue `json:"turnoverPerShare"`
@@ -276,8 +290,9 @@ type Dividend struct {
 
 // Report describes a financial report date.
 type Report struct {
-	Date       string `json:"date"`
-	ReportType string `json:"reportType"`
+	Date        string `json:"date"`
+	ReportType  string `json:"reportType"`
+	IsConfirmed bool   `json:"isConfirmed"`
 }
 
 // --- Certificate ---
@@ -336,6 +351,72 @@ type WarrantKeyIndicators struct {
 	IsAza          bool    `json:"isAza"`
 	NumberOfOwners int     `json:"numberOfOwners"`
 	SubType        string  `json:"subType"`
+}
+
+// --- Certificate & warrant details ---
+
+// InstrumentDocuments links to an instrument's regulatory documents.
+type InstrumentDocuments struct {
+	KID        string `json:"kid"`
+	Prospectus string `json:"prospectus"`
+}
+
+// CertificateDetails contains extended data for a certificate: issuer, leverage
+// and its direction, regulatory documents, order book, and collateral terms.
+//
+// Trades and BrokerTradeSummaries are preserved as raw JSON, matching how
+// StockDetails treats the same rarely-machine-read sections.
+type CertificateDetails struct {
+	Issuer                string               `json:"issuer"`
+	Direction             string               `json:"direction"`
+	Leverage              float64              `json:"leverage"`
+	Documents             InstrumentDocuments  `json:"documents"`
+	OrderDepth            MarketDataOrderDepth `json:"orderDepth"`
+	CollateralValue       float64              `json:"collateralValue"`
+	SuperInterestApproved bool                 `json:"superInterestApproved"`
+
+	Trades               json.RawMessage `json:"trades"`
+	BrokerTradeSummaries json.RawMessage `json:"brokerTradeSummaries"`
+}
+
+// WarrantDetails contains extended data for a warrant: issuer, regulatory
+// documents, order book, and trading terms. Unlike CertificateDetails it carries
+// a TradingUnit and omits leverage/direction/super-interest fields.
+type WarrantDetails struct {
+	Issuer          string               `json:"issuer"`
+	Documents       InstrumentDocuments  `json:"documents"`
+	OrderDepth      MarketDataOrderDepth `json:"orderDepth"`
+	TradingUnit     int                  `json:"tradingUnit"`
+	CollateralValue float64              `json:"collateralValue"`
+
+	Trades               json.RawMessage `json:"trades"`
+	BrokerTradeSummaries json.RawMessage `json:"brokerTradeSummaries"`
+}
+
+// --- Off-hours price ---
+
+// OffHoursPrice is the latest pre- or post-market price for an instrument, from
+// the market-offhours-price push endpoint. Quote is nil and Status is empty when
+// the instrument has no off-hours session — the case for most derivatives, and
+// for any instrument outside its pre/post-market windows.
+type OffHoursPrice struct {
+	Quote  *OffHoursQuote `json:"quote"`
+	Status string         `json:"status"`
+}
+
+// OffHoursQuote is a single pre/post-market quote. Unlike Quote, its timestamps
+// are ISO 8601 strings rather than epoch milliseconds, and it carries no spread,
+// traded-volume, or VWAP fields.
+type OffHoursQuote struct {
+	Buy           float64 `json:"buy"`
+	Sell          float64 `json:"sell"`
+	Last          float64 `json:"last"`
+	Highest       float64 `json:"highest"`
+	Lowest        float64 `json:"lowest"`
+	Change        float64 `json:"change"`
+	ChangePercent float64 `json:"changePercent"`
+	Updated       string  `json:"updated"`
+	TimeOfLast    string  `json:"timeOfLast"`
 }
 
 // --- Orderbook (trading-critical) ---
@@ -414,7 +495,9 @@ type MarketDataQuote struct {
 	VolumeWeightedAveragePrice float64 `json:"volumeWeightedAveragePrice"`
 }
 
-// MarketDataOrderDepth contains the order book from the trading-critical endpoint.
+// MarketDataOrderDepth contains an order book snapshot, as returned by both the
+// trading-critical marketdata endpoint and the market-guide stock orderdepth
+// endpoint. MarketMakerExpected is absent (false) on the market-guide variant.
 type MarketDataOrderDepth struct {
 	ReceivedTime        int64                       `json:"receivedTime"`
 	Levels              []MarketDataOrderDepthLevel `json:"levels"`
@@ -428,9 +511,11 @@ type MarketDataOrderDepthLevel struct {
 }
 
 // MarketDataOrderSide contains the price and volume for one side of the order book.
+// Volume is float64 because the API formats empty sides as "0.00" — a decimal
+// literal that will not decode into an integer.
 type MarketDataOrderSide struct {
 	Price       float64 `json:"price"`
-	Volume      int     `json:"volume"`
+	Volume      float64 `json:"volume"`
 	PriceString string  `json:"priceString"`
 }
 
@@ -533,19 +618,19 @@ type StockDetails struct {
 
 // StockShareInfo describes the share structure of a stock.
 type StockShareInfo struct {
-	Preferred         bool  `json:"preferred"`
-	DepositoryReceipt bool  `json:"depositoryReceipt"`
-	NumberOfShares    int64 `json:"numberOfShares"`
+	Preferred         bool    `json:"preferred"`
+	DepositoryReceipt bool    `json:"depositoryReceipt"`
+	NumberOfShares    float64 `json:"numberOfShares"`
 }
 
 // Company describes the issuing company.
 type Company struct {
-	CompanyID           string `json:"companyId"`
-	Description         string `json:"description"`
-	CEO                 string `json:"ceo"`
-	Chairman            string `json:"chairman"`
-	TotalNumberOfShares int64  `json:"totalNumberOfShares"`
-	Homepage            string `json:"homepage"`
+	CompanyID           string  `json:"companyId"`
+	Description         string  `json:"description"`
+	CEO                 string  `json:"ceo"`
+	Chairman            string  `json:"chairman"`
+	TotalNumberOfShares float64 `json:"totalNumberOfShares"`
+	Homepage            string  `json:"homepage"`
 }
 
 // CompanyEvents lists upcoming and past corporate events.

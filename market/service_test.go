@@ -280,7 +280,12 @@ func TestGetStock_Success(t *testing.T) {
 				"timeLeftMs": 12475078,
 				"openingTime": "09:00:00",
 				"todayClosingTime": "17:30:00",
-				"normalClosingTime": "17:30:00"
+				"normalClosingTime": "17:30:00",
+				"currentStatus": "OPEN",
+				"marketStateSchedule": [
+					{"status": "OPEN", "start": "09:00:00", "end": "17:30:00"},
+					{"status": "CLOSED", "start": "17:30:00", "end": "09:00:00"}
+				]
 			},
 			"historicalClosingPrices": {
 				"oneDay": 345.45,
@@ -291,7 +296,11 @@ func TestGetStock_Success(t *testing.T) {
 			"keyIndicators": {
 				"numberOfOwners": 505118,
 				"priceEarningsRatio": 6.75,
+				"priceSalesRatio": 1.85,
 				"beta": 1.00,
+				"operatingProfitMargin": 0.6402,
+				"grossMargin": 0.7415,
+				"netMargin": 0.7473,
 				"marketCapital": {"value": 1062973451084.00, "currency": "SEK"},
 				"earningsPerShare": {"value": 51.42, "currency": "SEK"},
 				"dividend": {
@@ -301,7 +310,8 @@ func TestGetStock_Success(t *testing.T) {
 					"currencyCode": "SEK",
 					"exDateStatus": "FUTURE"
 				},
-				"nextReport": {"date": "2026-04-21", "reportType": "INTERIM"}
+				"nextReport": {"date": "2026-04-21", "reportType": "INTERIM", "isConfirmed": false},
+				"previousReport": {"date": "2026-01-21", "reportType": "INTERIM", "isConfirmed": true}
 			},
 			"quote": {
 				"buy": 346.85,
@@ -342,6 +352,15 @@ func TestGetStock_Success(t *testing.T) {
 	if !resp.MarketPlace.MarketOpen {
 		t.Error("MarketPlace.MarketOpen = false, want true")
 	}
+	if resp.MarketPlace.CurrentStatus != "OPEN" {
+		t.Errorf("MarketPlace.CurrentStatus = %q, want %q", resp.MarketPlace.CurrentStatus, "OPEN")
+	}
+	if len(resp.MarketPlace.MarketStateSchedule) != 2 {
+		t.Fatalf("MarketPlace.MarketStateSchedule len = %d, want 2", len(resp.MarketPlace.MarketStateSchedule))
+	}
+	if got := resp.MarketPlace.MarketStateSchedule[0]; got.Status != "OPEN" || got.Start != "09:00:00" || got.End != "17:30:00" {
+		t.Errorf("MarketStateSchedule[0] = %+v, want {OPEN 09:00:00 17:30:00}", got)
+	}
 	if len(resp.Sectors) != 1 || resp.Sectors[0].SectorName != "Investmentbolag" {
 		t.Errorf("Sectors = %v, want [{51, Investmentbolag}]", resp.Sectors)
 	}
@@ -357,6 +376,12 @@ func TestGetStock_Success(t *testing.T) {
 	if resp.KeyIndicators.PriceEarningsRatio != 6.75 {
 		t.Errorf("KeyIndicators.PriceEarningsRatio = %f, want 6.75", resp.KeyIndicators.PriceEarningsRatio)
 	}
+	if resp.KeyIndicators.PriceSalesRatio != 1.85 {
+		t.Errorf("KeyIndicators.PriceSalesRatio = %f, want 1.85", resp.KeyIndicators.PriceSalesRatio)
+	}
+	if resp.KeyIndicators.NetMargin != 0.7473 {
+		t.Errorf("KeyIndicators.NetMargin = %f, want 0.7473", resp.KeyIndicators.NetMargin)
+	}
 	if resp.KeyIndicators.MarketCapital.Currency != "SEK" {
 		t.Errorf("KeyIndicators.MarketCapital.Currency = %q, want %q", resp.KeyIndicators.MarketCapital.Currency, "SEK")
 	}
@@ -368,6 +393,12 @@ func TestGetStock_Success(t *testing.T) {
 	}
 	if resp.KeyIndicators.NextReport == nil || resp.KeyIndicators.NextReport.ReportType != "INTERIM" {
 		t.Errorf("KeyIndicators.NextReport = %v, want INTERIM report", resp.KeyIndicators.NextReport)
+	}
+	if resp.KeyIndicators.NextReport.IsConfirmed {
+		t.Error("KeyIndicators.NextReport.IsConfirmed = true, want false")
+	}
+	if resp.KeyIndicators.PreviousReport == nil || !resp.KeyIndicators.PreviousReport.IsConfirmed {
+		t.Errorf("KeyIndicators.PreviousReport = %v, want confirmed report", resp.KeyIndicators.PreviousReport)
 	}
 	if resp.Quote.Last != 346.85 {
 		t.Errorf("Quote.Last = %f, want 346.85", resp.Quote.Last)
@@ -700,6 +731,343 @@ func TestGetWarrant_HTTPError(t *testing.T) {
 	}
 }
 
+// --- GetCertificateDetails tests ---
+
+func TestGetCertificateDetails_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/certificate/1612107/details" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/certificate/1612107/details")
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"issuer": "Morgan Stanley & Co. International plc",
+			"direction": "Lång",
+			"leverage": 3,
+			"documents": {"kid": "https://example.com/kid", "prospectus": "https://example.com/prospectus"},
+			"trades": [],
+			"orderDepth": {"receivedTime": 1783108500065, "levels": []},
+			"brokerTradeSummaries": [],
+			"collateralValue": 0.0,
+			"superInterestApproved": false
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetCertificateDetails(context.Background(), "1612107")
+	if err != nil {
+		t.Fatalf("GetCertificateDetails failed: %v", err)
+	}
+	if resp.Issuer != "Morgan Stanley & Co. International plc" {
+		t.Errorf("Issuer = %q, want Morgan Stanley", resp.Issuer)
+	}
+	if resp.Direction != "Lång" || resp.Leverage != 3 {
+		t.Errorf("Direction/Leverage = %q/%v, want Lång/3", resp.Direction, resp.Leverage)
+	}
+	if resp.Documents.KID != "https://example.com/kid" {
+		t.Errorf("Documents.KID = %q, want the kid URL", resp.Documents.KID)
+	}
+	if len(resp.OrderDepth.Levels) != 0 {
+		t.Errorf("OrderDepth.Levels = %v, want empty", resp.OrderDepth.Levels)
+	}
+}
+
+func TestGetCertificateDetails_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetCertificateDetails(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetCertificateDetails_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetCertificateDetails(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+}
+
+// --- GetWarrantDetails tests ---
+
+func TestGetWarrantDetails_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/warrant/2044027/details" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/warrant/2044027/details")
+		}
+		w.WriteHeader(http.StatusOK)
+		// buySide volume 0.00 exercises the float64 order-depth volume.
+		_, _ = w.Write([]byte(`{
+			"issuer": "Societe Generale Effekten GmbH",
+			"documents": {"kid": "https://example.com/kid", "prospectus": "https://example.com/prospectus"},
+			"orderDepth": {"receivedTime": 1783108806416, "levels": [
+				{"buySide": {"price": 0.00, "volume": 0.00, "priceString": "0.00"}, "sellSide": {"price": 94.60, "volume": 1205, "priceString": "94.60"}}
+			]},
+			"brokerTradeSummaries": [],
+			"trades": [],
+			"tradingUnit": 1,
+			"collateralValue": 0.0
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetWarrantDetails(context.Background(), "2044027")
+	if err != nil {
+		t.Fatalf("GetWarrantDetails failed: %v", err)
+	}
+	if resp.Issuer != "Societe Generale Effekten GmbH" {
+		t.Errorf("Issuer = %q, want Societe Generale", resp.Issuer)
+	}
+	if resp.TradingUnit != 1 {
+		t.Errorf("TradingUnit = %d, want 1", resp.TradingUnit)
+	}
+	if len(resp.OrderDepth.Levels) != 1 {
+		t.Fatalf("OrderDepth.Levels len = %d, want 1", len(resp.OrderDepth.Levels))
+	}
+	if resp.OrderDepth.Levels[0].BuySide.Volume != 0 {
+		t.Errorf("BuySide.Volume = %v, want 0", resp.OrderDepth.Levels[0].BuySide.Volume)
+	}
+	if resp.OrderDepth.Levels[0].SellSide.Volume != 1205 {
+		t.Errorf("SellSide.Volume = %v, want 1205", resp.OrderDepth.Levels[0].SellSide.Volume)
+	}
+}
+
+func TestGetWarrantDetails_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetWarrantDetails(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetWarrantDetails_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetWarrantDetails(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+}
+
+// --- GetStockQuote tests ---
+
+func TestGetStockQuote_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/stock/4478/quote" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/stock/4478/quote")
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"buy":194.49,"sell":194.55,"last":194.83,"spread":0.03,"timeOfLast":1783026000429,"isRealTime":false}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetStockQuote(context.Background(), "4478")
+	if err != nil {
+		t.Fatalf("GetStockQuote failed: %v", err)
+	}
+	if resp.Last != 194.83 {
+		t.Errorf("Last = %f, want 194.83", resp.Last)
+	}
+	if resp.TimeOfLast != 1783026000429 {
+		t.Errorf("TimeOfLast = %d, want 1783026000429", resp.TimeOfLast)
+	}
+}
+
+func TestGetStockQuote_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockQuote(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetStockQuote_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetStockQuote(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+}
+
+// --- GetStockOrderDepth tests ---
+
+func TestGetStockOrderDepth_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/stock/4478/orderdepth" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/stock/4478/orderdepth")
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"receivedTime":1783043345495,"levels":[{"buySide":{"price":194.49,"volume":65,"priceString":"194.49"},"sellSide":{"price":194.55,"volume":1,"priceString":"194.55"}}]}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetStockOrderDepth(context.Background(), "4478")
+	if err != nil {
+		t.Fatalf("GetStockOrderDepth failed: %v", err)
+	}
+	if len(resp.Levels) != 1 {
+		t.Fatalf("Levels len = %d, want 1", len(resp.Levels))
+	}
+	if resp.Levels[0].BuySide.Volume != 65 {
+		t.Errorf("Levels[0].BuySide.Volume = %v, want 65", resp.Levels[0].BuySide.Volume)
+	}
+}
+
+func TestGetStockOrderDepth_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockOrderDepth(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetStockOrderDepth_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetStockOrderDepth(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+}
+
+// --- GetStockMarketPlace tests ---
+
+func TestGetStockMarketPlace_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/stock/4478/marketplace" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/stock/4478/marketplace")
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"marketOpen":false,"currentStatus":"CLOSED","marketStateSchedule":[{"status":"OPEN","start":"15:30:00","end":"22:00:00"}]}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetStockMarketPlace(context.Background(), "4478")
+	if err != nil {
+		t.Fatalf("GetStockMarketPlace failed: %v", err)
+	}
+	if resp.CurrentStatus != "CLOSED" {
+		t.Errorf("CurrentStatus = %q, want %q", resp.CurrentStatus, "CLOSED")
+	}
+	if len(resp.MarketStateSchedule) != 1 || resp.MarketStateSchedule[0].Status != "OPEN" {
+		t.Errorf("MarketStateSchedule = %v, want one OPEN entry", resp.MarketStateSchedule)
+	}
+}
+
+func TestGetStockMarketPlace_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockMarketPlace(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetStockMarketPlace_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetStockMarketPlace(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+}
+
+// --- GetOffHoursPrice tests ---
+
+func TestGetOffHoursPrice_Populated(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_push/market-offhours-price/latest/4478" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_push/market-offhours-price/latest/4478")
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"quote":{"buy":194.35,"last":194.4,"updated":"2026-07-02T23:59:58.838Z","timeOfLast":"2026-07-02T23:59:58.838Z"},"status":"POST_MARKET"}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetOffHoursPrice(context.Background(), "4478")
+	if err != nil {
+		t.Fatalf("GetOffHoursPrice failed: %v", err)
+	}
+	if resp.Status != "POST_MARKET" {
+		t.Errorf("Status = %q, want %q", resp.Status, "POST_MARKET")
+	}
+	if resp.Quote == nil {
+		t.Fatal("Quote = nil, want non-nil")
+	}
+	if resp.Quote.TimeOfLast != "2026-07-02T23:59:58.838Z" {
+		t.Errorf("Quote.TimeOfLast = %q, want ISO timestamp", resp.Quote.TimeOfLast)
+	}
+}
+
+// TestGetOffHoursPrice_NoSession covers derivatives and off-window instruments,
+// where the endpoint returns a null quote and status.
+func TestGetOffHoursPrice_NoSession(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"quote":null,"status":null}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetOffHoursPrice(context.Background(), "1612107")
+	if err != nil {
+		t.Fatalf("GetOffHoursPrice failed: %v", err)
+	}
+	if resp.Quote != nil {
+		t.Errorf("Quote = %v, want nil", resp.Quote)
+	}
+	if resp.Status != "" {
+		t.Errorf("Status = %q, want empty", resp.Status)
+	}
+}
+
+func TestGetOffHoursPrice_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetOffHoursPrice(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetOffHoursPrice_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetOffHoursPrice(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+}
+
 // --- GetMarketData tests ---
 
 func TestGetMarketData_Success(t *testing.T) {
@@ -774,7 +1142,7 @@ func TestGetMarketData_Success(t *testing.T) {
 		t.Errorf("BuySide.Price = %f, want 99.50", level.BuySide.Price)
 	}
 	if level.BuySide.Volume != 200 {
-		t.Errorf("BuySide.Volume = %d, want 200", level.BuySide.Volume)
+		t.Errorf("BuySide.Volume = %v, want 200", level.BuySide.Volume)
 	}
 	if level.SellSide.Price != 100.00 {
 		t.Errorf("SellSide.Price = %f, want 100.00", level.SellSide.Price)
@@ -1116,8 +1484,8 @@ func TestGetStockDetails_Success(t *testing.T) {
 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{
-			"stock": {"preferred": false, "depositoryReceipt": false, "numberOfShares": 1821936744},
-			"company": {"companyId": "194", "ceo": "Christian Cederholm", "chairman": "Jacob Wallenberg", "totalNumberOfShares": 3068700120, "homepage": "https://investorab.com"},
+			"stock": {"preferred": false, "depositoryReceipt": false, "numberOfShares": 1.821936744E+9},
+			"company": {"companyId": "194", "ceo": "Christian Cederholm", "chairman": "Jacob Wallenberg", "totalNumberOfShares": 3.06870012E+9, "homepage": "https://investorab.com"},
 			"companyEvents": {"events": [{"date": "2026-07-16", "type": "INTERIM_REPORT", "isConfirmed": true}]},
 			"companyOwners": {"updated": "2025-12-31", "owners": [{"name": "Knut och Alice Wallenbergs Stiftelse", "percentOfCapital": 20.1, "percentOfVotes": 43}]},
 			"dividends": {
@@ -1147,14 +1515,16 @@ func TestGetStockDetails_Success(t *testing.T) {
 		t.Fatalf("GetStockDetails failed: %v", err)
 	}
 
+	// Share counts arrive as JSON floats in scientific notation for large caps,
+	// so these fields are float64 — an int64 field cannot decode 1.82E+9.
 	if resp.Stock.NumberOfShares != 1821936744 {
-		t.Errorf("Stock.NumberOfShares = %d, want 1821936744", resp.Stock.NumberOfShares)
+		t.Errorf("Stock.NumberOfShares = %v, want 1821936744", resp.Stock.NumberOfShares)
 	}
 	if resp.Company.CompanyID != "194" || resp.Company.CEO != "Christian Cederholm" {
 		t.Errorf("Company = %+v, want CompanyID=194, CEO=Christian Cederholm", resp.Company)
 	}
 	if resp.Company.TotalNumberOfShares != 3068700120 {
-		t.Errorf("Company.TotalNumberOfShares = %d, want 3068700120", resp.Company.TotalNumberOfShares)
+		t.Errorf("Company.TotalNumberOfShares = %v, want 3068700120", resp.Company.TotalNumberOfShares)
 	}
 	if len(resp.CompanyEvents.Events) != 1 || resp.CompanyEvents.Events[0].Type != "INTERIM_REPORT" {
 		t.Errorf("CompanyEvents.Events = %+v, want one INTERIM_REPORT", resp.CompanyEvents.Events)

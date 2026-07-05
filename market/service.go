@@ -267,6 +267,182 @@ func (s *Service) GetStockDetails(ctx context.Context, orderbookID string) (*Sto
 	return &resp, nil
 }
 
+// GetStockQuote returns the latest quote for a stock. This is the same quote
+// carried on the full Stock response, fetched on its own for cheap polling.
+//
+// This endpoint exists only for stocks. This returns public market data and
+// does not require an authenticated session.
+func (s *Service) GetStockQuote(ctx context.Context, orderbookID string) (*Quote, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/stock/%s/quote", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp Quote
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetStockOrderDepth returns the current order book snapshot for a stock.
+//
+// This endpoint exists only for stocks. This returns public market data and
+// does not require an authenticated session.
+func (s *Service) GetStockOrderDepth(ctx context.Context, orderbookID string) (*MarketDataOrderDepth, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/stock/%s/orderdepth", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp MarketDataOrderDepth
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetStockMarketPlace returns the trading venue status and schedule for a stock.
+//
+// This endpoint exists only for stocks. This returns public market data and
+// does not require an authenticated session.
+func (s *Service) GetStockMarketPlace(ctx context.Context, orderbookID string) (*MarketPlace, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/stock/%s/marketplace", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp MarketPlace
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetOffHoursPrice returns the latest pre- or post-market price for an instrument.
+// The returned OffHoursPrice has a nil Quote when there is no off-hours session
+// for the instrument (typical for derivatives, or outside pre/post-market hours).
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetOffHoursPrice(ctx context.Context, orderbookID string) (*OffHoursPrice, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_push/market-offhours-price/latest/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp OffHoursPrice
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetCertificateDetails returns extended data for a certificate: issuer, leverage,
+// regulatory documents, order book, and collateral terms.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetCertificateDetails(ctx context.Context, orderbookID string) (*CertificateDetails, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/certificate/%s/details", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp CertificateDetails
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetWarrantDetails returns extended data for a warrant: issuer, regulatory
+// documents, order book, and trading terms.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetWarrantDetails(ctx context.Context, orderbookID string) (*WarrantDetails, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/warrant/%s/details", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp WarrantDetails
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
 // GetStockPriceChart returns OHLC bars for a stock over the given time period,
 // along with the previous closing price. The server selects an appropriate bar
 // resolution; available alternatives are reported in the response metadata.
