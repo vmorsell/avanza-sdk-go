@@ -27,7 +27,7 @@ func TestSearch_Success(t *testing.T) {
 					Type:            "CERTIFICATE",
 					Title:           "BULL OMX X18 AVA 39",
 					OrderbookID:     "2017182",
-					Tradable:       true,
+					Tradable:        true,
 					Buyable:         true,
 					Sellable:        true,
 					MarketPlaceName: "Nordic MTF",

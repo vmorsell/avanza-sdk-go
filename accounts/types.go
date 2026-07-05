@@ -14,7 +14,7 @@ type Category struct {
 	Name            string      `json:"name"`
 	TotalValue      Money       `json:"totalValue"`
 	Performance     Performance `json:"performance"`
-	SavingsGoalView interface{} `json:"savingsGoalView"`
+	SavingsGoalView any         `json:"savingsGoalView"`
 }
 
 // Account represents a single account (ISK, KF, AF, etc.).
@@ -33,9 +33,9 @@ type Account struct {
 	Name                     AccountName     `json:"name"`
 	Status                   string          `json:"status"`
 	ErrorStatus              string          `json:"errorStatus"`
-	Overmortgaged            interface{}     `json:"overmortgaged"`
+	Overmortgaged            any             `json:"overmortgaged"`
 	CurrencyBalances         []Money         `json:"currencyBalances"`
-	Overdrawn                []interface{}   `json:"overdrawn"`
+	Overdrawn                []any           `json:"overdrawn"`
 	Performance              Performance     `json:"performance"`
 	Settings                 AccountSettings `json:"settings"`
 	ClearingAccountNumber    string          `json:"clearingAccountNumber"`
@@ -108,7 +108,7 @@ type TradingAccount struct {
 	IsOvermortgaged                   bool              `json:"isOvermortgaged"`
 	IsOverdrawn                       bool              `json:"isOverdrawn"`
 	IsHidden                          bool              `json:"isHidden"`
-	Positions                         []interface{}     `json:"positions"`
+	Positions                         []any             `json:"positions"`
 	CurrencyBalances                  []CurrencyBalance `json:"currencyBalances"`
 	URLParameterID                    string            `json:"urlParameterId"`
 }
@@ -208,7 +208,7 @@ type CashPosition struct {
 // AccountPositions contains all positions for an account.
 type AccountPositions struct {
 	WithOrderbook     []AccountPosition `json:"withOrderbook"`
-	WithoutOrderbook  []interface{}     `json:"withoutOrderbook"`
+	WithoutOrderbook  []any             `json:"withoutOrderbook"`
 	CashPositions     []CashPosition    `json:"cashPositions"`
 	WithCreditAccount bool              `json:"withCreditAccount"`
 }
@@ -224,7 +224,7 @@ type TransactionsRequest struct {
 
 // TransactionsResponse contains transactions and metadata.
 type TransactionsResponse struct {
-	Transactions               []Transaction      `json:"transactions"`
+	Transactions               []Transaction       `json:"transactions"`
 	TransactionsAfterFiltering int                 `json:"transactionsAfterFiltering"`
 	TransactionsFilter         *TransactionsFilter `json:"transactionsFilter"`
 	FirstTransactionDate       string              `json:"firstTransactionDate"`
@@ -248,34 +248,34 @@ type TransactionsFilterDateRange struct {
 
 // Transaction represents a single transaction.
 type Transaction struct {
-	ID                         string                  `json:"id"`
-	Date                       string                  `json:"date"`
-	SettlementDate             *string                 `json:"settlementDate"`
-	AvailabilityDate           *string                 `json:"availabilityDate"`
-	TradeDate                  *string                 `json:"tradeDate"`
-	Account                    TransactionAccount      `json:"account"`
-	Orderbook                  *TransactionOrderbook   `json:"orderbook"`
-	InstrumentName             *string                 `json:"instrumentName"`
-	Description                string                  `json:"description"`
-	Type                       string                  `json:"type"`
-	BackofficeType             string                  `json:"backofficeType"`
-	BackofficeTypeText         string                  `json:"backofficeTypeText"`
-	Volume                     *Money                  `json:"volume"`
-	PriceInTradedCurrency      *Money                  `json:"priceInTradedCurrency"`
-	Amount                     *Money                  `json:"amount"`
-	OnCreditAccount            bool                    `json:"onCreditAccount"`
-	Commission                 *Money                  `json:"commission"`
-	CurrencyRate               *float64                `json:"currencyRate"`
-	NoteID                     *string                 `json:"noteId"`
-	PriceInTransactionCurrency *Money                  `json:"priceInTransactionCurrency"`
-	Intraday                   bool                    `json:"intraday"`
-	ForeignTaxRate             *float64                `json:"foreignTaxRate"`
-	ISIN                       *string                 `json:"isin"`
-	Result                     *Money                  `json:"result"`
-	VolumeFactor               *float64                `json:"volumeFactor"`
-	Cancelled                  bool                    `json:"cancelled"`
-	CancelDate                 *string                 `json:"cancelDate"`
-	VerificationNumber         string                  `json:"verificationNumber"`
+	ID                         string                `json:"id"`
+	Date                       string                `json:"date"`
+	SettlementDate             *string               `json:"settlementDate"`
+	AvailabilityDate           *string               `json:"availabilityDate"`
+	TradeDate                  *string               `json:"tradeDate"`
+	Account                    TransactionAccount    `json:"account"`
+	Orderbook                  *TransactionOrderbook `json:"orderbook"`
+	InstrumentName             *string               `json:"instrumentName"`
+	Description                string                `json:"description"`
+	Type                       string                `json:"type"`
+	BackofficeType             string                `json:"backofficeType"`
+	BackofficeTypeText         string                `json:"backofficeTypeText"`
+	Volume                     *Money                `json:"volume"`
+	PriceInTradedCurrency      *Money                `json:"priceInTradedCurrency"`
+	Amount                     *Money                `json:"amount"`
+	OnCreditAccount            bool                  `json:"onCreditAccount"`
+	Commission                 *Money                `json:"commission"`
+	CurrencyRate               *float64              `json:"currencyRate"`
+	NoteID                     *string               `json:"noteId"`
+	PriceInTransactionCurrency *Money                `json:"priceInTransactionCurrency"`
+	Intraday                   bool                  `json:"intraday"`
+	ForeignTaxRate             *float64              `json:"foreignTaxRate"`
+	ISIN                       *string               `json:"isin"`
+	Result                     *Money                `json:"result"`
+	VolumeFactor               *float64              `json:"volumeFactor"`
+	Cancelled                  bool                  `json:"cancelled"`
+	CancelDate                 *string               `json:"cancelDate"`
+	VerificationNumber         string                `json:"verificationNumber"`
 }
 
 // TransactionAccount contains account details for a transaction.

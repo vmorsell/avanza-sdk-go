@@ -43,14 +43,14 @@ type OrderMetadata struct {
 type PlaceOrderRequest struct {
 	IsDividendReinvestment bool           `json:"isDividendReinvestment"`
 	RequestID              string         `json:"requestId"`
-	OrderRequestParameters interface{}    `json:"orderRequestParameters"`
+	OrderRequestParameters any            `json:"orderRequestParameters"`
 	Price                  float64        `json:"price"`
 	Volume                 int            `json:"volume"`
-	OpenVolume             interface{}    `json:"openVolume"`
+	OpenVolume             any            `json:"openVolume"`
 	AccountID              string         `json:"accountId"`
 	Side                   OrderSide      `json:"side"`
 	OrderbookID            string         `json:"orderbookId"`
-	ValidUntil             interface{}    `json:"validUntil"`
+	ValidUntil             any            `json:"validUntil"`
 	Metadata               OrderMetadata  `json:"metadata"`
 	Condition              OrderCondition `json:"condition"`
 }
@@ -80,13 +80,13 @@ type DeleteOrderResponse struct {
 
 // ModifyOrderRequest contains parameters needed to modify an existing order.
 type ModifyOrderRequest struct {
-	OrderID    string      `json:"orderId"`
-	Price      float64     `json:"price"`
-	Volume     int         `json:"volume"`
-	OpenVolume interface{} `json:"openVolume"`
-	AccountID  string      `json:"accountId"`
-	ValidUntil interface{} `json:"validUntil"`
-	Metadata   interface{} `json:"metadata"`
+	OrderID    string  `json:"orderId"`
+	Price      float64 `json:"price"`
+	Volume     int     `json:"volume"`
+	OpenVolume any     `json:"openVolume"`
+	AccountID  string  `json:"accountId"`
+	ValidUntil any     `json:"validUntil"`
+	Metadata   any     `json:"metadata"`
 }
 
 // ModifyOrderResponse contains the result of modifying an order.
@@ -123,25 +123,25 @@ type OrderOrderbook struct {
 
 // Order represents an active or completed order.
 type Order struct {
-	Account              OrderAccount           `json:"account"`
-	OrderID              string                 `json:"orderId"`
-	Volume               int                    `json:"volume"`
-	OriginalVolume       int                    `json:"originalVolume"`
-	Price                float64                `json:"price"`
-	Amount               float64                `json:"amount"`
-	OrderbookID          string                 `json:"orderbookId"`
-	Side                 OrderSide              `json:"side"`
-	ValidUntil           string                 `json:"validUntil"`
-	Created              string                 `json:"created"`
-	Deletable            bool                   `json:"deletable"`
-	Modifiable           bool                   `json:"modifiable"`
-	Message              string                 `json:"message"`
-	State                string                 `json:"state"`
-	StateText            string                 `json:"stateText"`
-	StateMessage         string                 `json:"stateMessage"`
-	Orderbook            OrderOrderbook         `json:"orderbook"`
-	AdditionalParameters map[string]interface{} `json:"additionalParameters"`
-	Condition            OrderCondition         `json:"condition"`
+	Account              OrderAccount   `json:"account"`
+	OrderID              string         `json:"orderId"`
+	Volume               int            `json:"volume"`
+	OriginalVolume       int            `json:"originalVolume"`
+	Price                float64        `json:"price"`
+	Amount               float64        `json:"amount"`
+	OrderbookID          string         `json:"orderbookId"`
+	Side                 OrderSide      `json:"side"`
+	ValidUntil           string         `json:"validUntil"`
+	Created              string         `json:"created"`
+	Deletable            bool           `json:"deletable"`
+	Modifiable           bool           `json:"modifiable"`
+	Message              string         `json:"message"`
+	State                string         `json:"state"`
+	StateText            string         `json:"stateText"`
+	StateMessage         string         `json:"stateMessage"`
+	Orderbook            OrderOrderbook `json:"orderbook"`
+	AdditionalParameters map[string]any `json:"additionalParameters"`
+	Condition            OrderCondition `json:"condition"`
 }
 
 // GetOrderRequest contains parameters needed to get a single order.
@@ -170,24 +170,24 @@ type GetOrderResponse struct {
 
 // GetOrdersResponse contains all orders for the authenticated user.
 type GetOrdersResponse struct {
-	Orders          []Order       `json:"orders"`
-	FundOrders      []interface{} `json:"fundOrders"`
-	CancelledOrders []interface{} `json:"cancelledOrders"`
+	Orders          []Order `json:"orders"`
+	FundOrders      []any   `json:"fundOrders"`
+	CancelledOrders []any   `json:"cancelledOrders"`
 }
 
 // ValidateOrderRequest contains order parameters to validate before placing.
 type ValidateOrderRequest struct {
 	IsDividendReinvestment bool           `json:"isDividendReinvestment"`
 	RequestID              *string        `json:"requestId"`
-	OrderRequestParameters interface{}    `json:"orderRequestParameters"`
+	OrderRequestParameters any            `json:"orderRequestParameters"`
 	Price                  float64        `json:"price"`
 	Volume                 int            `json:"volume"`
-	OpenVolume             interface{}    `json:"openVolume"`
+	OpenVolume             any            `json:"openVolume"`
 	AccountID              string         `json:"accountId"`
 	Side                   OrderSide      `json:"side"`
 	OrderbookID            string         `json:"orderbookId"`
-	ValidUntil             interface{}    `json:"validUntil"`
-	Metadata               interface{}    `json:"metadata"`
+	ValidUntil             any            `json:"validUntil"`
+	Metadata               any            `json:"metadata"`
 	Condition              OrderCondition `json:"condition"`
 	ISIN                   string         `json:"isin"`
 	Currency               string         `json:"currency"`
@@ -243,7 +243,7 @@ type CurrencyExchangeFee struct {
 type StopLossTriggerType string
 
 const (
-	StopLossTriggerLessOrEqual StopLossTriggerType = "LESS_OR_EQUAL"  // Trigger when price drops to or below value
+	StopLossTriggerLessOrEqual StopLossTriggerType = "LESS_OR_EQUAL" // Trigger when price drops to or below value
 	StopLossTriggerMoreOrEqual StopLossTriggerType = "MORE_OR_EQUAL" // Trigger when price rises to or above value
 )
 
@@ -484,27 +484,27 @@ type OrderEventState struct {
 
 // OrderEventData contains order data from an SSE event.
 type OrderEventData struct {
-	ID                   string               `json:"id"`
-	AccountID            string               `json:"accountId"`
-	Orderbook            OrderEventOrderbook  `json:"orderbook"`
-	CurrentVolume        float64              `json:"currentVolume"`
-	OriginalVolume       float64              `json:"originalVolume"`
-	OpenVolume           *float64             `json:"openVolume"`
-	Price                float64              `json:"price"`
-	ValidDate            *string              `json:"validDate"`
-	Type                 OrderSide            `json:"type"`
-	State                OrderEventState      `json:"state"`
-	Action               OrderAction          `json:"action"`
-	Modifiable           bool                 `json:"modifiable"`
-	Deletable            bool                 `json:"deletable"`
-	Sum                  float64              `json:"sum"`
-	VisibleDate          *string              `json:"visibleDate"`
-	OrderDateTime        int64                `json:"orderDateTime"`
-	EventTimeStamp       int64                `json:"eventTimeStamp"`
-	UniqueID             string               `json:"uniqueId"`
-	AdditionalParameters map[string]any       `json:"additionalParameters"`
-	DetailedCancelStatus *string              `json:"detailedCancelStatus"`
-	Condition            OrderCondition       `json:"condition"`
+	ID                   string              `json:"id"`
+	AccountID            string              `json:"accountId"`
+	Orderbook            OrderEventOrderbook `json:"orderbook"`
+	CurrentVolume        float64             `json:"currentVolume"`
+	OriginalVolume       float64             `json:"originalVolume"`
+	OpenVolume           *float64            `json:"openVolume"`
+	Price                float64             `json:"price"`
+	ValidDate            *string             `json:"validDate"`
+	Type                 OrderSide           `json:"type"`
+	State                OrderEventState     `json:"state"`
+	Action               OrderAction         `json:"action"`
+	Modifiable           bool                `json:"modifiable"`
+	Deletable            bool                `json:"deletable"`
+	Sum                  float64             `json:"sum"`
+	VisibleDate          *string             `json:"visibleDate"`
+	OrderDateTime        int64               `json:"orderDateTime"`
+	EventTimeStamp       int64               `json:"eventTimeStamp"`
+	UniqueID             string              `json:"uniqueId"`
+	AdditionalParameters map[string]any      `json:"additionalParameters"`
+	DetailedCancelStatus *string             `json:"detailedCancelStatus"`
+	Condition            OrderCondition      `json:"condition"`
 }
 
 // OrderEvent is a single event from the orders subscription stream.

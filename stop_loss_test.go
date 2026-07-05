@@ -282,10 +282,10 @@ func TestGetStopLoss_Success(t *testing.T) {
 				Name: "Investor A",
 			},
 			Trigger: trading.StopLossTriggerResponse{
-				Value:     310,
-				Type:      trading.StopLossTriggerLessOrEqual,
+				Value:      310,
+				Type:       trading.StopLossTriggerLessOrEqual,
 				ValidUntil: "2026-04-29",
-				ValueType: trading.StopLossValueMonetary,
+				ValueType:  trading.StopLossValueMonetary,
 			},
 			Order: trading.StopLossOrderDetails{
 				Type:      trading.StopLossOrderEventBuy,
@@ -391,9 +391,9 @@ func TestModifyStopLoss_Success(t *testing.T) {
 		AccountID:        testAccountID,
 		OrderbookID:      testOrderbookID,
 		StopLossTrigger: trading.StopLossTrigger{
-			Type:      trading.StopLossTriggerLessOrEqual,
-			Value:     310,
-			ValueType: trading.StopLossValueMonetary,
+			Type:       trading.StopLossTriggerLessOrEqual,
+			Value:      310,
+			ValueType:  trading.StopLossValueMonetary,
 			ValidUntil: "2026-04-29",
 		},
 		StopLossOrderEvent: trading.StopLossOrderEvent{

@@ -46,8 +46,8 @@ func TestGetOrders_Success(t *testing.T) {
 					State:       "ACTIVE",
 				},
 			},
-			FundOrders:      []interface{}{},
-			CancelledOrders: []interface{}{},
+			FundOrders:      []any{},
+			CancelledOrders: []any{},
 		})
 	}))
 	defer server.Close()
@@ -97,8 +97,8 @@ func TestGetOrders_EmptyOrders(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(trading.GetOrdersResponse{
 			Orders:          []trading.Order{},
-			FundOrders:      []interface{}{},
-			CancelledOrders: []interface{}{},
+			FundOrders:      []any{},
+			CancelledOrders: []any{},
 		})
 	}))
 	defer server.Close()
