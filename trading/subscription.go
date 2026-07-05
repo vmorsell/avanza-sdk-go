@@ -11,10 +11,12 @@ import (
 
 // OrdersSubscription represents an active orders subscription.
 type OrdersSubscription struct {
-	sub    *sse.Subscription
-	events chan OrderEvent
-	errors chan error
-	wg     sync.WaitGroup
+	sub       *sse.Subscription
+	events    chan OrderEvent
+	errors    chan error
+	done      chan struct{}
+	closeOnce sync.Once
+	wg        sync.WaitGroup
 }
 
 // Events returns a channel that receives order events.
@@ -30,6 +32,7 @@ func (s *OrdersSubscription) Errors() <-chan error {
 // Close stops the subscription and cleans up resources.
 // Always call Close() when done with the subscription to prevent resource leaks.
 func (s *OrdersSubscription) Close() {
+	s.closeOnce.Do(func() { close(s.done) })
 	s.sub.Close()
 	s.wg.Wait()
 }
@@ -39,6 +42,7 @@ func newOrdersSubscription(sub *sse.Subscription) *OrdersSubscription {
 		sub:    sub,
 		events: make(chan OrderEvent, 100),
 		errors: make(chan error, 10),
+		done:   make(chan struct{}),
 	}
 	s.wg.Add(1)
 	go s.run()
@@ -76,7 +80,7 @@ func (s *OrdersSubscription) run() {
 
 func (s *OrdersSubscription) forwardEvent(raw sse.RawEvent) {
 	if raw.Event != "ORDER" {
-		s.events <- OrderEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry}
+		s.trySendEvent(OrderEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry})
 		return
 	}
 
@@ -89,20 +93,31 @@ func (s *OrdersSubscription) forwardEvent(raw sse.RawEvent) {
 		return
 	}
 
-	s.events <- OrderEvent{
+	s.trySendEvent(OrderEvent{
 		Event: raw.Event,
 		Data:  data,
 		ID:    raw.ID,
 		Retry: raw.Retry,
+	})
+}
+
+// trySendEvent sends without blocking Close: if the consumer has stopped
+// reading and the subscription is being closed, the event is dropped.
+func (s *OrdersSubscription) trySendEvent(event OrderEvent) {
+	select {
+	case s.events <- event:
+	case <-s.done:
 	}
 }
 
 // StopLossSubscription represents an active stop loss subscription.
 type StopLossSubscription struct {
-	sub    *sse.Subscription
-	events chan StopLossEvent
-	errors chan error
-	wg     sync.WaitGroup
+	sub       *sse.Subscription
+	events    chan StopLossEvent
+	errors    chan error
+	done      chan struct{}
+	closeOnce sync.Once
+	wg        sync.WaitGroup
 }
 
 // Events returns a channel that receives stop loss events.
@@ -118,6 +133,7 @@ func (s *StopLossSubscription) Errors() <-chan error {
 // Close stops the subscription and cleans up resources.
 // Always call Close() when done with the subscription to prevent resource leaks.
 func (s *StopLossSubscription) Close() {
+	s.closeOnce.Do(func() { close(s.done) })
 	s.sub.Close()
 	s.wg.Wait()
 }
@@ -127,6 +143,7 @@ func newStopLossSubscription(sub *sse.Subscription) *StopLossSubscription {
 		sub:    sub,
 		events: make(chan StopLossEvent, 100),
 		errors: make(chan error, 10),
+		done:   make(chan struct{}),
 	}
 	s.wg.Add(1)
 	go s.run()
@@ -164,7 +181,7 @@ func (s *StopLossSubscription) run() {
 
 func (s *StopLossSubscription) forwardEvent(raw sse.RawEvent) {
 	if raw.Event != "STOPLOSS" {
-		s.events <- StopLossEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry}
+		s.trySendEvent(StopLossEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry})
 		return
 	}
 
@@ -177,10 +194,19 @@ func (s *StopLossSubscription) forwardEvent(raw sse.RawEvent) {
 		return
 	}
 
-	s.events <- StopLossEvent{
+	s.trySendEvent(StopLossEvent{
 		Event: raw.Event,
 		Data:  data,
 		ID:    raw.ID,
 		Retry: raw.Retry,
+	})
+}
+
+// trySendEvent sends without blocking Close: if the consumer has stopped
+// reading and the subscription is being closed, the event is dropped.
+func (s *StopLossSubscription) trySendEvent(event StopLossEvent) {
+	select {
+	case s.events <- event:
+	case <-s.done:
 	}
 }

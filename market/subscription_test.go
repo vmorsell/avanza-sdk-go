@@ -59,6 +59,58 @@ func TestOrderDepthSubscription_ReceivesEvents(t *testing.T) {
 	sub.Close()
 }
 
+func TestOrderDepthSubscription_CloseWithUnreadEvents(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+
+		// Send more events than the subscription buffer (100) holds,
+		// so the forwarding goroutine ends up blocked on a send.
+		for i := range 150 {
+			writeSSEEvent(w, fmt.Sprintf("e%d", i), "ORDER_DEPTH", `{"orderbookId":"12345","levels":[]}`)
+		}
+		<-r.Context().Done()
+	}))
+	defer srv.Close()
+
+	c := client.NewClient(client.WithBaseURL(srv.URL))
+	c.SetMockCookies(map[string]string{"csid": "a", "cstoken": "b", "AZACSRF": "c"})
+	svc := NewService(c)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub, err := svc.SubscribeToOrderDepth(ctx, "12345")
+	if err != nil {
+		t.Fatalf("subscribe failed: %v", err)
+	}
+
+	// Wait for the buffer to fill without reading any events.
+	deadline := time.After(5 * time.Second)
+	for len(sub.events) < cap(sub.events) {
+		select {
+		case <-deadline:
+			t.Fatalf("timed out waiting for buffer to fill, got %d events", len(sub.events))
+		default:
+			time.Sleep(5 * time.Millisecond)
+		}
+	}
+	// Give the forwarder time to block on the next send.
+	time.Sleep(100 * time.Millisecond)
+
+	done := make(chan struct{})
+	go func() {
+		sub.Close()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("Close() deadlocked with unread events in the buffer")
+	}
+}
+
 func TestOrderDepthChannelsCloseOnSSEDeath(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)

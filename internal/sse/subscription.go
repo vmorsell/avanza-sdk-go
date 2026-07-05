@@ -19,6 +19,10 @@ import (
 const (
 	defaultRetryInterval = 3 * time.Second
 	maxRetryInterval     = 30 * time.Second
+
+	// maxEventSize is the largest single SSE line we accept. The scanner's
+	// default 64KB limit is too small for large order-depth snapshots.
+	maxEventSize = 1024 * 1024
 )
 
 // Config holds the parameters that differ between subscription types.
@@ -58,6 +62,7 @@ func New(ctx context.Context, cfg Config) *Subscription {
 		events: make(chan RawEvent, 100),
 		errors: make(chan error, 10),
 	}
+	s.wg.Add(1)
 	go s.start()
 	return s
 }
@@ -93,8 +98,8 @@ func (s *Subscription) trySendEvent(event RawEvent) {
 }
 
 // start begins the SSE stream processing with automatic reconnection.
+// The caller must have incremented s.wg before starting the goroutine.
 func (s *Subscription) start() {
-	s.wg.Add(1)
 	defer s.wg.Done()
 	defer close(s.events)
 	defer close(s.errors)
@@ -194,8 +199,10 @@ func (s *Subscription) setSSEHeaders(req *http.Request) {
 
 func (s *Subscription) processSSEStream(resp *http.Response) error {
 	scanner := bufio.NewScanner(resp.Body)
+	scanner.Buffer(make([]byte, 0, 64*1024), maxEventSize)
 
 	var event RawEvent
+	var dataLines []string
 
 	for scanner.Scan() {
 		select {
@@ -207,26 +214,34 @@ func (s *Subscription) processSSEStream(resp *http.Response) error {
 		line := strings.TrimSpace(scanner.Text())
 
 		if line == "" {
-			if event.Event != "" {
+			if event.Event != "" || len(dataLines) > 0 {
+				if event.Event == "" {
+					event.Event = "message"
+				}
+				if len(dataLines) > 0 {
+					event.Data = json.RawMessage(strings.Join(dataLines, "\n"))
+				}
 				s.trySendEvent(event)
-				event = RawEvent{}
 			}
+			event = RawEvent{}
+			dataLines = nil
 			continue
 		}
 
-		parts := strings.SplitN(line, ":", 2)
-		if len(parts) != 2 {
-			continue
+		field, value, found := strings.Cut(line, ":")
+		if !found {
+			// A line with no colon is a field with an empty value.
+			field = line
+			value = ""
 		}
-
-		field := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
+		field = strings.TrimSpace(field)
+		value = strings.TrimSpace(value)
 
 		switch field {
 		case "event":
 			event.Event = value
 		case "data":
-			event.Data = json.RawMessage(value)
+			dataLines = append(dataLines, value)
 		case "id":
 			event.ID = value
 			s.lastEventID = value

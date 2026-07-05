@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -87,6 +88,7 @@ func TestReconnectsAfterStreamDrop(t *testing.T) {
 		errors:        make(chan error, 10),
 		retryInterval: 10 * time.Millisecond,
 	}
+	sub.wg.Add(1)
 	go sub.start()
 
 	var events []RawEvent
@@ -145,6 +147,7 @@ func TestSendsLastEventIDOnReconnect(t *testing.T) {
 		errors:        make(chan error, 10),
 		retryInterval: 10 * time.Millisecond,
 	}
+	sub.wg.Add(1)
 	go sub.start()
 
 	timeout := time.After(5 * time.Second)
@@ -203,6 +206,7 @@ func TestRespectsServerRetryField(t *testing.T) {
 		errors:        make(chan error, 10),
 		retryInterval: 10 * time.Millisecond,
 	}
+	sub.wg.Add(1)
 	go sub.start()
 
 	timeout := time.After(5 * time.Second)
@@ -257,6 +261,7 @@ func TestStopsOn4xx(t *testing.T) {
 		events: make(chan RawEvent, 100),
 		errors: make(chan error, 10),
 	}
+	sub.wg.Add(1)
 	go sub.start()
 
 	select {
@@ -296,6 +301,7 @@ func TestCloseDuringReconnectWait(t *testing.T) {
 		errors:        make(chan error, 10),
 		retryInterval: 10 * time.Second,
 	}
+	sub.wg.Add(1)
 	go sub.start()
 
 	deadline := time.After(5 * time.Second)
@@ -318,6 +324,155 @@ func TestCloseDuringReconnectWait(t *testing.T) {
 	case <-done:
 	case <-time.After(2 * time.Second):
 		t.Fatal("Close() hung during reconnect wait")
+	}
+}
+
+func TestMultiLineDataConcatenated(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "event: TEST\ndata: line1\ndata: line2\n\n")
+		w.(http.Flusher).Flush()
+	}))
+	defer srv.Close()
+
+	c := newTestClient(srv.URL)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub := New(ctx, Config{Client: c, Endpoint: "/events", Referer: "https://example.com"})
+	defer sub.Close()
+
+	select {
+	case e := <-sub.Events():
+		if got := string(e.Data); got != "line1\nline2" {
+			t.Errorf("data = %q, want %q", got, "line1\nline2")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for event")
+	}
+}
+
+func TestEventWithoutTypeDefaultsToMessage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "data: {\"foo\":\"bar\"}\n\n")
+		w.(http.Flusher).Flush()
+	}))
+	defer srv.Close()
+
+	c := newTestClient(srv.URL)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub := New(ctx, Config{Client: c, Endpoint: "/events", Referer: "https://example.com"})
+	defer sub.Close()
+
+	select {
+	case e := <-sub.Events():
+		if e.Event != "message" {
+			t.Errorf("event type = %q, want message", e.Event)
+		}
+		if got := string(e.Data); got != `{"foo":"bar"}` {
+			t.Errorf("data = %q, want {\"foo\":\"bar\"}", got)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for event")
+	}
+}
+
+func TestCommentLinesIgnored(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, ": keepalive\n\nevent: TEST\ndata: {}\n\n")
+		w.(http.Flusher).Flush()
+	}))
+	defer srv.Close()
+
+	c := newTestClient(srv.URL)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub := New(ctx, Config{Client: c, Endpoint: "/events", Referer: "https://example.com"})
+	defer sub.Close()
+
+	select {
+	case e := <-sub.Events():
+		if e.Event != "TEST" {
+			t.Errorf("event type = %q, want TEST (comment should not dispatch)", e.Event)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for event")
+	}
+}
+
+func TestLargeEventExceedingDefaultScannerBuffer(t *testing.T) {
+	// A 100KB data line exceeds bufio.Scanner's 64KB default limit.
+	largeData := `{"pad":"` + strings.Repeat("x", 100*1024) + `"}`
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		writeSSEEvent(w, "big", largeData)
+	}))
+	defer srv.Close()
+
+	c := newTestClient(srv.URL)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub := New(ctx, Config{Client: c, Endpoint: "/events", Referer: "https://example.com"})
+	defer sub.Close()
+
+	select {
+	case e := <-sub.Events():
+		if len(e.Data) != len(largeData) {
+			t.Errorf("data length = %d, want %d", len(e.Data), len(largeData))
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for large event")
+	}
+}
+
+func TestCloseImmediatelyAfterNew(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.WriteHeader(http.StatusOK)
+		<-r.Context().Done()
+	}))
+	defer srv.Close()
+
+	c := newTestClient(srv.URL)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sub := New(ctx, Config{
+		Client:   c,
+		Endpoint: "/events",
+		Referer:  "https://example.com",
+	})
+	sub.Close()
+
+	// Close must be synchronous: once it returns, the goroutine has exited
+	// and both channels are closed.
+	select {
+	case _, ok := <-sub.Events():
+		if ok {
+			t.Fatal("events channel should be closed")
+		}
+	default:
+		t.Fatal("events channel not closed after Close returned")
+	}
+
+	select {
+	case _, ok := <-sub.Errors():
+		if ok {
+			t.Fatal("errors channel should be closed")
+		}
+	default:
+		t.Fatal("errors channel not closed after Close returned")
 	}
 }
 

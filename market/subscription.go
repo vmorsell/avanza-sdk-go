@@ -11,10 +11,12 @@ import (
 
 // OrderDepthSubscription represents an active order depth subscription.
 type OrderDepthSubscription struct {
-	sub    *sse.Subscription
-	events chan OrderDepthEvent
-	errors chan error
-	wg     sync.WaitGroup
+	sub       *sse.Subscription
+	events    chan OrderDepthEvent
+	errors    chan error
+	done      chan struct{}
+	closeOnce sync.Once
+	wg        sync.WaitGroup
 }
 
 // Events returns a channel that receives order depth events.
@@ -30,6 +32,7 @@ func (s *OrderDepthSubscription) Errors() <-chan error {
 // Close stops the subscription and cleans up resources.
 // Always call Close() when done with the subscription to prevent resource leaks.
 func (s *OrderDepthSubscription) Close() {
+	s.closeOnce.Do(func() { close(s.done) })
 	s.sub.Close()
 	s.wg.Wait()
 }
@@ -39,6 +42,7 @@ func newOrderDepthSubscription(sub *sse.Subscription) *OrderDepthSubscription {
 		sub:    sub,
 		events: make(chan OrderDepthEvent, 100),
 		errors: make(chan error, 10),
+		done:   make(chan struct{}),
 	}
 	s.wg.Add(1)
 	go s.run()
@@ -76,7 +80,7 @@ func (s *OrderDepthSubscription) run() {
 
 func (s *OrderDepthSubscription) forwardEvent(raw sse.RawEvent) {
 	if raw.Event != "ORDER_DEPTH" {
-		s.events <- OrderDepthEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry}
+		s.trySendEvent(OrderDepthEvent{Event: raw.Event, ID: raw.ID, Retry: raw.Retry})
 		return
 	}
 
@@ -89,10 +93,19 @@ func (s *OrderDepthSubscription) forwardEvent(raw sse.RawEvent) {
 		return
 	}
 
-	s.events <- OrderDepthEvent{
+	s.trySendEvent(OrderDepthEvent{
 		Event: raw.Event,
 		Data:  data,
 		ID:    raw.ID,
 		Retry: raw.Retry,
+	})
+}
+
+// trySendEvent sends without blocking Close: if the consumer has stopped
+// reading and the subscription is being closed, the event is dropped.
+func (s *OrderDepthSubscription) trySendEvent(event OrderDepthEvent) {
+	select {
+	case s.events <- event:
+	case <-s.done:
 	}
 }
