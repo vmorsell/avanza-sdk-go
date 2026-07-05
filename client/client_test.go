@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -83,7 +84,7 @@ func TestPost_Success(t *testing.T) {
 	tests := []struct {
 		name           string
 		endpoint       string
-		body           interface{}
+		body           any
 		serverResponse int
 		responseBody   string
 	}{
@@ -155,7 +156,7 @@ func TestPost_MarshalError(t *testing.T) {
 	ctx := context.Background()
 
 	// Functions cannot be marshaled to JSON
-	invalidBody := map[string]interface{}{
+	invalidBody := map[string]any{
 		"func": func() {},
 	}
 
@@ -636,4 +637,50 @@ func TestConcurrentRequests(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+func TestExtractCookies_DeletesExpiredCookies(t *testing.T) {
+	var call atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch call.Add(1) {
+		case 1:
+			http.SetCookie(w, &http.Cookie{Name: "csid", Value: "abc"})
+			http.SetCookie(w, &http.Cookie{Name: "AZACSRF", Value: "token"})
+		default:
+			// Server deletes both cookies.
+			http.SetCookie(w, &http.Cookie{Name: "csid", Value: "", MaxAge: -1})
+			http.SetCookie(w, &http.Cookie{Name: "AZACSRF", Value: "", MaxAge: -1})
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	c := NewClient(WithBaseURL(server.URL))
+	ctx := context.Background()
+
+	resp, err := c.Get(ctx, "/")
+	if err != nil {
+		t.Fatalf("first request failed: %v", err)
+	}
+	resp.Body.Close()
+
+	if got := c.Cookies()["csid"]; got != "abc" {
+		t.Fatalf("csid = %q, want abc", got)
+	}
+	if got := c.SecurityToken(); got != "token" {
+		t.Fatalf("security token = %q, want token", got)
+	}
+
+	resp, err = c.Get(ctx, "/")
+	if err != nil {
+		t.Fatalf("second request failed: %v", err)
+	}
+	resp.Body.Close()
+
+	if _, ok := c.Cookies()["csid"]; ok {
+		t.Error("csid should have been deleted")
+	}
+	if got := c.SecurityToken(); got != "" {
+		t.Errorf("security token = %q, want empty after deletion", got)
+	}
 }

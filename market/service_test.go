@@ -1561,3 +1561,15 @@ func TestSearch_NilTypesBecomesEmptyArray(t *testing.T) {
 		t.Fatalf("Search failed: %v", err)
 	}
 }
+
+func TestSearch_NilRequest(t *testing.T) {
+	svc := NewService(client.NewClient())
+
+	_, err := svc.Search(context.Background(), nil)
+	if err == nil {
+		t.Fatal("expected error for nil request, got nil")
+	}
+	if got, want := err.Error(), "request is required"; got != want {
+		t.Errorf("error = %q, want %q", got, want)
+	}
+}

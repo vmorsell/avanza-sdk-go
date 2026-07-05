@@ -42,21 +42,21 @@ type BankIDStartResponse struct {
 // State is "OUTSTANDING_TRANSACTION" while pending, "COMPLETE" on success, or "FAILED" on error.
 // Logins is populated when State is "COMPLETE".
 type BankIDCollectResponse struct {
-	Name                       string        `json:"name"`
-	TransactionID              string        `json:"transactionId"`
-	State                      string        `json:"state"`
-	HintCode                   string        `json:"hintCode"`
-	Hint                       string        `json:"hint"`
-	RFA                        string        `json:"rfa"`
-	IdentificationNumber       string        `json:"identificationNumber"`
-	Logins                     []Login       `json:"logins"`
-	RecommendedTargetCustomers []interface{} `json:"recommendedTargetCustomers"`
-	Poa                        Poa           `json:"poa"`
+	Name                       string  `json:"name"`
+	TransactionID              string  `json:"transactionId"`
+	State                      string  `json:"state"`
+	HintCode                   string  `json:"hintCode"`
+	Hint                       string  `json:"hint"`
+	RFA                        string  `json:"rfa"`
+	IdentificationNumber       string  `json:"identificationNumber"`
+	Logins                     []Login `json:"logins"`
+	RecommendedTargetCustomers []any   `json:"recommendedTargetCustomers"`
+	Poa                        Poa     `json:"poa"`
 }
 
 // Poa contains power of attorney information.
 type Poa struct {
-	Letters []interface{} `json:"letters"`
+	Letters []any `json:"letters"`
 }
 
 // Login represents a user account available after authentication completes.
@@ -251,6 +251,10 @@ func (a *AuthService) EstablishSession(ctx context.Context, collectResp *BankIDC
 		return fmt.Errorf("failed to visit trading page: %w", err)
 	}
 	defer tradingResp.Body.Close()
+
+	if tradingResp.StatusCode != http.StatusOK {
+		return fmt.Errorf("visit trading page: %w", client.NewHTTPError(tradingResp))
+	}
 
 	// Verify session is active
 	sessionResp, err := a.client.Get(ctx, "/_api/authentication/session/info/session")

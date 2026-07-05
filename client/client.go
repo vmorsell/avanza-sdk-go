@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/http"
 	"strings"
 	"sync"
@@ -54,9 +55,7 @@ func (c *Client) Cookies() map[string]string {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	cookies := make(map[string]string, len(c.cookies))
-	for k, v := range c.cookies {
-		cookies[k] = v
-	}
+	maps.Copy(cookies, c.cookies)
 	return cookies
 }
 
@@ -164,7 +163,7 @@ func NewClient(opts ...Option) *Client {
 
 // Post sends a POST request. Body is marshaled to JSON.
 // Cookies, security tokens, and rate limiting are handled automatically.
-func (c *Client) Post(ctx context.Context, endpoint string, body interface{}) (*http.Response, error) {
+func (c *Client) Post(ctx context.Context, endpoint string, body any) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, endpoint)
 
 	var jsonBody []byte
@@ -276,11 +275,23 @@ func (c *Client) extractCookies(resp *http.Response) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	for _, cookie := range resp.Cookies() {
-		if cookie.Name != "" && cookie.Value != "" {
-			c.cookies[cookie.Name] = cookie.Value
+		if cookie.Name == "" {
+			continue
+		}
+		// Max-Age<0 or a past Expires means the server is deleting the cookie.
+		if cookie.MaxAge < 0 || (!cookie.Expires.IsZero() && cookie.Expires.Before(time.Now())) {
+			delete(c.cookies, cookie.Name)
 			if cookie.Name == "AZACSRF" {
-				c.securityToken = cookie.Value
+				c.securityToken = ""
 			}
+			continue
+		}
+		if cookie.Value == "" {
+			continue
+		}
+		c.cookies[cookie.Name] = cookie.Value
+		if cookie.Name == "AZACSRF" {
+			c.securityToken = cookie.Value
 		}
 	}
 }

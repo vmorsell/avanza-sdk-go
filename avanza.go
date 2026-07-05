@@ -33,6 +33,16 @@
 //	if errors.As(err, &httpErr) {
 //		fmt.Printf("HTTP %d: %s\n", httpErr.StatusCode, httpErr.Body)
 //	}
+//
+// Session lifetime:
+//
+// Session cookies captured at login are held for the life of the process and
+// are never refreshed. When Avanza expires the session server-side, API calls
+// return *client.HTTPError with StatusCode 401 or 403, and active SSE
+// subscriptions stop reconnecting (4xx is treated as non-recoverable). There
+// is no automatic re-authentication — since login requires a human to scan a
+// BankID QR code, callers must detect the expired session and run the auth
+// flow again.
 package avanza
 
 import (

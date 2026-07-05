@@ -74,6 +74,9 @@ func NewService(client *client.Client) *Service {
 // PlaceOrder places a new order. Consider validating first with ValidateOrder
 // and checking fees with GetPreliminaryFee.
 func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*PlaceOrderResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.AccountID == "" {
 		return nil, fmt.Errorf("accountId is required")
 	}
@@ -117,6 +120,9 @@ func (s *Service) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (*Plac
 
 // DeleteOrder deletes an existing order.
 func (s *Service) DeleteOrder(ctx context.Context, req *DeleteOrderRequest) (*DeleteOrderResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.AccountID == "" {
 		return nil, fmt.Errorf("accountId is required")
 	}
@@ -148,6 +154,9 @@ func (s *Service) DeleteOrder(ctx context.Context, req *DeleteOrderRequest) (*De
 
 // ModifyOrder modifies an existing order.
 func (s *Service) ModifyOrder(ctx context.Context, req *ModifyOrderRequest) (*ModifyOrderResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.OrderID == "" {
 		return nil, fmt.Errorf("orderId is required")
 	}
@@ -185,6 +194,9 @@ func (s *Service) ModifyOrder(ctx context.Context, req *ModifyOrderRequest) (*Mo
 
 // GetOrder returns a single order by ID.
 func (s *Service) GetOrder(ctx context.Context, req *GetOrderRequest) (*GetOrderResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.OrderID == "" {
 		return nil, fmt.Errorf("orderId is required")
 	}
@@ -237,6 +249,9 @@ func (s *Service) GetOrders(ctx context.Context) (*GetOrdersResponse, error) {
 
 // ValidateOrder validates an order before placing it.
 func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) (*ValidateOrderResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.AccountID == "" {
 		return nil, fmt.Errorf("accountId is required")
 	}
@@ -285,6 +300,9 @@ func (s *Service) ValidateOrder(ctx context.Context, req *ValidateOrderRequest) 
 
 // GetPreliminaryFee estimates fees for an order.
 func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequest) (*PreliminaryFeeResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.AccountID == "" {
 		return nil, fmt.Errorf("accountId is required")
 	}
@@ -335,6 +353,9 @@ func (s *Service) GetPreliminaryFee(ctx context.Context, req *PreliminaryFeeRequ
 
 // PlaceStopLoss places a new stop loss order.
 func (s *Service) PlaceStopLoss(ctx context.Context, req *PlaceStopLossRequest) (*PlaceStopLossResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.AccountID == "" {
 		return nil, fmt.Errorf("accountId is required")
 	}
@@ -412,6 +433,9 @@ func (s *Service) GetStopLossOrders(ctx context.Context) ([]StopLossOrder, error
 
 // GetStopLoss returns a single stop loss order by account URL parameter ID and order ID.
 func (s *Service) GetStopLoss(ctx context.Context, req *GetStopLossRequest) (*StopLossOrder, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.AccountURLParameterID == "" {
 		return nil, fmt.Errorf("accountURLParameterID is required")
 	}
@@ -443,6 +467,9 @@ func (s *Service) GetStopLoss(ctx context.Context, req *GetStopLossRequest) (*St
 
 // ModifyStopLoss modifies an existing stop loss order.
 func (s *Service) ModifyStopLoss(ctx context.Context, req *ModifyStopLossRequest) (*PlaceStopLossResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.StopLossOrderID == "" {
 		return nil, fmt.Errorf("stoplossOrderId is required")
 	}
@@ -501,6 +528,9 @@ func (s *Service) ModifyStopLoss(ctx context.Context, req *ModifyStopLossRequest
 
 // DeleteStopLoss deletes an existing stop loss order.
 func (s *Service) DeleteStopLoss(ctx context.Context, req *DeleteStopLossRequest) error {
+	if req == nil {
+		return fmt.Errorf("request is required")
+	}
 	if req.AccountID == "" {
 		return fmt.Errorf("accountId is required")
 	}

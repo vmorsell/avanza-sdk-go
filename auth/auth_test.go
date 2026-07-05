@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -1004,5 +1005,40 @@ func TestGetSessionInfo_ContextCancellation(t *testing.T) {
 	_, err := service.GetSessionInfo(ctx)
 	if err == nil {
 		t.Fatal("expected error due to context cancellation, got nil")
+	}
+}
+
+func TestEstablishSession_TradingPageHTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case testLoginPath:
+			w.WriteHeader(http.StatusOK)
+		case "/handla/order.html":
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte("server error"))
+		default:
+			w.WriteHeader(http.StatusOK)
+		}
+	}))
+	defer server.Close()
+
+	c := newTestClient(server.URL)
+	service := NewAuthService(c)
+
+	collectResp := &BankIDCollectResponse{
+		Logins: []Login{{CustomerID: "customer-123", LoginPath: testLoginPath}},
+	}
+
+	err := service.EstablishSession(context.Background(), collectResp)
+	if err == nil {
+		t.Fatal("expected error for failed trading page request, got nil")
+	}
+
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T: %v", err, err)
+	}
+	if httpErr.StatusCode != http.StatusInternalServerError {
+		t.Errorf("status = %d, want 500", httpErr.StatusCode)
 	}
 }

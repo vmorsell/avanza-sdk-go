@@ -598,3 +598,38 @@ func TestGetPreliminaryFee_ValidationErrors(t *testing.T) {
 		})
 	}
 }
+
+// --- Nil requests ---
+
+func TestNilRequestsReturnError(t *testing.T) {
+	svc := NewService(client.NewClient())
+	ctx := context.Background()
+
+	tests := []struct {
+		name string
+		call func() error
+	}{
+		{"PlaceOrder", func() error { _, err := svc.PlaceOrder(ctx, nil); return err }},
+		{"DeleteOrder", func() error { _, err := svc.DeleteOrder(ctx, nil); return err }},
+		{"ModifyOrder", func() error { _, err := svc.ModifyOrder(ctx, nil); return err }},
+		{"GetOrder", func() error { _, err := svc.GetOrder(ctx, nil); return err }},
+		{"ValidateOrder", func() error { _, err := svc.ValidateOrder(ctx, nil); return err }},
+		{"GetPreliminaryFee", func() error { _, err := svc.GetPreliminaryFee(ctx, nil); return err }},
+		{"PlaceStopLoss", func() error { _, err := svc.PlaceStopLoss(ctx, nil); return err }},
+		{"GetStopLoss", func() error { _, err := svc.GetStopLoss(ctx, nil); return err }},
+		{"ModifyStopLoss", func() error { _, err := svc.ModifyStopLoss(ctx, nil); return err }},
+		{"DeleteStopLoss", func() error { return svc.DeleteStopLoss(ctx, nil) }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.call()
+			if err == nil {
+				t.Fatal("expected error for nil request, got nil")
+			}
+			if got, want := err.Error(), "request is required"; got != want {
+				t.Errorf("error = %q, want %q", got, want)
+			}
+		})
+	}
+}

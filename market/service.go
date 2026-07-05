@@ -29,6 +29,9 @@ func NewService(client *client.Client) *Service {
 //
 // This returns public market data and does not require an authenticated session.
 func (s *Service) Search(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("request is required")
+	}
 	if req.Query == "" {
 		return nil, fmt.Errorf("query is required")
 	}
