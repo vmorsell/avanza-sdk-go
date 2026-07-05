@@ -71,6 +71,24 @@ func main() {
 
 Hold on to the `Avanza` struct after that. Every service (`Auth`, `Accounts`, `Trading`, `Market`) hangs off it and they share one HTTP client, cookie jar, and rate limiter. Safe to share across goroutines.
 
+## Public market data (no authentication)
+
+Some of Avanza's endpoints serve public data and need no session. A plain `avanza.New()` client can call them straight away — skip the BankID flow entirely:
+
+```go
+c := avanza.New()
+
+hits, err := c.Market.Search(ctx, &market.SearchRequest{Query: "investor"})
+stock, err := c.Market.GetStock(ctx, "5247")                                  // quote + key indicators
+details, err := c.Market.GetStockDetails(ctx, "5247")                          // owners, holdings, dividends, exposure
+chart, err := c.Market.GetStockPriceChart(ctx, "5247", market.TimePeriodToday) // intraday OHLC
+cmp, err := c.Market.GetStockPriceChartComparison(ctx, "5247", "1002994", market.TimePeriodOneYear)
+news, err := c.Market.GetNews(ctx, "5247")                                     // press releases and media coverage
+forum, err := c.Market.GetForum(ctx, "5247")                                   // community posts
+```
+
+Methods that read public data (`Search`, `GetStock`, `GetCertificate`, `GetWarrant`, `GetStockDetails`, `GetStockPriceChart`, `GetStockPriceChartComparison`, `GetMarketMakerPriceChart`, `GetNews`, `GetForum`) say so in their godoc. Everything else — accounts, order placement, and the SSE subscriptions — requires an established session. See `examples/public-data`.
+
 ## Placing an order
 
 ```go
@@ -155,7 +173,7 @@ Bodies are left raw because Avanza's error shapes aren't consistent enough to mo
 
 ## Examples
 
-Runnable end-to-end examples live under [`examples/`](examples/), grouped by feature. Each is a `main.go` you can run directly once you have a test account.
+Runnable end-to-end examples live under [`examples/`](examples/), grouped by feature. Each is a `main.go` you can run directly once you have a test account — except [`examples/public-data`](examples/public-data), which needs no account.
 
 ## License
 

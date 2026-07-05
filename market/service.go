@@ -26,6 +26,8 @@ func NewService(client *client.Client) *Service {
 }
 
 // Search searches for instruments by name, ticker, or other text.
+//
+// This returns public market data and does not require an authenticated session.
 func (s *Service) Search(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {
 	if req.Query == "" {
 		return nil, fmt.Errorf("query is required")
@@ -70,6 +72,8 @@ func (s *Service) Search(ctx context.Context, req *SearchRequest) (*SearchRespon
 }
 
 // GetStock returns detailed market data for a stock.
+//
+// This returns public market data and does not require an authenticated session.
 func (s *Service) GetStock(ctx context.Context, orderbookID string) (*Stock, error) {
 	if orderbookID == "" {
 		return nil, fmt.Errorf("orderbookID is required")
@@ -224,6 +228,163 @@ func (s *Service) GetMarketMakerPriceChart(ctx context.Context, orderbookID stri
 	}
 
 	var resp MarketMakerPriceChart
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetStockDetails returns extended company and instrument data for a stock:
+// ownership, corporate events, dividends, holdings, fund/ETF exposure, and more.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetStockDetails(ctx context.Context, orderbookID string) (*StockDetails, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/stock/%s/details", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp StockDetails
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetStockPriceChart returns OHLC bars for a stock over the given time period,
+// along with the previous closing price. The server selects an appropriate bar
+// resolution; available alternatives are reported in the response metadata.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetStockPriceChart(ctx context.Context, orderbookID string, timePeriod TimePeriod) (*StockPriceChart, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+	if timePeriod == "" {
+		return nil, fmt.Errorf("timePeriod is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/price-chart/stock/%s?timePeriod=%s",
+		url.PathEscape(orderbookID), url.QueryEscape(string(timePeriod)))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp StockPriceChart
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetStockPriceChartComparison returns the OHLC series for orderbookID rebased for
+// comparison against compareOrderbookID over the given time period. The returned
+// StockPriceChart carries no PreviousClosingPrice for comparison requests.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetStockPriceChartComparison(ctx context.Context, orderbookID, compareOrderbookID string, timePeriod TimePeriod) (*StockPriceChart, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+	if compareOrderbookID == "" {
+		return nil, fmt.Errorf("compareOrderbookID is required")
+	}
+	if timePeriod == "" {
+		return nil, fmt.Errorf("timePeriod is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/price-chart/stock/%s/compare/%s?timePeriod=%s",
+		url.PathEscape(orderbookID), url.PathEscape(compareOrderbookID), url.QueryEscape(string(timePeriod)))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp StockPriceChart
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetNews returns the news feed for an instrument: press releases, analyst
+// notes, and articles from external Swedish financial media.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetNews(ctx context.Context, orderbookID string) (*News, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/news/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp News
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	return &resp, nil
+}
+
+// GetForum returns recent community forum posts for an instrument.
+//
+// This returns public market data and does not require an authenticated session.
+func (s *Service) GetForum(ctx context.Context, orderbookID string) (*Forum, error) {
+	if orderbookID == "" {
+		return nil, fmt.Errorf("orderbookID is required")
+	}
+
+	endpoint := fmt.Sprintf("/_api/market-guide/forum/%s", url.PathEscape(orderbookID))
+
+	httpResp, err := s.client.Get(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, client.NewHTTPError(httpResp)
+	}
+
+	var resp Forum
 	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

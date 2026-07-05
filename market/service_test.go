@@ -1105,6 +1105,440 @@ func TestGetMarketMakerPriceChart_HTTPError(t *testing.T) {
 	}
 }
 
+func TestGetStockDetails_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/stock/5247/details" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/stock/5247/details")
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", r.Method, http.MethodGet)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"stock": {"preferred": false, "depositoryReceipt": false, "numberOfShares": 1821936744},
+			"company": {"companyId": "194", "ceo": "Christian Cederholm", "chairman": "Jacob Wallenberg", "totalNumberOfShares": 3068700120, "homepage": "https://investorab.com"},
+			"companyEvents": {"events": [{"date": "2026-07-16", "type": "INTERIM_REPORT", "isConfirmed": true}]},
+			"companyOwners": {"updated": "2025-12-31", "owners": [{"name": "Knut och Alice Wallenbergs Stiftelse", "percentOfCapital": 20.1, "percentOfVotes": 43}]},
+			"dividends": {
+				"events": [{"exDate": "2026-11-06", "paymentDate": "2026-11-12", "amount": 1.6, "currencyCode": "SEK", "dividendType": "ORDINARY"}],
+				"pastEvents": [{"exDate": "2020-11-09", "amount": 0, "currencyCode": "SEK", "dividendType": "ORDINARY"}]
+			},
+			"tradingTerms": {"collateralValue": 0.8, "marginRequirement": 1.3, "shortSellable": true, "superInterestApproved": true},
+			"fundExposures": [{"orderbookId": "325406", "name": "Spiltan Aktiefond Investmentbolag", "exposure": 0.2717, "instrumentType": "FUND", "countryCode": "SE", "hasPosition": false}],
+			"etfExposures": [{"orderbookId": "5510", "name": "XACT OMXS30 ESG", "exposure": 0.1165, "instrumentType": "EXCHANGE_TRADED_FUND", "countryCode": "SE", "hasPosition": false}],
+			"companyHoldings": {"updated": "2026-01-22", "holdings": [
+				{"orderbookId": "5447", "countryCode": "SE", "name": "ABB", "substance": 23, "hasPosition": false},
+				{"countryCode": "SE", "name": "Mölnlycke", "substance": 8}
+			]},
+			"orderDepth": {"receivedTime": 1783092575435, "levels": [{"buySide": {"price": 406.70, "volume": 7, "priceString": "406.70"}, "sellSide": {"price": 406.90, "volume": 320, "priceString": "406.90"}}]},
+			"esgView": {"companyEqualityView": {"womenOnBoard": 38.46}},
+			"companyReports": [{"reportPeriodAndYear": {"reportPeriod": "Q1", "financialYear": 2026}}],
+			"trades": [],
+			"insiderTransactionsView": {"transactions": []},
+			"brokerTradeSummaries": []
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetStockDetails(context.Background(), "5247")
+	if err != nil {
+		t.Fatalf("GetStockDetails failed: %v", err)
+	}
+
+	if resp.Stock.NumberOfShares != 1821936744 {
+		t.Errorf("Stock.NumberOfShares = %d, want 1821936744", resp.Stock.NumberOfShares)
+	}
+	if resp.Company.CompanyID != "194" || resp.Company.CEO != "Christian Cederholm" {
+		t.Errorf("Company = %+v, want CompanyID=194, CEO=Christian Cederholm", resp.Company)
+	}
+	if resp.Company.TotalNumberOfShares != 3068700120 {
+		t.Errorf("Company.TotalNumberOfShares = %d, want 3068700120", resp.Company.TotalNumberOfShares)
+	}
+	if len(resp.CompanyEvents.Events) != 1 || resp.CompanyEvents.Events[0].Type != "INTERIM_REPORT" {
+		t.Errorf("CompanyEvents.Events = %+v, want one INTERIM_REPORT", resp.CompanyEvents.Events)
+	}
+	if len(resp.CompanyOwners.Owners) != 1 || resp.CompanyOwners.Owners[0].PercentOfVotes != 43 {
+		t.Errorf("CompanyOwners.Owners = %+v, want one owner with 43%% votes", resp.CompanyOwners.Owners)
+	}
+	if len(resp.Dividends.Events) != 1 || resp.Dividends.Events[0].Amount != 1.6 {
+		t.Errorf("Dividends.Events = %+v, want one event amount 1.6", resp.Dividends.Events)
+	}
+	if len(resp.Dividends.PastEvents) != 1 || resp.Dividends.PastEvents[0].PaymentDate != "" {
+		t.Errorf("Dividends.PastEvents[0].PaymentDate = %q, want empty", resp.Dividends.PastEvents[0].PaymentDate)
+	}
+	if !resp.TradingTerms.ShortSellable || resp.TradingTerms.CollateralValue != 0.8 {
+		t.Errorf("TradingTerms = %+v, want ShortSellable=true, CollateralValue=0.8", resp.TradingTerms)
+	}
+	if len(resp.FundExposures) != 1 || resp.FundExposures[0].OrderbookID != "325406" {
+		t.Errorf("FundExposures = %+v, want one with OrderbookID 325406", resp.FundExposures)
+	}
+	if len(resp.ETFExposures) != 1 || resp.ETFExposures[0].InstrumentType != "EXCHANGE_TRADED_FUND" {
+		t.Errorf("ETFExposures = %+v, want one EXCHANGE_TRADED_FUND", resp.ETFExposures)
+	}
+	if len(resp.CompanyHoldings.Holdings) != 2 {
+		t.Fatalf("len(CompanyHoldings.Holdings) = %d, want 2", len(resp.CompanyHoldings.Holdings))
+	}
+	if resp.CompanyHoldings.Holdings[1].OrderbookID != "" || resp.CompanyHoldings.Holdings[1].Name != "Mölnlycke" {
+		t.Errorf("unlisted holding = %+v, want empty OrderbookID, name Mölnlycke", resp.CompanyHoldings.Holdings[1])
+	}
+	if len(resp.OrderDepth.Levels) != 1 || resp.OrderDepth.Levels[0].SellSide.Volume != 320 {
+		t.Errorf("OrderDepth.Levels = %+v, want one level with sell volume 320", resp.OrderDepth.Levels)
+	}
+	if len(resp.ESGView) == 0 || len(resp.CompanyReports) == 0 {
+		t.Error("expected raw ESGView and CompanyReports to be preserved")
+	}
+}
+
+func TestGetStockDetails_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockDetails(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetStockDetails_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("not found"))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetStockDetails(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+	if httpErr.StatusCode != http.StatusNotFound {
+		t.Errorf("StatusCode = %d, want %d", httpErr.StatusCode, http.StatusNotFound)
+	}
+}
+
+func TestGetStockPriceChart_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/price-chart/stock/5247" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/price-chart/stock/5247")
+		}
+		if got := r.URL.Query().Get("timePeriod"); got != "today" {
+			t.Errorf("timePeriod = %q, want %q", got, "today")
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"ohlc": [
+				{"timestamp": 1783062000000, "open": 404.35, "close": 404.9, "low": 404.35, "high": 405.3, "totalVolumeTraded": 51478}
+			],
+			"metadata": {"resolution": {"chartResolution": "minute", "availableResolutions": ["minute", "hour", "day"]}},
+			"from": "2026-07-03",
+			"to": "2026-07-03",
+			"previousClosingPrice": 402.85
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetStockPriceChart(context.Background(), "5247", TimePeriodToday)
+	if err != nil {
+		t.Fatalf("GetStockPriceChart failed: %v", err)
+	}
+
+	if len(resp.OHLC) != 1 {
+		t.Fatalf("len(OHLC) = %d, want 1", len(resp.OHLC))
+	}
+	if resp.OHLC[0].Timestamp != 1783062000000 || resp.OHLC[0].TotalVolumeTraded != 51478 {
+		t.Errorf("OHLC[0] = %+v, want timestamp 1783062000000, volume 51478", resp.OHLC[0])
+	}
+	if resp.PreviousClosingPrice != 402.85 {
+		t.Errorf("PreviousClosingPrice = %v, want 402.85", resp.PreviousClosingPrice)
+	}
+	if resp.From != "2026-07-03" || resp.Metadata.Resolution.ChartResolution != "minute" {
+		t.Errorf("From/resolution = %q/%q, want 2026-07-03/minute", resp.From, resp.Metadata.Resolution.ChartResolution)
+	}
+}
+
+func TestGetStockPriceChart_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockPriceChart(context.Background(), "", TimePeriodToday); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetStockPriceChart_EmptyTimePeriod(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockPriceChart(context.Background(), "5247", ""); err == nil {
+		t.Fatal("expected error for empty timePeriod, got nil")
+	}
+}
+
+func TestGetStockPriceChartComparison_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/price-chart/stock/5247/compare/1002994" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/price-chart/stock/5247/compare/1002994")
+		}
+		if got := r.URL.Query().Get("timePeriod"); got != "one_week" {
+			t.Errorf("timePeriod = %q, want %q", got, "one_week")
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"ohlc": [{"timestamp": 1783062000000, "open": 404.35, "close": 403.9, "low": 403.75, "high": 404.45, "totalVolumeTraded": 0}],
+			"metadata": {"resolution": {"chartResolution": "minute", "availableResolutions": ["minute", "day"]}},
+			"from": "2026-07-03",
+			"to": "2026-07-03"
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetStockPriceChartComparison(context.Background(), "5247", "1002994", TimePeriodOneWeek)
+	if err != nil {
+		t.Fatalf("GetStockPriceChartComparison failed: %v", err)
+	}
+
+	if len(resp.OHLC) != 1 || resp.OHLC[0].Close != 403.9 {
+		t.Errorf("OHLC = %+v, want one bar with close 403.9", resp.OHLC)
+	}
+	if resp.PreviousClosingPrice != 0 {
+		t.Errorf("PreviousClosingPrice = %v, want 0 for comparison", resp.PreviousClosingPrice)
+	}
+}
+
+func TestGetStockPriceChartComparison_MissingIDs(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetStockPriceChartComparison(context.Background(), "", "1002994", TimePeriodToday); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+	if _, err := svc.GetStockPriceChartComparison(context.Background(), "5247", "", TimePeriodToday); err == nil {
+		t.Fatal("expected error for empty compareOrderbookID, got nil")
+	}
+	if _, err := svc.GetStockPriceChartComparison(context.Background(), "5247", "1002994", ""); err == nil {
+		t.Fatal("expected error for empty timePeriod, got nil")
+	}
+}
+
+// TestPublicEndpoints_NoAuthHeaders proves the public market-data endpoints are
+// reachable with a freshly constructed client that has never authenticated: no
+// Cookie and no X-SecurityToken header are sent.
+func TestPublicEndpoints_NoAuthHeaders(t *testing.T) {
+	assertNoAuth := func(t *testing.T, r *http.Request) {
+		t.Helper()
+		if c := r.Header.Get("Cookie"); c != "" {
+			t.Errorf("unexpected Cookie header: %q", c)
+		}
+		if tok := r.Header.Get("X-SecurityToken"); tok != "" {
+			t.Errorf("unexpected X-SecurityToken header: %q", tok)
+		}
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assertNoAuth(t, r)
+		w.WriteHeader(http.StatusOK)
+		switch r.URL.Path {
+		case "/_api/search/filtered-search":
+			_, _ = w.Write([]byte(`{}`))
+		case "/_api/market-guide/news/5247":
+			_, _ = w.Write([]byte(`{"articles": [], "moreNewsLink": ""}`))
+		case "/_api/market-guide/forum/5247":
+			_, _ = w.Write([]byte(`{"url": "", "posts": []}`))
+		default:
+			_, _ = w.Write([]byte(`{"ohlc": [], "metadata": {"resolution": {"chartResolution": "day", "availableResolutions": ["day"]}}}`))
+		}
+	}))
+	defer server.Close()
+
+	// A fresh client with no SetMockCookies — i.e. never authenticated.
+	svc := NewService(newTestClient(server.URL))
+	ctx := context.Background()
+
+	if _, err := svc.Search(ctx, &SearchRequest{Query: "investor"}); err != nil {
+		t.Fatalf("Search failed: %v", err)
+	}
+	if _, err := svc.GetStock(ctx, "5247"); err != nil {
+		t.Fatalf("GetStock failed: %v", err)
+	}
+	if _, err := svc.GetStockDetails(ctx, "5247"); err != nil {
+		t.Fatalf("GetStockDetails failed: %v", err)
+	}
+	if _, err := svc.GetStockPriceChart(ctx, "5247", TimePeriodToday); err != nil {
+		t.Fatalf("GetStockPriceChart failed: %v", err)
+	}
+	if _, err := svc.GetStockPriceChartComparison(ctx, "5247", "1002994", TimePeriodToday); err != nil {
+		t.Fatalf("GetStockPriceChartComparison failed: %v", err)
+	}
+	if _, err := svc.GetNews(ctx, "5247"); err != nil {
+		t.Fatalf("GetNews failed: %v", err)
+	}
+	if _, err := svc.GetForum(ctx, "5247"); err != nil {
+		t.Fatalf("GetForum failed: %v", err)
+	}
+}
+
+func TestGetNews_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/news/5247" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/news/5247")
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", r.Method, http.MethodGet)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"articles": [
+				{
+					"timePublishedMillis": 1782972900000,
+					"timePublished": "2026-07-02T08:15:00",
+					"headline": "Invitation to Investor's Q2 2026 webcast",
+					"vignette": "",
+					"articleType": "Pressrelease",
+					"category": "Pressmeddelande",
+					"newsSource": "Cision",
+					"fullArticleLink": "https://www.placera.se/telegram/avanza/8_9e008baf.html",
+					"intro": "Invitation to Investor's Q2 2026 webcast...",
+					"externalLink": true
+				}
+			],
+			"moreNewsLink": "https://www.placera.se/placera/sok/bolag.html/ALL?query=194"
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetNews(context.Background(), "5247")
+	if err != nil {
+		t.Fatalf("GetNews failed: %v", err)
+	}
+
+	if len(resp.Articles) != 1 {
+		t.Fatalf("len(Articles) = %d, want 1", len(resp.Articles))
+	}
+	a := resp.Articles[0]
+	if a.TimePublishedMillis != 1782972900000 {
+		t.Errorf("TimePublishedMillis = %d, want 1782972900000", a.TimePublishedMillis)
+	}
+	if a.NewsSource != "Cision" || a.ArticleType != "Pressrelease" {
+		t.Errorf("article = %+v, want NewsSource=Cision, ArticleType=Pressrelease", a)
+	}
+	if !a.ExternalLink {
+		t.Error("ExternalLink = false, want true")
+	}
+	if resp.MoreNewsLink == "" {
+		t.Error("expected non-empty MoreNewsLink")
+	}
+}
+
+func TestGetNews_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetNews(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetNews_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("not found"))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetNews(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+	if httpErr.StatusCode != http.StatusNotFound {
+		t.Errorf("StatusCode = %d, want %d", httpErr.StatusCode, http.StatusNotFound)
+	}
+}
+
+func TestGetForum_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/_api/market-guide/forum/5247" {
+			t.Errorf("path = %q, want %q", r.URL.Path, "/_api/market-guide/forum/5247")
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %q, want %q", r.Method, http.MethodGet)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"url": "https://forum.placera.se/bolag/investor",
+			"posts": [
+				{
+					"author": "Räven",
+					"title": "Omtumlande vecka…",
+					"content": "… där jag för första gången sålt Investor.",
+					"likes": 4,
+					"replies": 2,
+					"timestamp": 1783176906442,
+					"url": "https://forum.placera.se/inlagg/0a5ec352"
+				},
+				{
+					"author": "Furre",
+					"title": "Lyckad dag",
+					"content": "",
+					"likes": 4,
+					"replies": 1,
+					"timestamp": 1783002613379,
+					"url": "https://forum.placera.se/inlagg/c3e1187f"
+				}
+			]
+		}`))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	resp, err := svc.GetForum(context.Background(), "5247")
+	if err != nil {
+		t.Fatalf("GetForum failed: %v", err)
+	}
+
+	if resp.URL != "https://forum.placera.se/bolag/investor" {
+		t.Errorf("URL = %q, want forum url", resp.URL)
+	}
+	if len(resp.Posts) != 2 {
+		t.Fatalf("len(Posts) = %d, want 2", len(resp.Posts))
+	}
+	p := resp.Posts[0]
+	if p.Author != "Räven" || p.Likes != 4 || p.Replies != 2 {
+		t.Errorf("post = %+v, want Author=Räven, Likes=4, Replies=2", p)
+	}
+	if p.Timestamp != 1783176906442 {
+		t.Errorf("Timestamp = %d, want 1783176906442", p.Timestamp)
+	}
+	if resp.Posts[1].Content != "" {
+		t.Errorf("Posts[1].Content = %q, want empty", resp.Posts[1].Content)
+	}
+}
+
+func TestGetForum_EmptyOrderbookID(t *testing.T) {
+	svc := NewService(newTestClient("http://localhost"))
+	if _, err := svc.GetForum(context.Background(), ""); err == nil {
+		t.Fatal("expected error for empty orderbookID, got nil")
+	}
+}
+
+func TestGetForum_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("not found"))
+	}))
+	defer server.Close()
+
+	svc := NewService(newTestClient(server.URL))
+	_, err := svc.GetForum(context.Background(), "999")
+	var httpErr *client.HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected *client.HTTPError, got %T", err)
+	}
+	if httpErr.StatusCode != http.StatusNotFound {
+		t.Errorf("StatusCode = %d, want %d", httpErr.StatusCode, http.StatusNotFound)
+	}
+}
+
 func TestSearch_NilTypesBecomesEmptyArray(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req searchAPIRequest
